@@ -13,6 +13,8 @@ using Metacells
 using SomeGraphs
 using TanayLabUtilities
 
+using ..Utilities
+
 # Needed because of JET:
 import Metacells.Contracts.block_axis
 import Metacells.Contracts.gene_axis
@@ -110,7 +112,7 @@ function gene_gene_graph(
 
     points_xs = get_matrix(daf, "gene", axis, "linear_fraction")[x_gene, :].array
     points_ys = get_matrix(daf, "gene", axis, "linear_fraction")[y_gene, :].array
-    points_colors, colors_configuration = type_colors(daf, axis)
+    points_colors, colors_configuration = points_type_colors(daf, axis)
 
     return points_graph(;
         x_axis_title = "$(x_gene) fraction",
@@ -178,7 +180,7 @@ end
 # The UMAP embedding, a point per entry of some axis. As with `gene_gene_graph`, the two graphs differ only in which
 # axis the points are.
 function umap_graph(daf::DafReader; axis::AbstractString)::PointsGraph
-    points_colors, colors_configuration = type_colors(daf, axis)
+    points_colors, colors_configuration = points_type_colors(daf, axis)
 
     return points_graph(;
         x_axis_title = "UMAP x",
@@ -196,21 +198,17 @@ function umap_graph(daf::DafReader; axis::AbstractString)::PointsGraph
     )
 end
 
-# The color of each point of some axis, and the configuration for drawing it. The type is optional, and so is coloring
-# by it. Without the colors of the type axis there is nothing to map a type name to, so a repository which has types
-# but no colors for them is drawn as if it had no types at all.
-function type_colors(
+# The color of each point of some axis, and the configuration for drawing it. A type which has no color to be drawn in
+# is not shown at all, so such a graph is drawn as if it had no types.
+function points_type_colors(
     daf::DafReader,
     axis::AbstractString,
 )::Tuple{Maybe{AbstractVector{<:AbstractString}}, ColorsConfiguration}
-    type_per_point = get_vector(daf, axis, "type"; default = nothing)
-    if type_per_point === nothing || !has_axis(daf, "type")
+    type_per_point, colors_configuration = type_colors(daf, axis; show_legend = true)
+    if colors_configuration === nothing
         return (nothing, ColorsConfiguration())
     else
-        return (
-            type_per_point.array,
-            ColorsConfiguration(; palette = get_vector(daf, "type", "color"), show_legend = true),
-        )
+        return (type_per_point, colors_configuration)
     end
 end
 

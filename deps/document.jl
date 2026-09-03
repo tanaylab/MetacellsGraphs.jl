@@ -48,7 +48,7 @@ makedocs(;
         prettyurls = false,
         size_threshold_warn = 200 * 2^10,
     ),
-    pages = ["index.md", "scatter_graphs.md"],
+    pages = ["index.md", "scatter_graphs.md", "heatmap_graphs.md"],
 )
 
 if seen_problems

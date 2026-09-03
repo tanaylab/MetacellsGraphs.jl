@@ -22,7 +22,12 @@ using Reexport
 using SomeGraphs
 using TanayLabUtilities
 
+include("utilities.jl")
+
 include("scatter_graphs.jl")
 @reexport using .ScatterGraphs
+
+include("heatmap_graphs.jl")
+@reexport using .HeatmapGraphs
 
 end  # module

@@ -1,0 +1,652 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Heatmap Graphs · MetacellsGraphs.jl v0.1.0
+</title>
+<meta name="title" content="Heatmap Graphs · MetacellsGraphs.jl v0.1.0"/>
+<meta property="og:title" content="Heatmap Graphs · MetacellsGraphs.jl v0.1.0"/>
+<meta property="twitter:title" content="Heatmap Graphs · MetacellsGraphs.jl v0.1.0"/>
+<meta name="description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<meta property="og:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<meta property="twitter:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<script data-outdated-warner src="assets/warner.js">
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/>
+<script>documenterBaseURL="."
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js">
+</script>
+<script src="search_index.js">
+</script>
+<script src="siteinfo.js">
+</script>
+<script src="../versions.js">
+</script>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/>
+<script src="assets/themeswap.js">
+</script>
+</head>
+<body>
+<div id="documenter">
+<nav class="docs-sidebar">
+<div class="docs-package-name">
+<span class="docs-autofit">
+<a href="index.html">MetacellsGraphs.jl v0.1.0
+</a>
+</span>
+</div>
+<button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)
+</button>
+<ul class="docs-menu">
+<li>
+<a class="tocitem" href="index.html">MetacellsGraphs
+</a>
+</li>
+<li>
+<a class="tocitem" href="scatter_graphs.html">Scatter Graphs
+</a>
+</li>
+<li class="is-active">
+<a class="tocitem" href="heatmap_graphs.html">Heatmap Graphs
+</a>
+<ul class="internal">
+<li>
+<a class="tocitem" href="#Index">
+<span>Index
+</span>
+</a>
+</li>
+</ul>
+</li>
+</ul>
+<div class="docs-version-selector field has-addons">
+<div class="control">
+<span class="docs-label button is-static is-size-7">Version
+</span>
+</div>
+<div class="docs-selector control is-expanded">
+<div class="select is-fullwidth is-size-7">
+<select id="documenter-version-selector">
+</select>
+</div>
+</div>
+</div>
+</nav>
+<div class="docs-main">
+<header class="docs-navbar">
+<a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#">
+</a>
+<nav class="breadcrumb">
+<ul class="is-hidden-mobile">
+<li class="is-active">
+<a href="heatmap_graphs.html">Heatmap Graphs
+</a>
+</li>
+</ul>
+<ul class="is-hidden-tablet">
+<li class="is-active">
+<a href="heatmap_graphs.html">Heatmap Graphs
+</a>
+</li>
+</ul>
+</nav>
+<div class="docs-right">
+<a class="docs-navbar-link" href="https://github.com/tanaylab/MetacellsGraphs.jl/blob/main{path}?plain=1#L{line}" title="View the repository on GitHub">
+<span class="docs-icon fa-brands">
+</span>
+<span class="docs-label is-hidden-touch">GitHub
+</span>
+</a>
+<a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings">
+</a>
+<a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings">
+</a>
+</div>
+</header>
+<article class="content" id="documenter-page">
+<h1 id="Heatmap-Graphs">
+<a class="docs-heading-anchor" href="#Heatmap-Graphs">Heatmap Graphs
+</a>
+<a id="Heatmap-Graphs-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Heatmap-Graphs" title="Permalink">
+</a>
+</h1>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs">
+<code>MetacellsGraphs.HeatmapGraphs
+</code>
+</a> — 
+<span class="docstring-category">Module
+</span>
+</summary>
+<section>
+<div>
+<p>Heatmap graphs of a metacells repository.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">markers_metacells_heatmap_graph(
+    daf::DafReader;
+    markers_count::Integer = ```100```,
+    group_by_type::Bool = ```false```,
+    group_by_block::Bool = ```false```,
+    use_global_flow_order::Bool = ```false```,
+)::HeatmapGraph
+</code>
+</pre>
+<p>The expression of the 
+<code>markers_count
+</code> best marker genes in each metacell, as the fold factor of the gene from its median across all the metacells.
+</p>
+<p>The genes are the rows and the metacells are the columns; both are clustered. There are too many metacells to name them, so each is identified in its hover, together with the block and the type it belongs to. If the metacells have a type, it is also shown as a color annotation of the columns, using the colors of the type axis.
+</p>
+<p>Given 
+<code>group_by_type
+</code> and/or 
+<code>group_by_block
+</code>, the columns are grouped by the type and/or by the block of each metacell, which both constrains the clustering to the groups and puts a gap between them. Given both, the grouping is hierarchical: the blocks are grouped inside the types, which is how they nest. Given 
+<code>use_global_flow_order
+</code>, the type groups run in the global flow order of the types, so that every graph lays them out the same way; otherwise the clustering places them, as it always places the blocks.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>metacell
+</strong> (required): Minimal-sized groups of cells for robust point estimates.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ marker_rank
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
+</p>
+<p>
+<strong>metacell @ block
+</strong>::AbstractString (optional): The unique block each metacell belongs to.
+</p>
+<p>
+<strong>metacell @ type
+</strong>::AbstractString (optional): The type each metacell belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>type @ global
+<em>flow
+</em>order
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, metacell @ log
+<em>linear
+</em>fraction
+</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">skeletons_metacells_heatmap_graph(
+    daf::DafReader;
+    group_by_type::Bool = ```false```,
+    group_by_block::Bool = ```false```,
+    use_global_flow_order::Bool = ```false```,
+)::HeatmapGraph
+</code>
+</pre>
+<p>The expression of the skeleton genes in each metacell, as the fold factor of the gene from its median across all the metacells.
+</p>
+<p>This is 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
+<code>markers_metacells_heatmap_graph
+</code>
+</a> of the skeleton genes, and reads the same way. The skeletons are the genes the blocks were computed from, so this shows what the blocks were told apart by, rather than everything which tells the metacells apart.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>metacell
+</strong> (required): Minimal-sized groups of cells for robust point estimates.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ is_skeleton
+</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
+</p>
+<p>
+<strong>metacell @ block
+</strong>::AbstractString (optional): The unique block each metacell belongs to.
+</p>
+<p>
+<strong>metacell @ type
+</strong>::AbstractString (optional): The type each metacell belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>type @ global
+<em>flow
+</em>order
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, metacell @ log
+<em>linear
+</em>fraction
+</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">markers_blocks_heatmap_graph(
+    daf::DafReader;
+    markers_count::Integer = ```100```,
+    group_by_type::Bool = ```false```,
+    use_global_flow_order::Bool = ```false```,
+)::HeatmapGraph
+</code>
+</pre>
+<p>The expression of the 
+<code>markers_count
+</code> best marker genes in each block, as the fold factor of the gene from its median across all the blocks.
+</p>
+<p>This is 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
+<code>markers_metacells_heatmap_graph
+</code>
+</a> of the blocks the metacells were grouped into, and reads the same way, except that a block belongs to nothing below its type, so there is no 
+<code>group_by_block
+</code> and the hover names just the block and its type.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>block
+</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ marker_rank
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
+</p>
+<p>
+<strong>block @ type
+</strong>::AbstractString (optional): The type each block belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>type @ global
+<em>flow
+</em>order
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, block @ log
+<em>linear
+</em>fraction
+</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">skeletons_blocks_heatmap_graph(
+    daf::DafReader;
+    group_by_type::Bool = ```false```,
+    use_global_flow_order::Bool = ```false```,
+)::HeatmapGraph
+</code>
+</pre>
+<p>The expression of the skeleton genes in each block, as the fold factor of the gene from its median across all the blocks.
+</p>
+<p>This is 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
+<code>markers_blocks_heatmap_graph
+</code>
+</a> of the skeleton genes, and reads the same way. The skeletons are the genes the blocks were computed from, so this shows what the blocks were told apart by, rather than everything which tells them apart.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>block
+</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ is_skeleton
+</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
+</p>
+<p>
+<strong>block @ type
+</strong>::AbstractString (optional): The type each block belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>type @ global
+<em>flow
+</em>order
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, block @ log
+<em>linear
+</em>fraction
+</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
+<code>MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The extreme of the color scale of the fold factors. A fold factor is a log2, so a gene is drawn in full blue where it is 3 below its median (an eighth of it), in white where it is at it, and in full red where it is 3 above it (eight times it); anything more extreme is drawn in the same color as this. All the heatmaps use the same extreme, so that they can be compared to each other.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
+<code>MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The fraction of a grouped axis given over to the gaps between its groups. A gap is measured in entries, so a gap of a fixed number of them is invisible in an axis holding thousands and is most of an axis holding a few dozen. Sizing the gaps so that together they take this fraction of the axis makes them visible whatever the axis holds, while an axis holding many small groups keeps the single entry it takes to separate them at all instead of becoming mostly gaps.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Index">
+<a class="docs-heading-anchor" href="#Index">Index
+</a>
+<a id="Index-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Index" title="Permalink">
+</a>
+</h2>
+<ul>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs">
+<code>MetacellsGraphs.HeatmapGraphs
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
+<code>MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
+<code>MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph
+</code>
+</a>
+</li>
+</ul>
+</article>
+<nav class="docs-footer">
+<a class="docs-footer-prevpage" href="scatter_graphs.html">« Scatter Graphs
+</a>
+<div class="flexbox-break">
+</div>
+<p class="footer-message">Powered by 
+<a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl
+</a> and the 
+<a href="https://julialang.org/">Julia Programming Language
+</a>.
+</p>
+</nav>
+</div>
+<div class="modal" id="documenter-settings">
+<div class="modal-background">
+</div>
+<div class="modal-card">
+<header class="modal-card-head">
+<p class="modal-card-title">Settings
+</p>
+<button class="delete">
+</button>
+</header>
+<section class="modal-card-body">
+<p>
+<label class="label">Theme
+</label>
+<div class="select">
+<select id="documenter-themepicker">
+<option value="auto">Automatic (OS)
+</option>
+<option value="documenter-light">documenter-light
+</option>
+<option value="documenter-dark">documenter-dark
+</option>
+<option value="catppuccin-latte">catppuccin-latte
+</option>
+<option value="catppuccin-frappe">catppuccin-frappe
+</option>
+<option value="catppuccin-macchiato">catppuccin-macchiato
+</option>
+<option value="catppuccin-mocha">catppuccin-mocha
+</option>
+</select>
+</div>
+</p>
+<hr/>
+<p>This document was generated with 
+<a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl
+</a> version 1.17.0. Using Julia version 1.12.6.
+</p>
+</section>
+<footer class="modal-card-foot">
+</footer>
+</div>
+</div>
+</div>
+</body>
+</html>

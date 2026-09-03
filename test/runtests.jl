@@ -17,3 +17,4 @@ nested_test("doctests") do
 end
 
 include("scatter_graphs.jl")
+include("heatmap_graphs.jl")
