@@ -5,11 +5,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MetacellsGraphs · MetacellsGraphs.jl v0.1.0
+<title>Scatter Graphs · MetacellsGraphs.jl v0.1.0
 </title>
-<meta name="title" content="MetacellsGraphs · MetacellsGraphs.jl v0.1.0"/>
-<meta property="og:title" content="MetacellsGraphs · MetacellsGraphs.jl v0.1.0"/>
-<meta property="twitter:title" content="MetacellsGraphs · MetacellsGraphs.jl v0.1.0"/>
+<meta name="title" content="Scatter Graphs · MetacellsGraphs.jl v0.1.0"/>
+<meta property="og:title" content="Scatter Graphs · MetacellsGraphs.jl v0.1.0"/>
+<meta property="twitter:title" content="Scatter Graphs · MetacellsGraphs.jl v0.1.0"/>
 <meta name="description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
 <meta property="og:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
 <meta property="twitter:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
@@ -52,21 +52,21 @@
 <button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)
 </button>
 <ul class="docs-menu">
-<li class="is-active">
+<li>
 <a class="tocitem" href="index.html">MetacellsGraphs
 </a>
+</li>
+<li class="is-active">
+<a class="tocitem" href="scatter_graphs.html">Scatter Graphs
+</a>
 <ul class="internal">
-<li class="toplevel">
+<li>
 <a class="tocitem" href="#Index">
 <span>Index
 </span>
 </a>
 </li>
 </ul>
-</li>
-<li>
-<a class="tocitem" href="scatter_graphs.html">Scatter Graphs
-</a>
 </li>
 </ul>
 <div class="docs-version-selector field has-addons">
@@ -89,13 +89,13 @@
 <nav class="breadcrumb">
 <ul class="is-hidden-mobile">
 <li class="is-active">
-<a href="index.html">MetacellsGraphs
+<a href="scatter_graphs.html">Scatter Graphs
 </a>
 </li>
 </ul>
 <ul class="is-hidden-tablet">
 <li class="is-active">
-<a href="index.html">MetacellsGraphs
+<a href="scatter_graphs.html">Scatter Graphs
 </a>
 </li>
 </ul>
@@ -114,19 +114,19 @@
 </div>
 </header>
 <article class="content" id="documenter-page">
-<h1 id="MetacellsGraphs">
-<a class="docs-heading-anchor" href="#MetacellsGraphs">MetacellsGraphs
+<h1 id="Scatter-Graphs">
+<a class="docs-heading-anchor" href="#Scatter-Graphs">Scatter Graphs
 </a>
-<a id="MetacellsGraphs-1">
+<a id="Scatter-Graphs-1">
 </a>
-<a class="docs-heading-anchor-permalink" href="#MetacellsGraphs" title="Permalink">
+<a class="docs-heading-anchor-permalink" href="#Scatter-Graphs" title="Permalink">
 </a>
 </h1>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs">
-<a class="docstring-binding" href="#MetacellsGraphs">
-<code>MetacellsGraphs
+<summary id="MetacellsGraphs.ScatterGraphs">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs">
+<code>MetacellsGraphs.ScatterGraphs
 </code>
 </a> — 
 <span class="docstring-category">Module
@@ -134,49 +134,181 @@
 </summary>
 <section>
 <div>
-<p>Draw the figures worth looking at of a metacells repository.
-</p>
-<p>This sits between 
-<a href="https://github.com/tanaylab/SomeGraphs.jl">
-<code>SomeGraphs
-</code>
-</a>, which draws heatmaps, scatters, bars and distributions from arrays and knows nothing of metacells, and 
-<a href="https://github.com/tanaylab/Metacells.jl">
-<code>Metacells
-</code>
-</a>, which computes what a metacells repository holds and draws nothing. A figure here reads a repository through 
-<code>DataAxesFormats
-</code>, names its properties as 
-<code>Metacells
-</code> does, and draws with 
-<code>SomeGraphs
-</code>.
-</p>
-<p>It does the arithmetic a figure needs and keeps the result in the figure: means, quantiles, normalizations, a fold factor from a median, the order a clustered heatmap is drawn in. It also gathers across repositories, which is how a figure compares the rounds of sharpening. What it does not do is produce data the repository should have held - if a number is worth storing, it belongs in a computation in 
-<code>Metacells
-</code>, and nothing here writes to a repository.
-</p>
-<p>The figures are meant to be asked for from a notebook: a call takes a repository and a few names and returns a figure, writes no files, and needs no output directory.
+<p>Scatter graphs of a metacells repository.
 </p>
 </div>
 </section>
 </details>
 </article>
-<h1 id="Index">
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
+<code>MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">metacells_gene_gene_graph(
+    daf::DafReader;
+    x_gene::AbstractString,
+    y_gene::AbstractString,
+    gene_fraction_regularization::Real = ```1.0e-5```,
+)::PointsGraph
+</code>
+</pre>
+<p>The expression of one gene against another, a point per metacell, on log scale.
+</p>
+<p>If the metacells have a type, the points are colored by it, using the colors of the type axis, and the types are shown in a legend. If they do not, they are all the same color; nothing else about the graph changes.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>metacell
+</strong> (required): Minimal-sized groups of cells for robust point estimates.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>metacell @ type
+</strong>::AbstractString (optional): The type each metacell belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, metacell @ linear_fraction
+</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph">
+<code>MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">blocks_gene_gene_graph(
+    daf::DafReader;
+    x_gene::AbstractString,
+    y_gene::AbstractString,
+    gene_fraction_regularization::Real = ```1.0e-5```,
+)::PointsGraph
+</code>
+</pre>
+<p>The expression of one gene against another, a point per block, on log scale.
+</p>
+<p>This is 
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
+<code>metacells_gene_gene_graph
+</code>
+</a> of the blocks the metacells were grouped into, and reads the same way; a block is coarser, so the same pair of genes shows fewer points and less scatter.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>block
+</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>block @ type
+</strong>::AbstractString (optional): The type each block belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, block @ linear_fraction
+</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
+<code>MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The regularization added to a fraction before taking its log, so that a gene seen in no cell of an entity has a value to be drawn at instead of falling off the bottom of the axis. It is deliberately small: a fraction this size is one UMI in a hundred thousand, which is below anything these graphs are read for.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Index">
 <a class="docs-heading-anchor" href="#Index">Index
 </a>
 <a id="Index-1">
 </a>
 <a class="docs-heading-anchor-permalink" href="#Index" title="Permalink">
 </a>
-</h1>
+</h2>
 <ul>
-<li>
-<a href="index.html#MetacellsGraphs">
-<code>MetacellsGraphs
-</code>
-</a>
-</li>
 <li>
 <a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs">
 <code>MetacellsGraphs.ScatterGraphs
@@ -204,7 +336,7 @@
 </ul>
 </article>
 <nav class="docs-footer">
-<a class="docs-footer-nextpage" href="scatter_graphs.html">Scatter Graphs »
+<a class="docs-footer-prevpage" href="index.html">« MetacellsGraphs
 </a>
 <div class="flexbox-break">
 </div>

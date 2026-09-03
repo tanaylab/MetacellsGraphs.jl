@@ -16,31 +16,13 @@ writes no files, and needs no output directory.
 """
 module MetacellsGraphs
 
-export hello_metacells_graphs
-
 using DataAxesFormats
 using Metacells
+using Reexport
 using SomeGraphs
 using TanayLabUtilities
 
-"""
-    hello_metacells_graphs()::AbstractString
-
-Say hello.
-
-A placeholder, so that the package has something in it: the gates have nothing to look at otherwise. Delete it when the
-first real figure arrives.
-
-```jldoctest
-println(hello_metacells_graphs())
-
-# output
-
-Hello from MetacellsGraphs!
-```
-"""
-function hello_metacells_graphs()::AbstractString
-    return "Hello from MetacellsGraphs!"
-end
+include("scatter_graphs.jl")
+@reexport using .ScatterGraphs
 
 end  # module

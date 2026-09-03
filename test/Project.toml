@@ -1,4 +1,7 @@
 [deps]
+DataAxesFormats = "1375bf9c-a47d-45a1-aad5-626dd8629d98"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+NestedTests = "c7752788-e2db-4f03-8189-845608b41f97"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SomeGraphs = "eb091223-14cb-4747-ac22-0b59a9f2afeb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

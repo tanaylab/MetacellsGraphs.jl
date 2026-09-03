@@ -1,15 +1,19 @@
+using DataAxesFormats
 using Documenter
 using MetacellsGraphs
+using NestedTests
 using Random
+using SomeGraphs
 using Test
+
+test_prefixes(ARGS)
+abort_on_first_failure(true)
 
 Random.seed!(123456)
 
-@testset "doctests" begin
+nested_test("doctests") do
     DocMeta.setdocmeta!(MetacellsGraphs, :DocTestSetup, :(using MetacellsGraphs); recursive = true)
     return doctest(MetacellsGraphs; manual = false)
 end
 
-@testset "hello" begin
-    @test hello_metacells_graphs() == "Hello from MetacellsGraphs!"
-end
+include("scatter_graphs.jl")
