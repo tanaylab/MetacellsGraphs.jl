@@ -1,0 +1,17 @@
+name = "MetacellsGraphs"
+uuid = "b78c44d1-95b4-453a-bb1d-4e115706a256"
+version = "0.1.0"
+authors = ["Oren Ben-Kiki <oren@ben-kiki.org>"]
+
+[deps]
+DataAxesFormats = "1375bf9c-a47d-45a1-aad5-626dd8629d98"
+Metacells = "2c3fbd22-7937-42a8-a46e-a575a65e83f1"
+SomeGraphs = "eb091223-14cb-4747-ac22-0b59a9f2afeb"
+TanayLabUtilities = "2fad9582-3092-42c8-a7a2-4a8f52ca25c8"
+
+[compat]
+DataAxesFormats = "0.3.0"
+Metacells = "0.1.0"
+SomeGraphs = "0.2.0"
+TanayLabUtilities = "0.1.0"
+julia = "1.12"
