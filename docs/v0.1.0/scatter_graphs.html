@@ -284,6 +284,132 @@
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.metacells_umap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">metacells_umap_graph(daf::DafReader)::PointsGraph
+</code>
+</pre>
+<p>The 2D UMAP embedding of the metacells, a point per metacell.
+</p>
+<p>If the metacells have a type, the points are colored by it, using the colors of the type axis, and the types are shown in a legend. If they do not, they are all the same color; nothing else about the graph changes.
+</p>
+<p>The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid; only which points are near which other points means anything.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>metacell
+</strong> (required): Minimal-sized groups of cells for robust point estimates.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>metacell @ umap_x
+</strong>::Union{Float32, Float64} (required): The X coordinate of each metacell in a 2D UMAP projection.
+</p>
+<p>
+<strong>metacell @ umap_y
+</strong>::Union{Float32, Float64} (required): The Y coordinate of each metacell in a 2D UMAP projection.
+</p>
+<p>
+<strong>metacell @ type
+</strong>::AbstractString (optional): The type each metacell belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.blocks_umap_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">blocks_umap_graph(daf::DafReader)::PointsGraph
+</code>
+</pre>
+<p>The 2D UMAP embedding of the blocks, a point per block.
+</p>
+<p>This is 
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
+<code>metacells_umap_graph
+</code>
+</a> of the blocks the metacells were grouped into, and reads the same way; a block is placed at the mean position of its metacells, so the same embedding shows fewer points closer to its center.
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>block
+</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>block @ umap_x
+</strong>::Union{Float32, Float64} (required): The X coordinate of each block in a 2D UMAP projection.
+</p>
+<p>
+<strong>block @ umap_y
+</strong>::Union{Float32, Float64} (required): The Y coordinate of each block in a 2D UMAP projection.
+</p>
+<p>
+<strong>block @ type
+</strong>::AbstractString (optional): The type each block belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
 <a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
 <code>MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
@@ -328,8 +454,20 @@
 </a>
 </li>
 <li>
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.blocks_umap_graph
+</code>
+</a>
+</li>
+<li>
 <a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
 <code>MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph
+</code>
+</a>
+</li>
+<li>
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.metacells_umap_graph
 </code>
 </a>
 </li>

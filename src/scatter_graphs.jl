@@ -4,7 +4,9 @@ Scatter graphs of a metacells repository.
 module ScatterGraphs
 
 export blocks_gene_gene_graph
+export blocks_umap_graph
 export metacells_gene_gene_graph
+export metacells_umap_graph
 
 using DataAxesFormats
 using Metacells
@@ -21,6 +23,10 @@ import Metacells.Contracts.type_axis
 import Metacells.Contracts.vector_of_color_per_type
 import Metacells.Contracts.vector_of_type_per_block
 import Metacells.Contracts.vector_of_type_per_metacell
+import Metacells.Contracts.vector_of_umap_x_per_block
+import Metacells.Contracts.vector_of_umap_x_per_metacell
+import Metacells.Contracts.vector_of_umap_y_per_block
+import Metacells.Contracts.vector_of_umap_y_per_metacell
 
 """
 The regularization added to a fraction before taking its log, so that a gene seen in no cell of an entity has a value
@@ -104,17 +110,7 @@ function gene_gene_graph(
 
     points_xs = get_matrix(daf, "gene", axis, "linear_fraction")[x_gene, :].array
     points_ys = get_matrix(daf, "gene", axis, "linear_fraction")[y_gene, :].array
-
-    # The type is optional, and so is coloring by it. Without the colors of the type axis there is nothing to map a
-    # type name to, so a repository which has types but no colors for them is drawn as if it had no types at all.
-    type_per_point = get_vector(daf, axis, "type"; default = nothing)
-    if type_per_point === nothing || !has_axis(daf, "type")
-        points_colors = nothing
-        colors_configuration = ColorsConfiguration()
-    else
-        points_colors = type_per_point.array
-        colors_configuration = ColorsConfiguration(; palette = get_vector(daf, "type", "color"), show_legend = true)
-    end
+    points_colors, colors_configuration = type_colors(daf, axis)
 
     return points_graph(;
         x_axis_title = "$(x_gene) fraction",
@@ -130,6 +126,92 @@ function gene_gene_graph(
             points = ScattersConfiguration(; colors = colors_configuration),
         ),
     )
+end
+
+"""
+    metacells_umap_graph(daf::DafReader)::PointsGraph
+
+The 2D UMAP embedding of the metacells, a point per metacell.
+
+If the metacells have a type, the points are colored by it, using the colors of the type axis, and the types are shown
+in a legend. If they do not, they are all the same color; nothing else about the graph changes.
+
+The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid; only
+which points are near which other points means anything.
+
+$(CONTRACT)
+"""
+@computation Contract(;
+    axes = [metacell_axis(RequiredInput), type_axis(OptionalInput)],
+    data = [
+        vector_of_umap_x_per_metacell(RequiredInput),
+        vector_of_umap_y_per_metacell(RequiredInput),
+        vector_of_type_per_metacell(OptionalInput),
+        vector_of_color_per_type(OptionalInput),
+    ],
+) function metacells_umap_graph(daf::DafReader)::PointsGraph
+    return umap_graph(daf; axis = "metacell")
+end
+
+"""
+    blocks_umap_graph(daf::DafReader)::PointsGraph
+
+The 2D UMAP embedding of the blocks, a point per block.
+
+This is [`metacells_umap_graph`](@ref) of the blocks the metacells were grouped into, and reads the same way; a block
+is placed at the mean position of its metacells, so the same embedding shows fewer points closer to its center.
+
+$(CONTRACT)
+"""
+@computation Contract(;
+    axes = [block_axis(RequiredInput), type_axis(OptionalInput)],
+    data = [
+        vector_of_umap_x_per_block(RequiredInput),
+        vector_of_umap_y_per_block(RequiredInput),
+        vector_of_type_per_block(OptionalInput),
+        vector_of_color_per_type(OptionalInput),
+    ],
+) function blocks_umap_graph(daf::DafReader)::PointsGraph
+    return umap_graph(daf; axis = "block")
+end
+
+# The UMAP embedding, a point per entry of some axis. As with `gene_gene_graph`, the two graphs differ only in which
+# axis the points are.
+function umap_graph(daf::DafReader; axis::AbstractString)::PointsGraph
+    points_colors, colors_configuration = type_colors(daf, axis)
+
+    return points_graph(;
+        x_axis_title = "UMAP x",
+        y_axis_title = "UMAP y",
+        points_colors_title = "type",
+        points_xs = get_vector(daf, axis, "umap_x").array,
+        points_ys = get_vector(daf, axis, "umap_y").array,
+        points_colors,
+        points_hovers = axis_vector(daf, axis),
+        configuration = PointsGraphConfiguration(;
+            x_axis = AxisConfiguration(; show_ticks = false, show_grid = false),
+            y_axis = AxisConfiguration(; show_ticks = false, show_grid = false),
+            points = ScattersConfiguration(; colors = colors_configuration),
+        ),
+    )
+end
+
+# The color of each point of some axis, and the configuration for drawing it. The type is optional, and so is coloring
+# by it. Without the colors of the type axis there is nothing to map a type name to, so a repository which has types
+# but no colors for them is drawn as if it had no types at all.
+function type_colors(
+    daf::DafReader,
+    axis::AbstractString,
+)::Tuple{Maybe{AbstractVector{<:AbstractString}}, ColorsConfiguration}
+    type_per_point = get_vector(daf, axis, "type"; default = nothing)
+    if type_per_point === nothing || !has_axis(daf, "type")
+        return (nothing, ColorsConfiguration())
+    else
+        return (
+            type_per_point.array,
+            ColorsConfiguration(; palette = get_vector(daf, "type", "color"), show_legend = true),
+        )
+    end
 end
 
 end  # module
