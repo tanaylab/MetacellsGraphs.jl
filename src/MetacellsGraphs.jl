@@ -30,4 +30,7 @@ include("scatter_graphs.jl")
 include("heatmap_graphs.jl")
 @reexport using .HeatmapGraphs
 
+include("bar_graphs.jl")
+@reexport using .BarGraphs
+
 end  # module

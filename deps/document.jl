@@ -20,6 +20,7 @@ global_logger(detect_problems)
 
 push!(LOAD_PATH, joinpath(@__DIR__, ".."))
 
+using DocumenterInterLinks
 using MetacellsGraphs
 using Pkg
 
@@ -48,7 +49,10 @@ makedocs(;
         prettyurls = false,
         size_threshold_warn = 200 * 2^10,
     ),
-    pages = ["index.md", "scatter_graphs.md", "heatmap_graphs.md"],
+    pages = ["index.md", "scatter_graphs.md", "heatmap_graphs.md", "bar_graphs.md"],
+    # The contracts we use are `Metacells`', and the links in their descriptions point into its documentation. The URL
+    # names a version, so it needs updating when `Metacells` releases one.
+    plugins = [InterLinks("Metacells" => "https://tanaylab.github.io/Metacells.jl/v0.1.0/objects.inv")],
 )
 
 if seen_problems

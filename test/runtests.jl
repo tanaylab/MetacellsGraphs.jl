@@ -18,3 +18,4 @@ end
 
 include("scatter_graphs.jl")
 include("heatmap_graphs.jl")
+include("bar_graphs.jl")
