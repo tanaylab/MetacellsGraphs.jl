@@ -165,18 +165,23 @@
     daf::DafReader,
     base_daf::DafReader,
     genes_count::Integer = ```30```,
+    regulators_count::Integer = ```5```,
 )::SeriesBarsGraph
 </code>
 </pre>
 <p>The 
 <code>genes_count
-</code> genes whose correlation with their cells the metacells improved in the most of the base neighborhoods, as a butterfly of the percentage of neighborhoods each declined in (to the left) and improved in (to the right).
+</code> genes whose correlation with their cells the metacells improved in the most of the base neighborhoods, as a butterfly of the percentage of neighborhoods each degraded in (to the left) and improved in (to the right).
 </p>
-<p>A gene is improved in a base block when its correlation between the cells of that block&#39;s neighborhood and their punctuated metacells is at least 0.05 above what it is in the 
-<code>base_daf
-</code>, and declined when it is at least that far below. Only the base blocks the gene is correlated in at all - the ones its correlation in the 
-<code>base_daf
-</code> is not zero in - are counted, so a gene which is a marker in a few neighborhoods is judged on those rather than diluted by the ones it says nothing about. A gene correlated in no base block is not shown.
+<p>Everything drawn here is a column of 
+<a href="https://tanaylab.github.io/Metacells.jl/v0.1.0/analyze_genes.html#Metacells.AnalyzeGenes.compute_gene_report">
+<code>compute_gene_report
+</code>
+</a>, which is what says when a gene is improved or degraded in a base block and which regulators it moves with; the graph picks the genes worth showing and draws them. A gene which is not a marker is not in the report and is therefore not shown.
+</p>
+<p>The hover of each bar says how often the gene is in no module at all in that side&#39;s base blocks, and which 
+<code>regulators_count
+</code> regulators it most often shares one with there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene name different regulators.
 </p>
 <p>Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides. A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the metacells nevertheless describe better than the base does.
 </p>
@@ -205,8 +210,72 @@
 </a>, copied into the alternative.
 </p>
 <p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ is_marker
+</strong>::Bool (required): A mask of genes that distinguish between cell states.
+</p>
+<p>
+<strong>gene @ marker_rank
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
+</p>
+<p>
+<strong>gene @ is_lateral
+</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
+</p>
+<p>
+<strong>gene @ is
+<em>transcription
+</em>factor
+</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
+</p>
+<p>
+<strong>gene @ is_regulator
+</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
+</p>
+<p>
+<strong>gene @ is_skeleton
+</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
+</p>
+<p>
+<strong>gene @ mean
+<em>no
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>improved
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells improved it.
+</p>
+<p>
+<strong>gene @ mean
+<em>no
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>degraded
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells degraded it.
+</p>
+<p>
 <strong>Matrices
 </strong>
+</p>
+<p>
+<strong>gene, gene @ correlation
+<em>between
+</em>markers
+</strong>::Union{Float32, Float64} (required): The correlation between the log expression of pairs of marker genes across the metacells.
 </p>
 <p>
 <strong>gene, base
@@ -219,6 +288,34 @@
 <em>punctuated
 </em>metacells
 </strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
+</p>
+<p>
+<strong>gene, gene @ mean
+<em>shared
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>improved
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells improved it.
+</p>
+<p>
+<strong>gene, gene @ mean
+<em>shared
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>degraded
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells degraded it.
 </p>
 <p>
 <strong>Base
@@ -239,18 +336,6 @@
 <p>
 <strong>block
 </strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_lateral
-</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
-</p>
-<p>
-<strong>gene @ is_regulator
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
 </p>
 <p>
 <strong>Matrices
@@ -274,9 +359,9 @@
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.BarGraphs.declined_genes_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.BarGraphs.declined_genes_graph">
-<code>MetacellsGraphs.BarGraphs.declined_genes_graph
+<summary id="MetacellsGraphs.BarGraphs.degraded_genes_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.BarGraphs.degraded_genes_graph">
+<code>MetacellsGraphs.BarGraphs.degraded_genes_graph
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -285,16 +370,17 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">declined_genes_graph(;
+<code class="language-julia hljs">degraded_genes_graph(;
     daf::DafReader,
     base_daf::DafReader,
     genes_count::Integer = ```30```,
+    regulators_count::Integer = ```5```,
 )::SeriesBarsGraph
 </code>
 </pre>
 <p>The 
 <code>genes_count
-</code> genes whose correlation with their cells the metacells declined in the most of the base neighborhoods.
+</code> genes whose correlation with their cells the metacells degraded in the most of the base neighborhoods.
 </p>
 <p>This is 
 <a href="bar_graphs.html#MetacellsGraphs.BarGraphs.improved_genes_graph">
@@ -327,8 +413,72 @@
 </a>, copied into the alternative.
 </p>
 <p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>gene @ is_marker
+</strong>::Bool (required): A mask of genes that distinguish between cell states.
+</p>
+<p>
+<strong>gene @ marker_rank
+</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
+</p>
+<p>
+<strong>gene @ is_lateral
+</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
+</p>
+<p>
+<strong>gene @ is
+<em>transcription
+</em>factor
+</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
+</p>
+<p>
+<strong>gene @ is_regulator
+</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
+</p>
+<p>
+<strong>gene @ is_skeleton
+</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
+</p>
+<p>
+<strong>gene @ mean
+<em>no
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>improved
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells improved it.
+</p>
+<p>
+<strong>gene @ mean
+<em>no
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>degraded
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells degraded it.
+</p>
+<p>
 <strong>Matrices
 </strong>
+</p>
+<p>
+<strong>gene, gene @ correlation
+<em>between
+</em>markers
+</strong>::Union{Float32, Float64} (required): The correlation between the log expression of pairs of marker genes across the metacells.
 </p>
 <p>
 <strong>gene, base
@@ -341,6 +491,34 @@
 <em>punctuated
 </em>metacells
 </strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
+</p>
+<p>
+<strong>gene, gene @ mean
+<em>shared
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>improved
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells improved it.
+</p>
+<p>
+<strong>gene, gene @ mean
+<em>shared
+</em>module
+<em>fraction
+</em>in
+<em>base
+</em>neighborhood
+<em>cells
+</em>at
+<em>degraded
+</em>base_blocks
+</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells degraded it.
 </p>
 <p>
 <strong>Base
@@ -363,18 +541,6 @@
 </strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
 </p>
 <p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_lateral
-</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
-</p>
-<p>
-<strong>gene @ is_regulator
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
-</p>
-<p>
 <strong>Matrices
 </strong>
 </p>
@@ -389,24 +555,6 @@
 <em>punctuated
 </em>metacells
 </strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS">
-<a class="docstring-binding" href="#MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS">
-<code>MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>How much of a difference in correlation is a difference at all. A gene whose correlation in a base block moved by less than this between the two repositories is neither improved nor declined there. This is the threshold the pipeline reports its own counts by, so it is a constant rather than a parameter: a graph drawn by a different threshold is not comparable to those.
 </p>
 </div>
 </section>
@@ -428,14 +576,8 @@
 </a>
 </li>
 <li>
-<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS">
-<code>MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS
-</code>
-</a>
-</li>
-<li>
-<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.declined_genes_graph">
-<code>MetacellsGraphs.BarGraphs.declined_genes_graph
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.degraded_genes_graph">
+<code>MetacellsGraphs.BarGraphs.degraded_genes_graph
 </code>
 </a>
 </li>

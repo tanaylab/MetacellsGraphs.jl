@@ -3,8 +3,7 @@
 ```@docs
 MetacellsGraphs.BarGraphs
 MetacellsGraphs.BarGraphs.improved_genes_graph
-MetacellsGraphs.BarGraphs.declined_genes_graph
-MetacellsGraphs.BarGraphs.MIN_CHANGED_CORRELATION_FOR_GRAPHS
+MetacellsGraphs.BarGraphs.degraded_genes_graph
 ```
 
 ## Index

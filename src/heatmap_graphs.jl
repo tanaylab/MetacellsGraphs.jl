@@ -355,16 +355,6 @@ function groups_gap(n_entries::Integer, group_per_entry::Maybe{AbstractVector}):
     return max(1, round(Int, n_entries * TOTAL_GROUPS_GAP_FRACTION / n_gaps))
 end
 
-# The hover of each entry of an axis, naming the entry and everything it belongs to, skipping whatever the repository
-# does not have.
-function entries_hovers(fields::Pair{<:AbstractString, <:Maybe{AbstractVector}}...)::Vector{AbstractString}
-    known_fields = Pair{AbstractString, AbstractVector}[field for field in fields if field[2] !== nothing]
-    return AbstractString[
-        join(String["$(label): $(value_per_entry[entry_index])" for (label, value_per_entry) in known_fields], "<br>")
-        for entry_index in eachindex(known_fields[1][2])
-    ]
-end
-
 # The color annotation of the type of each entry, or no annotation at all when there are no types to show or no colors
 # to show them in.
 function type_annotations(

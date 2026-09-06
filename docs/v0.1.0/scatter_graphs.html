@@ -418,6 +418,141 @@
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph">
+<code>MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">gene_base_delta_correlations_graph(;
+    daf::DafReader,
+    base_daf::DafReader,
+    gene::AbstractString,
+    gene_fraction_regularization::Real = ```1.0e-5```,
+)::PointsGraph
+</code>
+</pre>
+<p>What the metacells did to one gene, a point per base block: how much its correlation with the cells changed, against how much of the gene there is in the block to say anything about.
+</p>
+<p>The 
+<code>x
+</code> axis is the gene&#39;s correlation between the cells of the base block&#39;s neighborhood and their punctuated metacells, minus what it is in the 
+<code>base_daf
+</code> - so a point right of zero is a block whose metacells describe the gene better than the base does. The 
+<code>y
+</code> axis is how much of the gene the base block expresses, on log scale, since moving the correlation of a gene which is barely there says less than moving one which is everywhere.
+</p>
+<p>Only the base blocks whose base correlation is not zero are shown. A zero there is what a gene saying nothing about a block looks like, rather than a correlation which happens to be zero; a gene which says nothing about any block has nothing to show and is an error rather than an empty graph.
+</p>
+<p>If the blocks have a type, the points are colored by it, using the colors of the type axis. Each point&#39;s hover names its block and type and gives both correlations along with the change between them.
+</p>
+<p>
+<strong>Daf
+</strong>
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>base_block
+</strong> (required): A copy of the base 
+<a href="https://tanaylab.github.io/Metacells.jl/v0.1.0/contracts.html#Metacells.Contracts.block_axis">
+<code>block_axis
+</code>
+</a>, copied into the alternative.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, base
+<em>block @ correlation
+</em>between
+<em>base
+</em>neighborhood
+<em>cells
+</em>and
+<em>punctuated
+</em>metacells
+</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
+</p>
+<p>
+<strong>Base
+</strong>
+</p>
+<p>
+<strong>Inputs
+</strong>
+</p>
+<p>
+<strong>Axes
+</strong>
+</p>
+<p>
+<strong>gene
+</strong> (required): Sequenced genes.
+</p>
+<p>
+<strong>block
+</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
+</p>
+<p>
+<strong>type
+</strong> (optional): Distinct named biological cell states.
+</p>
+<p>
+<strong>Vectors
+</strong>
+</p>
+<p>
+<strong>block @ type
+</strong>::AbstractString (optional): The type each block belongs to.
+</p>
+<p>
+<strong>type @ color
+</strong>::AbstractString (optional): A unique color for each type for visualizations.
+</p>
+<p>
+<strong>Matrices
+</strong>
+</p>
+<p>
+<strong>gene, base
+<em>block @ correlation
+</em>between
+<em>base
+</em>neighborhood
+<em>cells
+</em>and
+<em>punctuated
+</em>metacells
+</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
+</p>
+<p>
+<strong>gene, block @ linear_fraction
+</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
 <a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
 <code>MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
@@ -464,6 +599,12 @@
 <li>
 <a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
 <code>MetacellsGraphs.ScatterGraphs.blocks_umap_graph
+</code>
+</a>
+</li>
+<li>
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph">
+<code>MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph
 </code>
 </a>
 </li>

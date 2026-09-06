@@ -5,6 +5,7 @@ module ScatterGraphs
 
 export blocks_gene_gene_graph
 export blocks_umap_graph
+export gene_base_delta_correlations_graph
 export metacells_gene_gene_graph
 export metacells_umap_graph
 
@@ -16,8 +17,10 @@ using TanayLabUtilities
 using ..Utilities
 
 # Needed because of JET:
+import Metacells.Contracts.base_block_axis
 import Metacells.Contracts.block_axis
 import Metacells.Contracts.gene_axis
+import Metacells.Contracts.matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block
 import Metacells.Contracts.matrix_of_linear_fraction_per_gene_per_block
 import Metacells.Contracts.matrix_of_linear_fraction_per_gene_per_metacell
 import Metacells.Contracts.metacell_axis
@@ -196,6 +199,115 @@ function umap_graph(daf::DafReader; axis::AbstractString)::PointsGraph
             points = ScattersConfiguration(; colors = colors_configuration),
         ),
     )
+end
+
+"""
+    gene_base_delta_correlations_graph(;
+        daf::DafReader,
+        base_daf::DafReader,
+        gene::AbstractString,
+        gene_fraction_regularization::Real = $(DEFAULT.gene_fraction_regularization),
+    )::PointsGraph
+
+What the metacells did to one gene, a point per base block: how much its correlation with the cells changed, against
+how much of the gene there is in the block to say anything about.
+
+The `x` axis is the gene's correlation between the cells of the base block's neighborhood and their punctuated
+metacells, minus what it is in the `base_daf` - so a point right of zero is a block whose metacells describe the gene
+better than the base does. The `y` axis is how much of the gene the base block expresses, on log scale, since moving
+the correlation of a gene which is barely there says less than moving one which is everywhere.
+
+Only the base blocks whose base correlation is not zero are shown. A zero there is what a gene saying nothing about a
+block looks like, rather than a correlation which happens to be zero; a gene which says nothing about any block has
+nothing to show and is an error rather than an empty graph.
+
+If the blocks have a type, the points are colored by it, using the colors of the type axis. Each point's hover names
+its block and type and gives both correlations along with the change between them.
+
+# Daf
+
+$(CONTRACT1)
+
+# Base
+
+$(CONTRACT2)
+"""
+@computation Contract(;
+    name = "daf",
+    link = Metacells,
+    axes = [gene_axis(RequiredInput), base_block_axis(RequiredInput)],
+    data = [
+        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
+            RequiredInput,
+        ),
+    ],
+) Contract(;
+    name = "base_daf",
+    link = Metacells,
+    axes = [gene_axis(RequiredInput), block_axis(RequiredInput), type_axis(OptionalInput)],
+    data = [
+        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
+            RequiredInput,
+        ),
+        matrix_of_linear_fraction_per_gene_per_block(RequiredInput),
+        vector_of_type_per_block(OptionalInput),
+        vector_of_color_per_type(OptionalInput),
+    ],
+) function gene_base_delta_correlations_graph(;
+    daf::DafReader,
+    base_daf::DafReader,
+    gene::AbstractString,
+    gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
+)::PointsGraph
+    @assert gene_fraction_regularization >= 0
+    @assert axis_vector(base_daf, "gene") == axis_vector(daf, "gene")
+    @assert axis_vector(base_daf, "block") == axis_vector(daf, "base_block")
+
+    base_correlation_per_base_block = correlation_per_base_block(base_daf, gene)
+    delta_correlation_per_base_block = correlation_per_base_block(daf, gene) .- base_correlation_per_base_block
+
+    block_indices = findall(base_correlation_per_base_block .!= 0)
+    if isempty(block_indices)
+        error("no base block correlates the gene: $(gene)\nof the base daf data: $(base_daf.name)")
+    end
+
+    type_per_block, colors_configuration = points_type_colors(base_daf, "block")
+    linear_fraction_per_block = get_matrix(base_daf, "gene", "block", "linear_fraction")[gene, :].array
+
+    return points_graph(;
+        x_axis_title = "$(gene) correlation change",
+        y_axis_title = "$(gene) fraction",
+        points_colors_title = "type",
+        points_xs = delta_correlation_per_base_block[block_indices],
+        points_ys = linear_fraction_per_block[block_indices],
+        points_colors = type_per_block === nothing ? nothing : type_per_block[block_indices],
+        points_hovers = entries_hovers(
+            "block" => axis_vector(base_daf, "block")[block_indices],
+            "type" => type_per_block === nothing ? nothing : type_per_block[block_indices],
+            "base correlation" => rounded(base_correlation_per_base_block[block_indices]),
+            "correlation" => rounded(
+                base_correlation_per_base_block[block_indices] .+ delta_correlation_per_base_block[block_indices],
+            ),
+            "change" => rounded(delta_correlation_per_base_block[block_indices]),
+        ),
+        configuration = PointsGraphConfiguration(;
+            y_axis = AxisConfiguration(; log_scale = Log2Scale, log_regularization = gene_fraction_regularization),
+            points = ScattersConfiguration(; colors = colors_configuration),
+        ),
+    )
+end
+
+# The correlation of one gene with the cells of each base block's neighborhood.
+function correlation_per_base_block(daf::DafReader, gene::AbstractString)::AbstractVector{<:AbstractFloat}
+    return get_matrix(daf, "gene", "base_block", "correlation_between_base_neighborhood_cells_and_punctuated_metacells")[
+        gene,
+        :,
+    ].array
+end
+
+# Correlations as a reader reads them, rather than as many digits as a `Float32` prints.
+function rounded(values::AbstractVector{<:AbstractFloat})::Vector{Float32}
+    return round.(values; digits = 3)
 end
 
 # The color of each point of some axis, and the configuration for drawing it. A type which has no color to be drawn in

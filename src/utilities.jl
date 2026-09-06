@@ -1,6 +1,7 @@
 # Helpers shared by more than one kind of graph. Nothing here is exposed to the user of the package.
 module Utilities
 
+export entries_hovers
 export type_colors
 
 using DataAxesFormats
@@ -24,6 +25,16 @@ function type_colors(
     else
         return (type_per_entry.array, ColorsConfiguration(; palette = get_vector(daf, "type", "color"), show_legend))
     end
+end
+
+# The hover of each entry of an axis, naming the entry and everything it belongs to, skipping whatever the repository
+# does not have.
+function entries_hovers(fields::Pair{<:AbstractString, <:Maybe{AbstractVector}}...)::Vector{AbstractString}
+    known_fields = Pair{AbstractString, AbstractVector}[field for field in fields if field[2] !== nothing]
+    return AbstractString[
+        join(String["$(label): $(value_per_entry[entry_index])" for (label, value_per_entry) in known_fields], "<br>")
+        for entry_index in eachindex(known_fields[1][2])
+    ]
 end
 
 end  # module

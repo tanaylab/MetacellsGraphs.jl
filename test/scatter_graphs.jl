@@ -119,4 +119,88 @@ nested_test("scatter_graphs") do
         @test graph.configuration.y_axis.log_regularization == 1e-3
         return nothing
     end
+
+    nested_test("gene_base_delta_correlations") do
+        # The base is the repository the blocks and the expression come from, and the other repository holds the same
+        # genes correlated over the same base blocks. Gene `A` improves in `B1` and degrades in `B2`; gene `B` is
+        # correlated in no base block at all, so it has nothing to show.
+        add_axis!(daf, "base_block", ["B1", "B2"])
+        set_matrix!(
+            daf,
+            "gene",
+            "base_block",
+            "correlation_between_base_neighborhood_cells_and_punctuated_metacells",
+            Float32[
+                0.4 0.6
+                0.0 0.0
+                0.5 0.5
+            ],
+        )
+
+        base_daf = MemoryDaf(; name = "base!")
+        add_axis!(base_daf, "gene", ["A", "B", "C"])
+        add_axis!(base_daf, "block", ["B1", "B2"])
+        add_axis!(base_daf, "base_block", ["B1", "B2"])
+        set_matrix!(
+            base_daf,
+            "gene",
+            "block",
+            "linear_fraction",
+            Float32[
+                0.15 0.35
+                0.35 0.15
+                0.05 0.05
+            ],
+        )
+        set_matrix!(
+            base_daf,
+            "gene",
+            "base_block",
+            "correlation_between_base_neighborhood_cells_and_punctuated_metacells",
+            Float32[
+                0.3 0.7
+                0.0 0.0
+                0.5 0.0
+            ],
+        )
+
+        nested_test("()") do
+            graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "A")
+            @test graph.data.points_xs ≈ Float32[0.1, -0.1]
+            @test graph.data.points_ys == Float32[0.15, 0.35]
+            @test graph.data.points_colors === nothing
+            @test graph.data.points_hovers[1] == "block: B1<br>base correlation: 0.3<br>correlation: 0.4<br>change: 0.1"
+            @test graph.configuration.y_axis.log_scale == Log2Scale
+            return nothing
+        end
+
+        # A gene correlated in only some of the base blocks is shown in those, since a zero base correlation is the
+        # gene saying nothing about the block rather than a correlation of zero.
+        nested_test("uncorrelated") do
+            graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "C")
+            @test graph.data.points_xs == Float32[0.0]
+            @test graph.data.points_ys == Float32[0.05]
+            return nothing
+        end
+
+        nested_test("!correlated") do
+            @test_throws "no base block correlates the gene: B\nof the base daf data: base!" gene_base_delta_correlations_graph(;
+                daf,
+                base_daf,
+                gene = "B",
+            )
+            return nothing
+        end
+
+        nested_test("typed") do
+            add_axis!(base_daf, "type", ["X", "Y"])
+            set_vector!(base_daf, "type", "color", ["red", "blue"])
+            set_vector!(base_daf, "block", "type", ["X", "Y"])
+            graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "A")
+            @test graph.data.points_colors == ["X", "Y"]
+            @test graph.data.points_hovers[1] ==
+                  "block: B1<br>type: X<br>base correlation: 0.3<br>correlation: 0.4<br>change: 0.1"
+            return nothing
+        end
+    end
 end
