@@ -111,54 +111,65 @@ nested_test("bar_graphs") do
 
         # The gene the graph is named for is at the top, which for horizontal bars is the end of the vector. `C` and `D`
         # both improved in nothing, so they are in marker rank order.
-        @test graph.data.bars_names == ["C", "D", "B", "A"]
-        @test graph.data.series_bars_values[1] == [1.0, 0.0, 0.5, 0.0]
-        @test graph.data.series_bars_values[2] == [0.0, 0.0, 0.25, 0.75]
-        @test graph.data.series_names == ["degraded", "improved"]
+        @test graph.data.bars.names == ["C", "D", "B", "A"]
+        @test graph.configuration.bar_axis.title == "Genes"
+        @test graph.data.series[1].values.vector == [1.0, 0.0, 0.5, 0.0]
+        @test graph.data.series[2].values.vector == [0.0, 0.0, 0.25, 0.75]
+        @test graph.configuration.value_axis.title == "Base neighborhoods"
+        @test [series.name for series in graph.data.series] == ["degraded", "improved"]
+        @test [series.color for series in graph.data.series] == ["darkred", "darkblue"]
         @test graph.configuration.mirrored
         @test graph.configuration.values_orientation == HorizontalValues
-        @test graph.configuration.value_axis.percent
+        @test graph.configuration.value_axis.scale.percent
         return nothing
     end
 
     nested_test("degraded") do
         graph = degraded_genes_graph(; daf, base_daf)
-        @test graph.data.bars_names == ["A", "D", "B", "C"]
-        @test graph.data.series_bars_values[1] == [0.0, 0.0, 0.5, 1.0]
-        @test graph.data.series_bars_values[2] == [0.75, 0.0, 0.25, 0.0]
+        @test graph.data.bars.names == ["A", "D", "B", "C"]
+        @test graph.data.series[1].values.vector == [0.0, 0.0, 0.5, 1.0]
+        @test graph.data.series[2].values.vector == [0.75, 0.0, 0.25, 0.0]
         return nothing
     end
 
     nested_test("genes_count") do
         graph = improved_genes_graph(; daf, base_daf, genes_count = 2)
-        @test graph.data.bars_names == ["B", "A"]
+        @test graph.data.bars.names == ["B", "A"]
         return nothing
     end
 
     nested_test("hovers") do
         graph = improved_genes_graph(; daf, base_daf)
 
-        # The bars are ["C", "D", "B", "A"], and each wing says what its own side's base blocks say.
-        @test graph.data.series_bars_hovers[1][1] == "C<br>degraded: in no module in 20.0% of the cells<br>- B: 60.0%"
-        @test graph.data.series_bars_hovers[1][4] == "A<br>degraded: in no module in 100.0% of the cells"
-        @test graph.data.series_bars_hovers[2][1] == "C<br>improved: in no module in 100.0% of the cells"
-        @test graph.data.series_bars_hovers[2][4] == "A<br>improved: in no module in 25.0% of the cells<br>- B: 40.0%"
+        # The bars are ["C", "D", "B", "A"], and each wing says what its own side's base blocks say. The gene is named
+        # by the bar it belongs to, so the hover of a series does not repeat it.
+        @test graph.data.series[1].bars.hovers[1] == "degraded: in no module in 20.0% of the cells<br>- B: 60.0%"
+        @test graph.data.series[1].bars.hovers[4] == "degraded: in no module in 100.0% of the cells"
+        @test graph.data.series[2].bars.hovers[1] == "improved: in no module in 100.0% of the cells"
+        @test graph.data.series[2].bars.hovers[4] == "improved: in no module in 25.0% of the cells<br>- B: 40.0%"
         return nothing
     end
 
     nested_test("regulators_count") do
         graph = improved_genes_graph(; daf, base_daf, regulators_count = 0)
-        @test graph.data.series_bars_hovers[2][4] == "A<br>improved: in no module in 25.0% of the cells"
+        @test graph.data.series[2].bars.hovers[4] == "improved: in no module in 25.0% of the cells"
         return nothing
     end
 
     nested_test("annotations") do
         graph = improved_genes_graph(; daf, base_daf)
-        @test length(graph.data.bars_annotations) == 2
-        @test graph.data.bars_annotations[1].title == "is lateral"
-        @test graph.data.bars_annotations[1].values == ["no", "yes", "no", "no"]
-        @test graph.data.bars_annotations[2].title == "is regulator"
-        @test graph.data.bars_annotations[2].values == ["no", "no", "yes", "no"]
+        @test length(graph.data.annotations) == 2
+        @test graph.data.annotations[1].colors.title == "is lateral"
+        @test graph.data.annotations[1].values.vector == ["false", "true", "false", "false"]
+        @test graph.data.annotations[2].colors.title == "is regulator"
+        @test graph.data.annotations[2].values.vector == ["false", "false", "true", "false"]
+        @test !graph.data.annotations[1].colors.show_legend
+        @test graph.data.bars.hovers == [
+            "is lateral: false<br>is regulator: false",
+            "is lateral: true<br>is regulator: false",
+            "is lateral: false<br>is regulator: true",
+            "is lateral: false<br>is regulator: false",
+        ]
         return nothing
     end
 end

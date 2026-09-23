@@ -57,6 +57,10 @@
 </a>
 </li>
 <li>
+<a class="tocitem" href="data_sources.html">Data Sources
+</a>
+</li>
+<li>
 <a class="tocitem" href="scatter_graphs.html">Scatter Graphs
 </a>
 </li>
@@ -144,6 +148,10 @@
 <div>
 <p>Bar graphs of a metacells repository.
 </p>
+<p>Unlike the other graphs, a graph here picks its own bars, so there is nothing for a caller to fill in afterwards. It reads a report computed by 
+<code>Metacells
+</code>, keeps the genes worth showing, and draws everything about them.
+</p>
 </div>
 </section>
 </details>
@@ -164,8 +172,8 @@
 <code class="language-julia hljs">improved_genes_graph(;
     daf::DafReader,
     base_daf::DafReader,
-    genes_count::Integer = ```30```,
-    regulators_count::Integer = ```5```,
+    genes_count::Integer = 30,
+    regulators_count::Integer = 5,
 )::SeriesBarsGraph
 </code>
 </pre>
@@ -181,177 +189,9 @@
 </p>
 <p>The hover of each bar says how often the gene is in no module at all in that side&#39;s base blocks, and which 
 <code>regulators_count
-</code> regulators it most often shares one with there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene name different regulators.
+</code> regulators it is most often in a module with there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene name different regulators.
 </p>
 <p>Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides. A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the metacells nevertheless describe better than the base does.
-</p>
-<p>
-<strong>Daf
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>base_block
-</strong> (required): A copy of the base 
-<a href="https://tanaylab.github.io/Metacells.jl/v0.1.0/contracts.html#Metacells.Contracts.block_axis">
-<code>block_axis
-</code>
-</a>, copied into the alternative.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_marker
-</strong>::Bool (required): A mask of genes that distinguish between cell states.
-</p>
-<p>
-<strong>gene @ marker_rank
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
-</p>
-<p>
-<strong>gene @ is_lateral
-</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
-</p>
-<p>
-<strong>gene @ is
-<em>transcription
-</em>factor
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
-</p>
-<p>
-<strong>gene @ is_regulator
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
-</p>
-<p>
-<strong>gene @ is_skeleton
-</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
-</p>
-<p>
-<strong>gene @ mean
-<em>no
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>improved
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells improved it.
-</p>
-<p>
-<strong>gene @ mean
-<em>no
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>degraded
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells degraded it.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, gene @ correlation
-<em>between
-</em>markers
-</strong>::Union{Float32, Float64} (required): The correlation between the log expression of pairs of marker genes across the metacells.
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
-</p>
-<p>
-<strong>gene, gene @ mean
-<em>shared
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>improved
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells improved it.
-</p>
-<p>
-<strong>gene, gene @ mean
-<em>shared
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>degraded
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells degraded it.
-</p>
-<p>
-<strong>Base
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
 </p>
 </div>
 </section>
@@ -373,8 +213,8 @@
 <code class="language-julia hljs">degraded_genes_graph(;
     daf::DafReader,
     base_daf::DafReader,
-    genes_count::Integer = ```30```,
-    regulators_count::Integer = ```5```,
+    genes_count::Integer = 30,
+    regulators_count::Integer = 5,
 )::SeriesBarsGraph
 </code>
 </pre>
@@ -387,174 +227,6 @@
 <code>improved_genes_graph
 </code>
 </a> picking its genes by the other side, and reads the same way; the two graphs show the same two series and differ only in which of them decides what is worth showing.
-</p>
-<p>
-<strong>Daf
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>base_block
-</strong> (required): A copy of the base 
-<a href="https://tanaylab.github.io/Metacells.jl/v0.1.0/contracts.html#Metacells.Contracts.block_axis">
-<code>block_axis
-</code>
-</a>, copied into the alternative.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_marker
-</strong>::Bool (required): A mask of genes that distinguish between cell states.
-</p>
-<p>
-<strong>gene @ marker_rank
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
-</p>
-<p>
-<strong>gene @ is_lateral
-</strong>::Bool (required): A mask of genes that are lateral to the biological behaviors of interest.
-</p>
-<p>
-<strong>gene @ is
-<em>transcription
-</em>factor
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
-</p>
-<p>
-<strong>gene @ is_regulator
-</strong>::Bool (required): A mask of genes that regulate the expression level of other genes.
-</p>
-<p>
-<strong>gene @ is_skeleton
-</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
-</p>
-<p>
-<strong>gene @ mean
-<em>no
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>improved
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells improved it.
-</p>
-<p>
-<strong>gene @ mean
-<em>no
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>degraded
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): How often each gene is in no module at all, where the metacells degraded it.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, gene @ correlation
-<em>between
-</em>markers
-</strong>::Union{Float32, Float64} (required): The correlation between the log expression of pairs of marker genes across the metacells.
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
-</p>
-<p>
-<strong>gene, gene @ mean
-<em>shared
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>improved
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells improved it.
-</p>
-<p>
-<strong>gene, gene @ mean
-<em>shared
-</em>module
-<em>fraction
-</em>in
-<em>base
-</em>neighborhood
-<em>cells
-</em>at
-<em>degraded
-</em>base_blocks
-</strong>::Union{Float32, Float64} (required): Which regulators each gene shares a module with, where the metacells degraded it.
-</p>
-<p>
-<strong>Base
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
 </p>
 </div>
 </section>

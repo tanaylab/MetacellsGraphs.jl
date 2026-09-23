@@ -34,90 +34,98 @@ nested_test("scatter_graphs") do
     set_vector!(daf, "block", "umap_x", Float32[0.5, 2.5])
     set_vector!(daf, "block", "umap_y", Float32[2.5, 0.5])
 
-    nested_test("untyped") do
-        nested_test("metacells_gene_gene") do
-            graph = metacells_gene_gene_graph(daf; x_gene = "A", y_gene = "B")
-            @test graph.data.points_xs == Float32[0.1, 0.2, 0.3, 0.4]
-            @test graph.data.points_ys == Float32[0.4, 0.3, 0.2, 0.1]
-            @test graph.data.points_colors === nothing
-            @test graph.data.points_hovers == ["M1", "M2", "M3", "M4"]
-            @test graph.configuration.x_axis.log_scale == Log2Scale
-            @test graph.configuration.y_axis.log_regularization == 1e-5
+    nested_test("gene_gene") do
+        nested_test("metacells") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B")
+            @test graph.data.x.vector == Float32[0.1, 0.2, 0.3, 0.4]
+            @test graph.data.y.vector == Float32[0.4, 0.3, 0.2, 0.1]
+            @test graph.configuration.x_axis.title == "A fraction"
+            @test graph.configuration.y_axis.title == "B fraction"
+            @test graph.configuration.x_axis.scale.log_base == Log2Base
+            @test graph.configuration.y_axis.scale.log_regularization == 1e-5
+            @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
+            @test graph.data.points.entities.hovers[1] == "A fraction: 0.1<br>B fraction: 0.4"
+
+            # The graph says nothing about the colors of the points; the caller does.
+            @test graph.data.points.colors.vector === nothing
             return nothing
         end
 
-        nested_test("blocks_gene_gene") do
-            graph = blocks_gene_gene_graph(daf; x_gene = "A", y_gene = "C")
-            @test graph.data.points_xs == Float32[0.15, 0.35]
-            @test graph.data.points_ys == Float32[0.05, 0.05]
-            @test graph.data.points_colors === nothing
-            @test graph.data.points_hovers == ["B1", "B2"]
+        nested_test("blocks") do
+            graph = gene_gene_graph(daf; axis = "block", x_gene = "A", y_gene = "C")
+            @test graph.data.x.vector == Float32[0.15, 0.35]
+            @test graph.data.y.vector == Float32[0.05, 0.05]
+            @test graph.data.points.entities.names == ["B1", "B2"]
+            @test graph.data.points.entities.hovers[2] == "A fraction: 0.35<br>C fraction: 0.05"
             return nothing
         end
 
-        nested_test("metacells_umap") do
-            graph = metacells_umap_graph(daf)
-            @test graph.data.points_xs == Float32[0.0, 1.0, 2.0, 3.0]
-            @test graph.data.points_ys == Float32[3.0, 2.0, 1.0, 0.0]
-            @test graph.data.points_colors === nothing
-            @test graph.data.points_hovers == ["M1", "M2", "M3", "M4"]
-            @test !graph.configuration.x_axis.show_ticks
-            @test !graph.configuration.y_axis.show_grid
+        nested_test("entries") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", entries = ["M1", "M3"])
+            @test graph.data.x.vector == Float32[0.1, 0.3]
+            @test graph.data.y.vector == Float32[0.4, 0.2]
+            @test graph.data.points.entities.names == ["M1", "M3"]
             return nothing
         end
 
-        nested_test("blocks_umap") do
-            graph = blocks_umap_graph(daf)
-            @test graph.data.points_xs == Float32[0.5, 2.5]
-            @test graph.data.points_ys == Float32[2.5, 0.5]
-            @test graph.data.points_colors === nothing
-            @test graph.data.points_hovers == ["B1", "B2"]
+        nested_test("regularization") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", gene_fraction_regularization = 1e-3)
+            @test graph.configuration.x_axis.scale.log_regularization == 1e-3
+            @test graph.configuration.y_axis.scale.log_regularization == 1e-3
             return nothing
         end
     end
 
-    nested_test("typed") do
+    nested_test("umap") do
+        nested_test("metacells") do
+            graph = umap_graph(daf)
+            @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
+            @test graph.data.y.vector == Float32[3.0, 2.0, 1.0, 0.0]
+            @test graph.configuration.x_axis.title == "UMAP X"
+            @test graph.configuration.y_axis.title == "UMAP Y"
+            @test !graph.configuration.x_axis.show_ticks
+            @test !graph.configuration.y_axis.show_grid
+            @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
+
+            # A UMAP coordinate is the arbitrary output of the projection, so it says nothing in a hover.
+            @test graph.data.points.entities.hovers === nothing
+            return nothing
+        end
+
+        nested_test("blocks") do
+            graph = umap_graph(daf; axis = "block")
+            @test graph.data.x.vector == Float32[0.5, 2.5]
+            @test graph.data.y.vector == Float32[2.5, 0.5]
+            @test graph.data.points.entities.names == ["B1", "B2"]
+            return nothing
+        end
+    end
+
+    # Coloring the points is a second call, so any per-entry property can be the color.
+    nested_test("colors") do
         add_axis!(daf, "type", ["X", "Y"])
         set_vector!(daf, "type", "color", ["red", "blue"])
         set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
-        set_vector!(daf, "block", "type", ["X", "Y"])
 
-        nested_test("metacells_gene_gene") do
-            graph = metacells_gene_gene_graph(daf; x_gene = "A", y_gene = "B")
-            @test graph.data.points_colors == ["X", "X", "Y", "Y"]
+        nested_test("type") do
+            graph = umap_graph(daf)
+            fill_type!(points_colors_vector_fields(graph), daf)
+            @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
+            @test graph.configuration.points.colors.title == "type"
+            @test graph.configuration.points.colors.palette == Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
             @test graph.configuration.points.colors.show_legend
-            @test graph.configuration.points.colors.palette == ["red", "blue"]
+            @test graph.data.points.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end
 
-        nested_test("blocks_gene_gene") do
-            graph = blocks_gene_gene_graph(daf; x_gene = "A", y_gene = "B")
-            @test graph.data.points_colors == ["X", "Y"]
-            @test graph.configuration.points.colors.show_legend
+        nested_test("total_UMIs") do
+            set_vector!(daf, "metacell", "total_UMIs", UInt32[100, 200, 300, 400])
+            graph = umap_graph(daf)
+            fill_total_UMIs!(points_colors_vector_fields(graph), daf)
+            @test graph.data.points.colors.vector == UInt32[100, 200, 300, 400]
+            @test graph.configuration.points.colors.scale.log_base == Log2Base
             return nothing
         end
-
-        nested_test("metacells_umap") do
-            graph = metacells_umap_graph(daf)
-            @test graph.data.points_colors == ["X", "X", "Y", "Y"]
-            @test graph.configuration.points.colors.show_legend
-            @test graph.configuration.points.colors.palette == ["red", "blue"]
-            return nothing
-        end
-
-        nested_test("blocks_umap") do
-            graph = blocks_umap_graph(daf)
-            @test graph.data.points_colors == ["X", "Y"]
-            @test graph.configuration.points.colors.show_legend
-            return nothing
-        end
-    end
-
-    nested_test("regularization") do
-        graph = metacells_gene_gene_graph(daf; x_gene = "A", y_gene = "B", gene_fraction_regularization = 1e-3)
-        @test graph.configuration.x_axis.log_regularization == 1e-3
-        @test graph.configuration.y_axis.log_regularization == 1e-3
-        return nothing
     end
 
     nested_test("gene_base_delta_correlations") do
@@ -166,20 +174,26 @@ nested_test("scatter_graphs") do
 
         nested_test("()") do
             graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "A")
-            @test graph.data.points_xs ≈ Float32[0.1, -0.1]
-            @test graph.data.points_ys == Float32[0.15, 0.35]
-            @test graph.data.points_colors === nothing
-            @test graph.data.points_hovers[1] == "block: B1<br>base correlation: 0.3<br>correlation: 0.4<br>change: 0.1"
-            @test graph.configuration.y_axis.log_scale == Log2Scale
+            @test graph.data.x.vector ≈ Float32[0.1, -0.1]
+            @test graph.data.y.vector == Float32[0.15, 0.35]
+            @test graph.configuration.x_axis.title == "correlation change"
+            @test graph.configuration.y_axis.title == "A fraction"
+            @test graph.configuration.y_axis.scale.log_base == Log2Base
+            @test !graph.configuration.x_axis.scale.include_hidden
+            @test !graph.configuration.y_axis.scale.include_hidden
+            @test graph.data.points.entities.names == ["B1", "B2"]
+            @test graph.data.points.entities.mask == [true, true]
+            @test graph.data.points.colors.vector === nothing
             return nothing
         end
 
         # A gene correlated in only some of the base blocks is shown in those, since a zero base correlation is the
-        # gene saying nothing about the block rather than a correlation of zero.
+        # gene saying nothing about the block rather than a correlation of zero. The rest are hidden, not dropped.
         nested_test("uncorrelated") do
             graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "C")
-            @test graph.data.points_xs == Float32[0.0]
-            @test graph.data.points_ys == Float32[0.05]
+            @test graph.data.x.vector == Float32[0.0, 0.5]
+            @test graph.data.y.vector == Float32[0.05, 0.05]
+            @test graph.data.points.entities.mask == [true, false]
             return nothing
         end
 
@@ -189,17 +203,6 @@ nested_test("scatter_graphs") do
                 base_daf,
                 gene = "B",
             )
-            return nothing
-        end
-
-        nested_test("typed") do
-            add_axis!(base_daf, "type", ["X", "Y"])
-            set_vector!(base_daf, "type", "color", ["red", "blue"])
-            set_vector!(base_daf, "block", "type", ["X", "Y"])
-            graph = gene_base_delta_correlations_graph(; daf, base_daf, gene = "A")
-            @test graph.data.points_colors == ["X", "Y"]
-            @test graph.data.points_hovers[1] ==
-                  "block: B1<br>type: X<br>base correlation: 0.3<br>correlation: 0.4<br>change: 0.1"
             return nothing
         end
     end

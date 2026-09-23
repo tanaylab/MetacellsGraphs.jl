@@ -38,131 +38,114 @@ nested_test("heatmap_graphs") do
         ],
     )
 
-    nested_test("untyped") do
-        nested_test("markers_metacells") do
-            graph = markers_metacells_heatmap_graph(daf)
-            @test graph.data.rows_names == ["A", "B", "C", "D"]
-            @test graph.data.entries_values[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
-            @test graph.data.columns_hovers[1] == "metacell: M1<br>block: B1"
-            @test isempty(graph.data.columns_annotations)
-            @test graph.data.columns_groups === nothing
-            @test graph.configuration.entries_colors.axis.maximum == 3
+    nested_test("genes") do
+        nested_test("markers") do
+            genes = get_top_marker_gene_indices(daf; markers_count = 100)
+            graph = genes_heatmap_graph(daf; genes, rows_axis_title = "Marker genes")
+            @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
+            @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
+            @test graph.data.entries.matrix[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
+            @test graph.configuration.rows.title == "Marker genes"
+            @test graph.configuration.columns.title == "Metacells"
+            @test graph.configuration.rows.reorder == OptimalHclust
+            @test graph.configuration.columns.reorder == OptimalHclust
+            @test graph.configuration.entries.colors.scale.minimum == -3
+            @test graph.configuration.entries.colors.scale.maximum == 3
+            @test graph.configuration.entries.colors.palette == "BuWtRd"
+
+            # There are too many columns to label, so they are named in the hovers only.
+            @test !graph.configuration.columns.show_ticks
+            @test graph.configuration.rows.show_ticks
+
+            # The graph groups nothing and annotates nothing; the caller does.
+            @test isempty(graph.data.columns.annotations)
+            @test graph.data.columns.groups.vector === nothing
+            @test graph.data.columns.subgroups.vector === nothing
             return nothing
         end
 
         nested_test("markers_count") do
-            graph = markers_metacells_heatmap_graph(daf; markers_count = 2)
-            @test graph.data.rows_names == ["A", "B"]
+            genes = get_top_marker_gene_indices(daf; markers_count = 2)
+            graph = genes_heatmap_graph(daf; genes)
+            @test graph.data.rows.entities.names == ["A", "B"]
+            @test graph.configuration.rows.title == "Genes"
             return nothing
         end
 
-        nested_test("skeletons_metacells") do
-            graph = skeletons_metacells_heatmap_graph(daf)
-            @test graph.data.rows_names == ["A", "B"]
-            @test graph.data.entries_values[2, :] == Float32[1.0, 0.0, 0.0, -1.0]
+        nested_test("skeletons") do
+            genes = get_skeleton_gene_indices(daf)
+            graph = genes_heatmap_graph(daf; genes, rows_axis_title = "Skeleton genes")
+            @test graph.data.rows.entities.names == ["A", "B"]
+            @test graph.data.entries.matrix[2, :] == Float32[1.0, 0.0, 0.0, -1.0]
             return nothing
         end
 
-        nested_test("markers_blocks") do
-            graph = markers_blocks_heatmap_graph(daf)
-            @test graph.data.rows_names == ["A", "B", "C", "D"]
-            @test graph.data.entries_values[1, :] == Float32[-0.5, 0.5]
-            @test graph.data.columns_hovers == ["block: B1", "block: B2"]
+        nested_test("blocks") do
+            genes = get_top_marker_gene_indices(daf; markers_count = 100)
+            graph = genes_heatmap_graph(daf; axis = "block", genes)
+            @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
+            @test graph.data.columns.entities.names == ["B1", "B2"]
+            @test graph.data.entries.matrix[1, :] == Float32[-0.5, 0.5]
+            @test graph.configuration.columns.title == "Blocks"
             return nothing
         end
 
-        nested_test("skeletons_blocks") do
-            graph = skeletons_blocks_heatmap_graph(daf)
-            @test graph.data.rows_names == ["A", "B"]
-            @test graph.data.columns_hovers == ["block: B1", "block: B2"]
-            return nothing
-        end
-
-        nested_test("group_by_block") do
-            graph = markers_metacells_heatmap_graph(daf; group_by_block = true)
-            @test graph.data.columns_groups == ["B1", "B1", "B2", "B2"]
-            @test graph.data.columns_subgroups === nothing
-            return nothing
-        end
-
-        nested_test("!group_by_type") do
-            @test_throws "group_by_type without a type per metacell" markers_metacells_heatmap_graph(
-                daf;
-                group_by_type = true,
-            )
+        # A single gene has nothing to be ordered against, so there is nothing to cluster.
+        nested_test("one") do
+            graph = genes_heatmap_graph(daf; genes = ["A"])
+            @test graph.data.rows.entities.names == ["A"]
+            @test graph.configuration.rows.reorder === nothing
+            @test graph.configuration.columns.reorder == OptimalHclust
             return nothing
         end
     end
 
-    nested_test("colorless") do
-        add_axis!(daf, "type", ["X", "Y"])
-        set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
-
-        # A type with no color to draw it in is not shown, but it is still there to be grouped by.
-        graph = markers_metacells_heatmap_graph(daf; group_by_type = true)
-        @test isempty(graph.data.columns_annotations)
-        @test graph.data.columns_groups == ["X", "X", "Y", "Y"]
-        @test graph.data.columns_hovers[1] == "metacell: M1<br>block: B1<br>type: X"
-        return nothing
-    end
-
-    nested_test("typed") do
+    # Grouping and annotating the columns is a second call, so any per-entry property can do either.
+    nested_test("columns") do
         add_axis!(daf, "type", ["X", "Y"])
         set_vector!(daf, "type", "color", ["red", "blue"])
         set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
-        set_vector!(daf, "block", "type", ["X", "Y"])
 
         # The flow order runs the types in the reverse of the order the type axis holds them in.
         set_vector!(daf, "type", "global_flow_order", UInt32[2, 1])
 
-        nested_test("markers_metacells") do
-            graph = markers_metacells_heatmap_graph(daf)
-            @test graph.data.columns_hovers[1] == "metacell: M1<br>block: B1<br>type: X"
-            @test length(graph.data.columns_annotations) == 1
-            @test graph.data.columns_annotations[1].title == "type"
-            @test graph.data.columns_annotations[1].values == ["X", "X", "Y", "Y"]
-            @test graph.data.columns_annotations[1].colors.palette == ["red", "blue"]
+        genes = get_skeleton_gene_indices(daf)
+
+        nested_test("annotation") do
+            graph = genes_heatmap_graph(daf; genes)
+            index = add_columns_annotation!(graph)
+            fill_type!(columns_annotations_colors_vector_fields(graph, index), daf; show_legend = false)
+            @test graph.data.columns.annotations[1].values.vector == ["X", "X", "Y", "Y"]
+            @test graph.data.columns.annotations[1].colors.title == "type"
+            @test graph.data.columns.annotations[1].colors.palette ==
+                  Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
+            @test !graph.data.columns.annotations[1].colors.show_legend
+            @test graph.data.columns.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end
 
         nested_test("group_by_type") do
-            graph = markers_metacells_heatmap_graph(daf; group_by_type = true)
-            @test graph.data.columns_groups == ["X", "X", "Y", "Y"]
-            @test graph.data.columns_subgroups === nothing
+            graph = genes_heatmap_graph(daf; genes)
+            fill_type!(columns_groups_vector_data_fields(graph), daf)
+            @test graph.data.columns.groups.vector == ["X", "X", "Y", "Y"]
             return nothing
         end
 
+        nested_test("group_by_block") do
+            graph = genes_heatmap_graph(daf; genes)
+            fill_block!(columns_groups_vector_data_fields(graph), daf)
+            @test graph.data.columns.groups.vector == ["B1", "B1", "B2", "B2"]
+            @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
+            return nothing
+        end
+
+        # Naming both levels nests them: the blocks are grouped inside the types.
         nested_test("group_by_both") do
-            graph = markers_metacells_heatmap_graph(daf; group_by_type = true, group_by_block = true)
-            @test graph.data.columns_groups == ["X", "X", "Y", "Y"]
-            @test graph.data.columns_subgroups == ["B1", "B1", "B2", "B2"]
-            return nothing
-        end
-
-        nested_test("use_global_flow_order") do
-            graph = markers_metacells_heatmap_graph(daf; group_by_type = true, use_global_flow_order = true)
-            @test graph.data.columns_groups == UInt32[2, 2, 1, 1]
-            return nothing
-        end
-
-        nested_test("!use_global_flow_order") do
-            @test_throws "use_global_flow_order without group_by_type" markers_metacells_heatmap_graph(
-                daf;
-                use_global_flow_order = true,
-            )
-            return nothing
-        end
-
-        nested_test("markers_blocks") do
-            graph = markers_blocks_heatmap_graph(daf; group_by_type = true)
-            @test graph.data.columns_hovers == ["block: B1<br>type: X", "block: B2<br>type: Y"]
-            @test graph.data.columns_groups == ["X", "Y"]
-            return nothing
-        end
-
-        nested_test("skeletons_blocks") do
-            graph = skeletons_blocks_heatmap_graph(daf; group_by_type = true, use_global_flow_order = true)
-            @test graph.data.columns_groups == UInt32[2, 1]
+            graph = genes_heatmap_graph(daf; genes)
+            fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
+            fill_block!(columns_subgroups_vector_data_fields(graph), daf)
+            @test graph.data.columns.groups.vector == UInt32[2, 2, 1, 1]
+            @test graph.data.columns.subgroups.vector == ["B1", "B1", "B2", "B2"]
             return nothing
         end
     end

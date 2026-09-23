@@ -56,6 +56,10 @@
 <a class="tocitem" href="index.html">MetacellsGraphs
 </a>
 </li>
+<li>
+<a class="tocitem" href="data_sources.html">Data Sources
+</a>
+</li>
 <li class="is-active">
 <a class="tocitem" href="scatter_graphs.html">Scatter Graphs
 </a>
@@ -144,15 +148,28 @@
 <div>
 <p>Scatter graphs of a metacells repository.
 </p>
+<p>A graph function fills in the data the graph is about, and nothing else. In particular it does not color the points. The caller says how to color them in a second call, so that any property can be the color:
+</p>
+<pre>
+<code class="language-julia hljs">graph = umap_graph(daf)
+fill_type!(points_colors_vector_fields(graph), daf)
+</code>
+</pre>
+<p>The second call must name the same 
+<code>axis
+</code> and 
+<code>entries
+</code> as the first, or the vectors will not match. The same goes for the sizes of the points, and for anything else the graph leaves empty.
+</p>
 </div>
 </section>
 </details>
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
-<code>MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph
+<summary id="MetacellsGraphs.ScatterGraphs.gene_gene_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.gene_gene_graph">
+<code>MetacellsGraphs.ScatterGraphs.gene_gene_graph
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -161,57 +178,37 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">metacells_gene_gene_graph(
+<code class="language-julia hljs">gene_gene_graph(
     daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
     x_gene::AbstractString,
     y_gene::AbstractString,
-    gene_fraction_regularization::Real = ```1.0e-5```,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    gene_fraction_regularization::Real = 1.0e-5,
 )::PointsGraph
 </code>
 </pre>
-<p>The expression of one gene against another, a point per metacell, on log scale.
+<p>The expression of 
+<code>x_gene
+</code> against 
+<code>y_gene
+</code>, a point per each of the 
+<code>entries
+</code> of the 
+<code>axis
+</code>, on log scale.
 </p>
-<p>If the metacells have a type, the points are colored by it, using the colors of the type axis, and the types are shown in a legend. If they do not, they are all the same color; nothing else about the graph changes.
+<p>The 
+<code>axis
+</code> can be any axis which has a 
+<code>linear_fraction
+</code> per gene, typically 
+<code>metacell
+</code> or 
+<code>block
+</code>. A block is coarser, so the same pair of genes shows fewer points and less scatter.
 </p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>metacell
-</strong> (required): Minimal-sized groups of cells for robust point estimates.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>metacell @ type
-</strong>::AbstractString (optional): The type each metacell belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, metacell @ linear_fraction
-</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
+<p>The hover of each point names its entry and gives both fractions.
 </p>
 </div>
 </section>
@@ -219,9 +216,9 @@
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph">
-<code>MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph
+<summary id="MetacellsGraphs.ScatterGraphs.umap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.umap_graph
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -230,187 +227,30 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">blocks_gene_gene_graph(
+<code class="language-julia hljs">umap_graph(
     daf::DafReader;
-    x_gene::AbstractString,
-    y_gene::AbstractString,
-    gene_fraction_regularization::Real = ```1.0e-5```,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
 )::PointsGraph
 </code>
 </pre>
-<p>The expression of one gene against another, a point per block, on log scale.
+<p>The 2D UMAP embedding, a point per each of the 
+<code>entries
+</code> of the 
+<code>axis
+</code>.
 </p>
-<p>This is 
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
-<code>metacells_gene_gene_graph
-</code>
-</a> of the blocks the metacells were grouped into, and reads the same way; a block is coarser, so the same pair of genes shows fewer points and less scatter.
+<p>The 
+<code>axis
+</code> can be any axis which has UMAP coordinates, typically 
+<code>metacell
+</code> or 
+<code>block
+</code>. A block is placed at the mean position of its metacells, so the same embedding shows fewer points closer to its center.
 </p>
-<p>
-<strong>Inputs
-</strong>
+<p>The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid. Only which points are near which other points means anything.
 </p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>block @ type
-</strong>::AbstractString (optional): The type each block belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, block @ linear_fraction
-</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
-<code>MetacellsGraphs.ScatterGraphs.metacells_umap_graph
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">metacells_umap_graph(daf::DafReader)::PointsGraph
-</code>
-</pre>
-<p>The 2D UMAP embedding of the metacells, a point per metacell.
-</p>
-<p>If the metacells have a type, the points are colored by it, using the colors of the type axis, and the types are shown in a legend. If they do not, they are all the same color; nothing else about the graph changes.
-</p>
-<p>The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid; only which points are near which other points means anything.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>metacell
-</strong> (required): Minimal-sized groups of cells for robust point estimates.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>metacell @ umap_x
-</strong>::Union{Float32, Float64} (required): The X coordinate of each metacell in a 2D UMAP projection.
-</p>
-<p>
-<strong>metacell @ umap_y
-</strong>::Union{Float32, Float64} (required): The Y coordinate of each metacell in a 2D UMAP projection.
-</p>
-<p>
-<strong>metacell @ type
-</strong>::AbstractString (optional): The type each metacell belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
-<code>MetacellsGraphs.ScatterGraphs.blocks_umap_graph
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">blocks_umap_graph(daf::DafReader)::PointsGraph
-</code>
-</pre>
-<p>The 2D UMAP embedding of the blocks, a point per block.
-</p>
-<p>This is 
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
-<code>metacells_umap_graph
-</code>
-</a> of the blocks the metacells were grouped into, and reads the same way; a block is placed at the mean position of its metacells, so the same embedding shows fewer points closer to its center.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>block @ umap_x
-</strong>::Union{Float32, Float64} (required): The X coordinate of each block in a 2D UMAP projection.
-</p>
-<p>
-<strong>block @ umap_y
-</strong>::Union{Float32, Float64} (required): The Y coordinate of each block in a 2D UMAP projection.
-</p>
-<p>
-<strong>block @ type
-</strong>::AbstractString (optional): The type each block belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
+<p>The hover of each point names its entry and gives its coordinates.
 </p>
 </div>
 </section>
@@ -433,137 +273,36 @@
     daf::DafReader,
     base_daf::DafReader,
     gene::AbstractString,
-    gene_fraction_regularization::Real = ```1.0e-5```,
+    axis::AbstractString = &quot;base_block&quot;,
+    base_axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    gene_fraction_regularization::Real = 1.0e-5,
 )::PointsGraph
 </code>
 </pre>
-<p>What the metacells did to one gene, a point per base block: how much its correlation with the cells changed, against how much of the gene there is in the block to say anything about.
+<p>What the metacells did to one gene, a point per each of the 
+<code>entries
+</code>: how much its correlation with the cells changed, against how much of the gene there is to say anything about.
+</p>
+<p>Both repositories hold the correlations along the 
+<code>axis
+</code>. The 
+<code>base_daf
+</code> holds the expression along its 
+<code>base_axis
+</code> instead, because what is a base block there is also a block. The two must list the same names in the same order.
 </p>
 <p>The 
 <code>x
-</code> axis is the gene&#39;s correlation between the cells of the base block&#39;s neighborhood and their punctuated metacells, minus what it is in the 
+</code> axis is the gene&#39;s correlation between the cells of the entry&#39;s neighborhood and their punctuated metacells, minus what it is in the 
 <code>base_daf
-</code> - so a point right of zero is a block whose metacells describe the gene better than the base does. The 
+</code>. A point right of zero is an entry whose metacells describe the gene better than the base does. The 
 <code>y
-</code> axis is how much of the gene the base block expresses, on log scale, since moving the correlation of a gene which is barely there says less than moving one which is everywhere.
+</code> axis is how much of the gene the entry expresses, on log scale, since moving the correlation of a gene which is barely there says less than moving one which is everywhere.
 </p>
-<p>Only the base blocks whose base correlation is not zero are shown. A zero there is what a gene saying nothing about a block looks like, rather than a correlation which happens to be zero; a gene which says nothing about any block has nothing to show and is an error rather than an empty graph.
+<p>Only the entries whose base correlation is not zero are shown. A zero there is what a gene saying nothing about an entry looks like, rather than a correlation which happens to be zero. A gene which says nothing about any entry has nothing to show and is an error rather than an empty graph. The hidden entries stay in the data, masked, and do not affect the ranges of the axes.
 </p>
-<p>If the blocks have a type, the points are colored by it, using the colors of the type axis. Each point&#39;s hover names its block and type and gives both correlations along with the change between them.
-</p>
-<p>
-<strong>Daf
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>base_block
-</strong> (required): A copy of the base 
-<a href="https://tanaylab.github.io/Metacells.jl/v0.1.0/contracts.html#Metacells.Contracts.block_axis">
-<code>block_axis
-</code>
-</a>, copied into the alternative.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
-</p>
-<p>
-<strong>Base
-</strong>
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>block @ type
-</strong>::AbstractString (optional): The type each block belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, base
-<em>block @ correlation
-</em>between
-<em>base
-</em>neighborhood
-<em>cells
-</em>and
-<em>punctuated
-</em>metacells
-</strong>::Union{Float32, Float64} (required): The correlation between cells and their metacells (minus the correlated cell) of each gene&#39;s expression levels in each base block&#39;s neighborhood.
-</p>
-<p>
-<strong>gene, block @ linear_fraction
-</strong>::Union{Float32, Float64} (required): The linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
-<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
-<code>MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The regularization added to a fraction before taking its log, so that a gene seen in no cell of an entity has a value to be drawn at instead of falling off the bottom of the axis. It is deliberately small: a fraction this size is one UMI in a hundred thousand, which is below anything these graphs are read for.
+<p>The hover of each point names its entry and gives both correlations, the change between them, and the fraction of the gene.
 </p>
 </div>
 </section>
@@ -585,45 +324,27 @@
 </a>
 </li>
 <li>
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
-<code>MetacellsGraphs.ScatterGraphs.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
-</code>
-</a>
-</li>
-<li>
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph">
-<code>MetacellsGraphs.ScatterGraphs.blocks_gene_gene_graph
-</code>
-</a>
-</li>
-<li>
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.blocks_umap_graph">
-<code>MetacellsGraphs.ScatterGraphs.blocks_umap_graph
-</code>
-</a>
-</li>
-<li>
 <a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph">
 <code>MetacellsGraphs.ScatterGraphs.gene_base_delta_correlations_graph
 </code>
 </a>
 </li>
 <li>
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph">
-<code>MetacellsGraphs.ScatterGraphs.metacells_gene_gene_graph
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.gene_gene_graph">
+<code>MetacellsGraphs.ScatterGraphs.gene_gene_graph
 </code>
 </a>
 </li>
 <li>
-<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.metacells_umap_graph">
-<code>MetacellsGraphs.ScatterGraphs.metacells_umap_graph
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.umap_graph">
+<code>MetacellsGraphs.ScatterGraphs.umap_graph
 </code>
 </a>
 </li>
 </ul>
 </article>
 <nav class="docs-footer">
-<a class="docs-footer-prevpage" href="index.html">« MetacellsGraphs
+<a class="docs-footer-prevpage" href="data_sources.html">« Data Sources
 </a>
 <a class="docs-footer-nextpage" href="heatmap_graphs.html">Heatmap Graphs »
 </a>

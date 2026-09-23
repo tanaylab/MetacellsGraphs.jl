@@ -1,4 +1,5 @@
 using DataAxesFormats
+using DataFrames
 using Documenter
 using MetacellsGraphs
 using NestedTests
@@ -16,6 +17,7 @@ nested_test("doctests") do
     return doctest(MetacellsGraphs; manual = false)
 end
 
+include("data_sources.jl")
 include("scatter_graphs.jl")
 include("heatmap_graphs.jl")
 include("bar_graphs.jl")

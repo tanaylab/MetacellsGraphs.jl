@@ -1,5 +1,8 @@
 """
 Bar graphs of a metacells repository.
+
+Unlike the other graphs, a graph here picks its own bars, so there is nothing for a caller to fill in afterwards. It
+reads a report computed by `Metacells`, keeps the genes worth showing, and draws everything about them.
 """
 module BarGraphs
 
@@ -12,29 +15,14 @@ using Metacells
 using SomeGraphs
 using TanayLabUtilities
 
-# Needed because of JET:
-import Metacells.Contracts.base_block_axis
-import Metacells.Contracts.block_axis
-import Metacells.Contracts.gene_axis
-import Metacells.Contracts.matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block
-import Metacells.Contracts.matrix_of_correlation_between_markers_per_gene_per_gene
-import Metacells.Contracts.matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_regulator_per_gene
-import Metacells.Contracts.matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_regulator_per_gene
-import Metacells.Contracts.vector_of_is_lateral_per_gene
-import Metacells.Contracts.vector_of_is_marker_per_gene
-import Metacells.Contracts.vector_of_is_regulator_per_gene
-import Metacells.Contracts.vector_of_is_skeleton_per_gene
-import Metacells.Contracts.vector_of_is_transcription_factor_per_gene
-import Metacells.Contracts.vector_of_marker_rank_per_gene
-import Metacells.Contracts.vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_gene
-import Metacells.Contracts.vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_gene
+using ..DataSources
 
 """
     improved_genes_graph(;
         daf::DafReader,
         base_daf::DafReader,
-        genes_count::Integer = $(DEFAULT.genes_count),
-        regulators_count::Integer = $(DEFAULT.regulators_count),
+        genes_count::Integer = 30,
+        regulators_count::Integer = 5,
     )::SeriesBarsGraph
 
 The `genes_count` genes whose correlation with their cells the metacells improved in the most of the base
@@ -47,56 +35,15 @@ is improved or degraded in a base block and which regulators it moves with; the 
 and draws them. A gene which is not a marker is not in the report and is therefore not shown.
 
 The hover of each bar says how often the gene is in no module at all in that side's base blocks, and which
-`regulators_count` regulators it most often shares one with there - that is, what the sharpening moved the gene with,
-where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene
-name different regulators.
+`regulators_count` regulators it is most often in a module with there - that is, what the sharpening moved the gene
+with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a
+gene name different regulators.
 
 Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides.
 A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the
 metacells nevertheless describe better than the base does.
-
-# Daf
-
-$(CONTRACT1)
-
-# Base
-
-$(CONTRACT2)
 """
-@computation Contract(;
-    name = "daf",
-    link = Metacells,
-    axes = [gene_axis(RequiredInput), base_block_axis(RequiredInput)],
-    data = [
-        vector_of_is_marker_per_gene(RequiredInput),
-        vector_of_marker_rank_per_gene(RequiredInput),
-        vector_of_is_lateral_per_gene(RequiredInput),
-        vector_of_is_transcription_factor_per_gene(RequiredInput),
-        vector_of_is_regulator_per_gene(RequiredInput),
-        vector_of_is_skeleton_per_gene(RequiredInput),
-        matrix_of_correlation_between_markers_per_gene_per_gene(RequiredInput),
-        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
-            RequiredInput,
-        ),
-        vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_gene(RequiredInput),
-        vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_gene(RequiredInput),
-        matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_regulator_per_gene(
-            RequiredInput,
-        ),
-        matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_regulator_per_gene(
-            RequiredInput,
-        ),
-    ],
-) Contract(;
-    name = "base_daf",
-    link = Metacells,
-    axes = [gene_axis(RequiredInput), block_axis(RequiredInput)],
-    data = [
-        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
-            RequiredInput,
-        ),
-    ],
-) function improved_genes_graph(;
+function improved_genes_graph(;
     daf::DafReader,
     base_daf::DafReader,
     genes_count::Integer = 30,
@@ -109,8 +56,8 @@ end
     degraded_genes_graph(;
         daf::DafReader,
         base_daf::DafReader,
-        genes_count::Integer = $(DEFAULT.genes_count),
-        regulators_count::Integer = $(DEFAULT.regulators_count),
+        genes_count::Integer = 30,
+        regulators_count::Integer = 5,
     )::SeriesBarsGraph
 
 The `genes_count` genes whose correlation with their cells the metacells degraded in the most of the base
@@ -118,49 +65,8 @@ neighborhoods.
 
 This is [`improved_genes_graph`](@ref) picking its genes by the other side, and reads the same way; the two graphs show
 the same two series and differ only in which of them decides what is worth showing.
-
-# Daf
-
-$(CONTRACT1)
-
-# Base
-
-$(CONTRACT2)
 """
-@computation Contract(;
-    name = "daf",
-    link = Metacells,
-    axes = [gene_axis(RequiredInput), base_block_axis(RequiredInput)],
-    data = [
-        vector_of_is_marker_per_gene(RequiredInput),
-        vector_of_marker_rank_per_gene(RequiredInput),
-        vector_of_is_lateral_per_gene(RequiredInput),
-        vector_of_is_transcription_factor_per_gene(RequiredInput),
-        vector_of_is_regulator_per_gene(RequiredInput),
-        vector_of_is_skeleton_per_gene(RequiredInput),
-        matrix_of_correlation_between_markers_per_gene_per_gene(RequiredInput),
-        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
-            RequiredInput,
-        ),
-        vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_gene(RequiredInput),
-        vector_of_mean_no_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_gene(RequiredInput),
-        matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_improved_base_blocks_per_regulator_per_gene(
-            RequiredInput,
-        ),
-        matrix_of_mean_shared_module_fraction_in_base_neighborhood_cells_at_degraded_base_blocks_per_regulator_per_gene(
-            RequiredInput,
-        ),
-    ],
-) Contract(;
-    name = "base_daf",
-    link = Metacells,
-    axes = [gene_axis(RequiredInput), block_axis(RequiredInput)],
-    data = [
-        matrix_of_correlation_between_base_neighborhood_cells_and_punctuated_metacells_per_gene_per_base_block(
-            RequiredInput,
-        ),
-    ],
-) function degraded_genes_graph(;
+function degraded_genes_graph(;
     daf::DafReader,
     base_daf::DafReader,
     genes_count::Integer = 30,
@@ -190,85 +96,34 @@ function changed_genes_graph(;
     shown_report = last(report, genes_count)
 
     graph = series_bars_graph(;
-        bar_axis_title = "Genes",
-        value_axis_title = "Base neighborhoods",
-        series_bars_values = [shown_report[!, "deg_f"], shown_report[!, "imp_f"]],
-        bars_names = shown_report[!, "gene"],
-        series_bars_hovers = [
-            module_sharing_hovers(shown_report, "deg", "degraded", regulators_count),
-            module_sharing_hovers(shown_report, "imp", "improved", regulators_count),
-        ],
-        series_names = ["degraded", "improved"],
-        series_colors = ["darkred", "darkblue"],
         configuration = SeriesBarsGraphConfiguration(;
             values_orientation = HorizontalValues,
-            value_axis = AxisConfiguration(; percent = true),
+            value_axis = AxisConfiguration(;
+                title = "Base neighborhoods",
+                scale = ScaleConfiguration(; percent = true),
+            ),
+            bar_axis = AxisConfiguration(; title = "Genes"),
             mirrored = true,
         ),
     )
 
-    # The annotations are not part of what the constructor takes, so they are attached to the data.
-    graph.data.bars_annotations = [
-        mask_annotation("is lateral", shown_report[!, "lat?"]),
-        mask_annotation("is regulator", shown_report[!, "reg?"]),
-    ]
+    fill_column_names_data!(bars_entities(graph), shown_report; column = "gene")
+
+    # The series are the two sides of the butterfly, so their colors say which side a bar is on. The bar shows the
+    # value, so its hover says only what the sharpening moved the gene with.
+    for (prefix, side_name, color) in (("deg", "degraded", "darkred"), ("imp", "improved", "darkblue"))
+        series = SeriesData(; name = side_name, color)
+        add_series!(graph, series)
+        fill_column_vector_data!(series.values, shown_report; column = "$(prefix)_f")
+        fill_module_regulators_hovers!(series.bars, shown_report; prefix, side_name, regulators_count)
+    end
+
+    for (title, column) in (("is lateral", "lat?"), ("is regulator", "reg?"))
+        index = add_annotation!(graph)
+        fill_column_boolean_annotation!(annotations_colors_vector_fields(graph, index), shown_report; column, title)
+    end
 
     return graph
-end
-
-# The hover of each shown gene in one of the two series, saying how often the gene is in no module at all in the base
-# blocks of that side, and which regulators it most often shares one with there. Each side is asked about its own base
-# blocks, so the two wings of a gene say different things.
-function module_sharing_hovers(
-    shown_report::DataFrame,
-    prefix::AbstractString,
-    side_name::AbstractString,
-    regulators_count::Integer,
-)::Vector{AbstractString}
-    return AbstractString[
-        join(gene_hover_lines(shown_report, row_index, prefix, side_name, regulators_count), "<br>") for
-        row_index in 1:nrow(shown_report)
-    ]
-end
-
-# The lines of one gene's hover: the gene, how often it is in no module, and then a line per regulator it shares one
-# with. The report pads a side which gives the gene fewer regulators than asked for with empty names, which are the
-# regulators there are nothing to say about.
-function gene_hover_lines(
-    shown_report::DataFrame,
-    row_index::Integer,
-    prefix::AbstractString,
-    side_name::AbstractString,
-    regulators_count::Integer,
-)::Vector{String}
-    lines = String[
-        shown_report[row_index, "gene"],
-        "$(side_name): in no module in $(percent(shown_report[row_index, "$(prefix)_no_mod_f"])) of the cells",
-    ]
-    for rank in 1:regulators_count
-        regulator_name = shown_report[row_index, "$(prefix)_reg$(rank)"]
-        if regulator_name != ""
-            push!(lines, "- $(regulator_name): $(percent(shown_report[row_index, "$(prefix)_reg$(rank)_f"]))")
-        end
-    end
-    return lines
-end
-
-# Fractions in the units the value axis shows, so that the hover and the bars are read the same way.
-function percent(fraction::AbstractFloat)::String
-    return "$(round(100 * fraction; digits = 1))%"
-end
-
-# One mask of the genes, shown between the two sides. A mask is drawn as a category rather than as a number, so that it
-# is read as what it says rather than as a quantity.
-function mask_annotation(title::AbstractString, mask_per_gene::AbstractVector{Bool})::AnnotationData
-    values = [mask ? "yes" : "no" for mask in mask_per_gene]
-    return AnnotationData(;
-        title,
-        values,
-        hovers = values,
-        colors = ColorsConfiguration(; palette = Dict("yes" => "black", "no" => "lightgrey")),
-    )
 end
 
 end  # module

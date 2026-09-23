@@ -1,0 +1,3688 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Sources · MetacellsGraphs.jl v0.1.0
+</title>
+<meta name="title" content="Data Sources · MetacellsGraphs.jl v0.1.0"/>
+<meta property="og:title" content="Data Sources · MetacellsGraphs.jl v0.1.0"/>
+<meta property="twitter:title" content="Data Sources · MetacellsGraphs.jl v0.1.0"/>
+<meta name="description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<meta property="og:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<meta property="twitter:description" content="Documentation for MetacellsGraphs.jl v0.1.0."/>
+<script data-outdated-warner src="assets/warner.js">
+</script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/>
+<script>documenterBaseURL="."
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js">
+</script>
+<script src="search_index.js">
+</script>
+<script src="siteinfo.js">
+</script>
+<script src="../versions.js">
+</script>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/>
+<link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/>
+<script src="assets/themeswap.js">
+</script>
+</head>
+<body>
+<div id="documenter">
+<nav class="docs-sidebar">
+<div class="docs-package-name">
+<span class="docs-autofit">
+<a href="index.html">MetacellsGraphs.jl v0.1.0
+</a>
+</span>
+</div>
+<button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)
+</button>
+<ul class="docs-menu">
+<li>
+<a class="tocitem" href="index.html">MetacellsGraphs
+</a>
+</li>
+<li class="is-active">
+<a class="tocitem" href="data_sources.html">Data Sources
+</a>
+<ul class="internal">
+<li>
+<a class="tocitem" href="#Generic">
+<span>Generic
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Module-Regulators">
+<span>Module Regulators
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Gene-Expression">
+<span>Gene Expression
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Gene-Correlations">
+<span>Gene Correlations
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#UMAP-Coordinates">
+<span>UMAP Coordinates
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Gene-Selection">
+<span>Gene Selection
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Counts">
+<span>Counts
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Blocks">
+<span>Blocks
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Global-Flow-Order">
+<span>Global Flow Order
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Types">
+<span>Types
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Boolean-Annotations">
+<span>Boolean Annotations
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Low-Level-Functions">
+<span>Low Level Functions
+</span>
+</a>
+</li>
+<li>
+<a class="tocitem" href="#Index">
+<span>Index
+</span>
+</a>
+</li>
+</ul>
+</li>
+<li>
+<a class="tocitem" href="scatter_graphs.html">Scatter Graphs
+</a>
+</li>
+<li>
+<a class="tocitem" href="heatmap_graphs.html">Heatmap Graphs
+</a>
+</li>
+<li>
+<a class="tocitem" href="bar_graphs.html">Bar Graphs
+</a>
+</li>
+</ul>
+<div class="docs-version-selector field has-addons">
+<div class="control">
+<span class="docs-label button is-static is-size-7">Version
+</span>
+</div>
+<div class="docs-selector control is-expanded">
+<div class="select is-fullwidth is-size-7">
+<select id="documenter-version-selector">
+</select>
+</div>
+</div>
+</div>
+</nav>
+<div class="docs-main">
+<header class="docs-navbar">
+<a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#">
+</a>
+<nav class="breadcrumb">
+<ul class="is-hidden-mobile">
+<li class="is-active">
+<a href="data_sources.html">Data Sources
+</a>
+</li>
+</ul>
+<ul class="is-hidden-tablet">
+<li class="is-active">
+<a href="data_sources.html">Data Sources
+</a>
+</li>
+</ul>
+</nav>
+<div class="docs-right">
+<a class="docs-navbar-link" href="https://github.com/tanaylab/MetacellsGraphs.jl/blob/main{path}?plain=1#L{line}" title="View the repository on GitHub">
+<span class="docs-icon fa-brands">
+</span>
+<span class="docs-label is-hidden-touch">GitHub
+</span>
+</a>
+<a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings">
+</a>
+<a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings">
+</a>
+</div>
+</header>
+<article class="content" id="documenter-page">
+<h1 id="Data-Sources">
+<a class="docs-heading-anchor" href="#Data-Sources">Data Sources
+</a>
+<a id="Data-Sources-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Data-Sources" title="Permalink">
+</a>
+</h1>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources">
+<code>MetacellsGraphs.DataSources
+</code>
+</a> — 
+<span class="docstring-category">Module
+</span>
+</summary>
+<section>
+<div>
+<p>Data sources for the graphs of a metacells repository.
+</p>
+<p>A data source is a function extracting data from 
+<code>Daf
+</code> metacells repositories and inserting it into a 
+<code>SomeGraphs
+</code> graph. This uses the data source views (e.g. 
+<code>VectorDataFields
+</code>, 
+<code>MatrixDataFields
+</code>) provided for this purpose. These allow using the data for any graph role (coordinates, bar sizes, colors, annotations, etc.).
+</p>
+<p>A data source view has two halves: the 
+<code>data
+</code> (what to show) and the 
+<code>configuration
+</code> (how to show it). Each half is written the same way, by a 
+<code>get_
+</code> which fetches the data from 
+<code>daf
+</code> and a 
+<code>put_
+</code> which writes the data into a 
+<code>graph
+</code>, with a 
+<code>fill_
+</code> function that composes them:
+</p>
+<table>
+<tr>
+<th style="text-align: left">function
+</th>
+<th style="text-align: left">takes
+</th>
+<th style="text-align: left">does
+</th>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>get_&lt;something&gt;_vector
+</code>, 
+<code>..._matrix
+</code>
+</td>
+<td style="text-align: left">
+<code>daf
+</code> and what to query
+</td>
+<td style="text-align: left">returns the data
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_&lt;something&gt;_data!
+</code>
+</td>
+<td style="text-align: left">sinks, the data
+</td>
+<td style="text-align: left">writes the data fields to the 
+<code>graph
+</code>
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>fill_&lt;something&gt;_data!
+</code>
+</td>
+<td style="text-align: left">sinks, 
+<code>daf
+</code>, what to query
+</td>
+<td style="text-align: left">
+<code>get_
+</code> then 
+<code>put_
+</code>
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>get_&lt;something&gt;_colors
+</code>, ...
+</td>
+<td style="text-align: left">
+<code>daf
+</code> and what to query
+</td>
+<td style="text-align: left">returns what the configuration needs
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_&lt;something&gt;_configuration!
+</code>
+</td>
+<td style="text-align: left">sinks, how to show it
+</td>
+<td style="text-align: left">writes the configuration fields to the 
+<code>graph
+</code>
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>fill_&lt;something&gt;_configuration!
+</code>
+</td>
+<td style="text-align: left">sinks, 
+<code>daf
+</code>, how to show it
+</td>
+<td style="text-align: left">
+<code>get_
+</code> (if needed) then 
+<code>put_
+</code>
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>fill_&lt;something&gt;!
+</code>
+</td>
+<td style="text-align: left">sinks, 
+<code>daf
+</code>, everything
+</td>
+<td style="text-align: left">composes whichever of the above exist
+</td>
+</tr>
+</table>
+<p>In most cases there&#39;s no need for getting data from 
+<code>daf
+</code> for the configuration. In this case there&#39;s only a put function; there&#39;s no get and no need for a fill function.
+</p>
+<p>Generic functions (e.g., 
+<code>axis_names
+</code>, 
+<code>axis_vector
+</code>, 
+<code>axes_matrix
+</code>) only deal with data so have no configuration variants and no overall fill wrapper. Specific data (e.g., 
+<code>gene_expression
+</code>, 
+<code>type
+</code>) use these under the hood but add specific configuration for how to display the data in the graph.
+</p>
+<p>A 
+<code>get_
+</code> and a 
+<code>fill_
+</code> are named after where the data comes from, so a generic one says which 
+<code>daf
+</code> axes it queries (
+<code>axis_vector
+</code> for one, 
+<code>axes_matrix
+</code> for two). A 
+<code>put_
+</code> is named after where the data goes, so a generic one says which shape of sink it writes:
+</p>
+<table>
+<tr>
+<th style="text-align: left">function
+</th>
+<th style="text-align: left">writes
+</th>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_vector_data!
+</code>
+</td>
+<td style="text-align: left">values and a hover, into vector sinks
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_matrix_data!
+</code>
+</td>
+<td style="text-align: left">values and a hover, into matrix sinks
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_vector_names_data!
+</code>
+</td>
+<td style="text-align: left">names, into vector sinks
+</td>
+</tr>
+<tr>
+<td style="text-align: left">
+<code>put_matrix_names_data!
+</code>
+</td>
+<td style="text-align: left">names of both axes, into matrix sinks
+</td>
+</tr>
+</table>
+<p>A specific 
+<code>put_
+</code> is named after its source instead, since there is only one shape it can take. Nothing about a generic 
+<code>put_
+</code> depends on 
+<code>daf
+</code>, so the same one serves a 
+<code>DataFrame
+</code> or any other source of a vector.
+</p>
+<p>The fill and put functions take 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.Sinks">
+<code>Sinks
+</code>
+</a>: a single graph struct, or a tuple or vector of them. This allows easily reusing the same data in multiple places in the graph (e.g., values, labels, hovers). A data function writes only the sinks which are a 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.DataSink">
+<code>DataSink
+</code>
+</a>, and a configuration function only those which are a 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.ConfigurationSink">
+<code>ConfigurationSink
+</code>
+</a>, so a mixed collection is fine and either may match nothing at all.
+</p>
+<p>In general the data and the configuration functions take different sets of parameters (e.g., axis for data and gene regularization for configuration of log scale). The 
+<code>title
+</code> is a notable exception that gets passed to both sides, as it is used for computing hover values (data) and as an axis/legend title (configuration).
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Generic">
+<a class="docs-heading-anchor" href="#Generic">Generic
+</a>
+<a id="Generic-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Generic" title="Permalink">
+</a>
+</h2>
+<p>These fill the data half of any role from a 
+<code>daf
+</code> query. A specific data source uses them under the hood and adds only how to show the result.
+</p>
+<h3 id="Axis-Names">
+<a class="docs-heading-anchor" href="#Axis-Names">Axis Names
+</a>
+<a id="Axis-Names-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Axis-Names" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_axis_names_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_axis_names_data!">
+<code>MetacellsGraphs.DataSources.fill_axis_names_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_axis_names_data!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Name the entities of the 
+<code>sinks
+</code> after each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>.
+</p>
+<p>This fetches the names with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_entries_vector">
+<code>get_axis_entries_vector
+</code>
+</a>, then hands them to 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
+<code>put_vector_names_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_vector_names_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_names_data!">
+<code>MetacellsGraphs.DataSources.put_vector_names_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_vector_names_data!(sinks::Sinks, name_per_entry::AbstractVector{&lt;:AbstractString})::Nothing
+</code>
+</pre>
+<p>Name the entities of the 
+<code>sinks
+</code> after the 
+<code>name_per_entry
+</code>. Where the graph has room to label the entities, these become their tick labels. They are also the first line of the hover of each entity.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_axis_entries_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_axis_entries_vector">
+<code>MetacellsGraphs.DataSources.get_axis_entries_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_axis_entries_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the name for each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. If no 
+<code>entries
+</code> are specified, returns the names of all the entries.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Axis-Vectors">
+<a class="docs-heading-anchor" href="#Axis-Vectors">Axis Vectors
+</a>
+<a id="Axis-Vectors-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Axis-Vectors" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<code>MetacellsGraphs.DataSources.fill_axis_vector_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_axis_vector_data!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString,
+    query_suffix::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the result of the query 
+<code>@ axis query_suffix
+</code> for each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+<p>This fetches the data with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_vector">
+<code>get_axis_vector
+</code>
+</a>, then hands it to 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_vector_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_data!">
+<code>MetacellsGraphs.DataSources.put_vector_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_vector_data!(
+    sinks::Sinks,
+    value_per_entry::AbstractVector{&lt;:StorageScalarBase};
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Put a 
+<code>value_per_entry
+</code> of an axis into the 
+<code>sinks
+</code>: as the values of a role, and as a hover line on the entities. Use this when you have the data already; 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<code>fill_axis_vector_data!
+</code>
+</a> fetches it from a 
+<code>daf
+</code> repository for you.
+</p>
+<p>The 
+<code>title
+</code> prefixes the hover line, as 
+<code>title: value
+</code>. Nothing is configured here, because how to show a value depends on which property it is; a specific data source says that in its own 
+<code>put_..._configuration!
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_axis_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_axis_vector">
+<code>MetacellsGraphs.DataSources.get_axis_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_axis_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    query_suffix::AbstractString,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Maybe{StorageScalarBase} = nothing,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:StorageScalarBase}
+</code>
+</pre>
+<p>Get the result of the query 
+<code>@ axis via query_suffix
+</code> for each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>.
+</p>
+<p>The 
+<code>via
+</code> is a chain of axes to walk before asking anything, so that a property of something an entry belongs to can be asked for (e.g., the block of the metacell of each cell). An 
+<code>empty_value
+</code> is what an entry whose chain breaks gets; a 
+<code>nothing
+</code> leaves the query without a default, so such an entry is an error.
+</p>
+<p>The 
+<code>query_suffix
+</code> is whatever a vector query says at the end of that walk, e.g. 
+<code>&quot;: block&quot;
+</code> for a property or 
+<code>&quot;:: linear_fraction @ gene = FOXA1&quot;
+</code> for a slice of a matrix. It is written by the caller, so it is used as it is; everything else is escaped.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Masks">
+<a class="docs-heading-anchor" href="#Masks">Masks
+</a>
+<a id="Masks-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Masks" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_vector_mask_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_mask_data!">
+<code>MetacellsGraphs.DataSources.put_vector_mask_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_vector_mask_data!(
+    sinks::Sinks,
+    is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
+)::Nothing
+</code>
+</pre>
+<p>Hide the entities of the 
+<code>sinks
+</code> which are not shown by the 
+<code>is_shown_per_entry
+</code> mask. Hidden entities are still part of the data, so they take part in whatever is computed from it, unless the relevant configuration says otherwise.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Frame-Columns">
+<a class="docs-heading-anchor" href="#Frame-Columns">Frame Columns
+</a>
+<a id="Frame-Columns-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Frame-Columns" title="Permalink">
+</a>
+</h3>
+<p>Some graphs show a report computed by 
+<code>Metacells
+</code>, which is a 
+<code>DataFrame
+</code> rather than a property of a 
+<code>daf
+</code> repository. These fetch from a frame instead, and hand the result to the same 
+<code>put_
+</code> functions.
+</p>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_column_vector_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_column_vector_data!">
+<code>MetacellsGraphs.DataSources.fill_column_vector_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_column_vector_data!(
+    sinks::Sinks,
+    frame::DataFrame;
+    column::AbstractString,
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the 
+<code>column
+</code> of a 
+<code>frame
+</code>, one value per row.
+</p>
+<p>The entities are not named here, unlike 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<code>fill_axis_vector_data!
+</code>
+</a>; a frame has no one column which identifies its rows, so say which one does with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_column_names_data!">
+<code>fill_column_names_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_column_names_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_column_names_data!">
+<code>MetacellsGraphs.DataSources.fill_column_names_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_column_names_data!(sinks::Sinks, frame::DataFrame; column::AbstractString)::Nothing
+</code>
+</pre>
+<p>Name the entities of the 
+<code>sinks
+</code> after the 
+<code>column
+</code> of a 
+<code>frame
+</code>, one name per row.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_column_boolean_annotation!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_column_boolean_annotation!">
+<code>MetacellsGraphs.DataSources.fill_column_boolean_annotation!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_column_boolean_annotation!(
+    sinks::Sinks,
+    frame::DataFrame;
+    column::AbstractString,
+    title::Maybe{AbstractString} = column,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the Boolean 
+<code>column
+</code> of a 
+<code>frame
+</code>, shown as 
+<code>true
+</code> in black and 
+<code>false
+</code> in light grey. The 
+<code>DataFrame
+</code> twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean_annotation!">
+<code>fill_boolean_annotation!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_column_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_column_vector">
+<code>MetacellsGraphs.DataSources.get_column_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_column_vector(frame::DataFrame; column::AbstractString)::AbstractVector{&lt;:StorageScalarBase}
+</code>
+</pre>
+<p>Get the 
+<code>column
+</code> of a 
+<code>frame
+</code>, one value per row. This is the 
+<code>DataFrame
+</code> twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_vector">
+<code>get_axis_vector
+</code>
+</a>, for the graphs whose data is a report computed by 
+<code>Metacells
+</code> rather than a property of a 
+<code>daf
+</code> repository.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Module-Regulators">
+<a class="docs-heading-anchor" href="#Module-Regulators">Module Regulators
+</a>
+<a id="Module-Regulators-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Module-Regulators" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_module_regulators_hovers!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_module_regulators_hovers!">
+<code>MetacellsGraphs.DataSources.fill_module_regulators_hovers!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_module_regulators_hovers!(
+    sinks::Sinks,
+    frame::DataFrame;
+    prefix::AbstractString,
+    side_name::AbstractString,
+    regulators_count::Integer,
+)::Nothing
+</code>
+</pre>
+<p>Add a hover per row of a gene report 
+<code>frame
+</code> to the 
+<code>sinks
+</code>, saying which regulators the gene is in a module with in the base blocks of one side. The lines carry their own labels, so nothing is prefixed to them.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_module_regulators_hovers">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_module_regulators_hovers">
+<code>MetacellsGraphs.DataSources.get_module_regulators_hovers
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_module_regulators_hovers(
+    frame::DataFrame;
+    prefix::AbstractString,
+    side_name::AbstractString,
+    regulators_count::Integer,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get a hover per row of a gene report 
+<code>frame
+</code>, saying how often the gene is in no module at all in the base blocks of one side, and which regulators it is most often in a module with there. The 
+<code>prefix
+</code> picks that side&#39;s columns (
+<code>imp
+</code> or 
+<code>deg
+</code>), and the 
+<code>side_name
+</code> names it in the text.
+</p>
+<p>The report pads a side which gives a gene fewer regulators than the 
+<code>regulators_count
+</code> asked for with empty names, which are the regulators there is nothing to say about, and which are left out.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Axes-Names">
+<a class="docs-heading-anchor" href="#Axes-Names">Axes Names
+</a>
+<a id="Axes-Names-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Axes-Names" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_axes_names_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_axes_names_data!">
+<code>MetacellsGraphs.DataSources.fill_axes_names_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_axes_names_data!(
+    sinks::Sinks,
+    daf::DafReader;
+    rows_axis::AbstractString,
+    columns_axis::AbstractString,
+    row_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    column_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Name the rows of the 
+<code>sinks
+</code> after the 
+<code>row_entries
+</code> of the 
+<code>daf
+</code> 
+<code>rows_axis
+</code>, and their columns after the 
+<code>column_entries
+</code> of its 
+<code>columns_axis
+</code>.
+</p>
+<p>This fetches the names with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_entries_vector">
+<code>get_axis_entries_vector
+</code>
+</a>, then hands them to 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
+<code>put_matrix_names_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_matrix_names_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_matrix_names_data!">
+<code>MetacellsGraphs.DataSources.put_matrix_names_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_matrix_names_data!(
+    sinks::Sinks,
+    name_per_row::AbstractVector{&lt;:AbstractString},
+    name_per_column::AbstractVector{&lt;:AbstractString},
+)::Nothing
+</code>
+</pre>
+<p>Name the rows and the columns of the 
+<code>sinks
+</code> after the 
+<code>name_per_row
+</code> and the 
+<code>name_per_column
+</code>. The matrix twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
+<code>put_vector_names_data!
+</code>
+</a>.
+</p>
+<p>The two axes are named together here rather than through 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.visit_data_sinks">
+<code>visit_data_sinks
+</code>
+</a>, which doesn&#39;t walk into them because they are sized by one axis each while the entries are sized by both.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Axes-Matrices">
+<a class="docs-heading-anchor" href="#Axes-Matrices">Axes Matrices
+</a>
+<a id="Axes-Matrices-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Axes-Matrices" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_axes_matrix_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_axes_matrix_data!">
+<code>MetacellsGraphs.DataSources.fill_axes_matrix_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_axes_matrix_data!(
+    sinks::Sinks,
+    daf::DafReader;
+    rows_axis::AbstractString,
+    columns_axis::AbstractString,
+    query_suffix::AbstractString,
+    row_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    column_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the result of the query 
+<code>@ rows_axis @ columns_axis query_suffix
+</code>, and name the rows and the columns. The matrix twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<code>fill_axis_vector_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_matrix_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_matrix_data!">
+<code>MetacellsGraphs.DataSources.put_matrix_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_matrix_data!(
+    sinks::Sinks,
+    value_per_row_per_column::AbstractMatrix{&lt;:StorageScalarBase};
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Put a 
+<code>value_per_row_per_column
+</code> of two axes into the 
+<code>sinks
+</code>: as the values of the entries, and as a hover line on each entry. The matrix twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>The row and the column entities are not written here. They belong to their axes and are sized by one axis each, so they are named separately; see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
+<code>put_matrix_names_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_axes_matrix">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_axes_matrix">
+<code>MetacellsGraphs.DataSources.get_axes_matrix
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_axes_matrix(
+    daf::DafReader;
+    rows_axis::AbstractString,
+    columns_axis::AbstractString,
+    query_suffix::AbstractString,
+    row_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    column_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractMatrix{&lt;:StorageScalarBase}
+</code>
+</pre>
+<p>Get the result of the query 
+<code>@ rows_axis @ columns_axis query_suffix
+</code> for each of the 
+<code>row_entries
+</code> and 
+<code>column_entries
+</code> of the two 
+<code>daf
+</code> axes. The matrix twin of 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_vector">
+<code>get_axis_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Gene-Expression">
+<a class="docs-heading-anchor" href="#Gene-Expression">Gene Expression
+</a>
+<a id="Gene-Expression-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Expression" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_genes_expression_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_genes_expression_configuration!">
+<code>MetacellsGraphs.DataSources.put_genes_expression_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_genes_expression_configuration!(
+    sinks::Sinks;
+    gene_fraction_regularization::Real = 1.0e-5,
+    title::Maybe{AbstractString} = &quot;fraction&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show gene expression (linear fraction) on a log-base-2 scale, regularized by 
+<code>gene_fraction_regularization
+</code>, named by the 
+<code>title
+</code>. The fractions themselves are put in by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a> or 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
+<code>put_matrix_data!
+</code>
+</a>.
+</p>
+<p>The 
+<code>show_legend
+</code> applies where the fractions are the colors. An axis is read off its own ticks and ignores it.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The regularization added to a gene fraction before taking its log.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Gene-Expression-Vectors">
+<a class="docs-heading-anchor" href="#Gene-Expression-Vectors">Gene Expression Vectors
+</a>
+<a id="Gene-Expression-Vectors-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Expression-Vectors" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_gene_expression!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_gene_expression!">
+<code>MetacellsGraphs.DataSources.fill_gene_expression!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_gene_expression!(
+    sinks::Sinks,
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
+    title::Maybe{AbstractString} = &quot;$(gene) fraction&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the 
+<code>gene
+</code> expression level (linear fraction) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>, shown in log base 2 using the 
+<code>gene_fraction_regularization
+</code>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_gene_expression_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_gene_expression_vector">
+<code>MetacellsGraphs.DataSources.get_gene_expression_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_gene_expression_vector(
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the vector of the 
+<code>gene
+</code> expression level (linear fraction) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Gene-Expression-Matrices">
+<a class="docs-heading-anchor" href="#Gene-Expression-Matrices">Gene Expression Matrices
+</a>
+<a id="Gene-Expression-Matrices-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Expression-Matrices" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_genes_expression_matrix!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_genes_expression_matrix!">
+<code>MetacellsGraphs.DataSources.fill_genes_expression_matrix!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_genes_expression_matrix!(
+    sinks::Sinks,
+    daf::DafReader;
+    genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
+    title::Maybe{AbstractString} = &quot;fraction&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the 
+<code>genes
+</code> expression level (linear fraction) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>, shown in log base 2 using the 
+<code>gene_fraction_regularization
+</code>, and name the rows and the columns. The 
+<code>genes
+</code> are the rows and the 
+<code>entries
+</code> are the columns.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_genes_expression_matrix">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_genes_expression_matrix">
+<code>MetacellsGraphs.DataSources.get_genes_expression_matrix
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_genes_expression_matrix(
+    daf::DafReader;
+    genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractMatrix{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the matrix of the 
+<code>genes
+</code> expression level (linear fraction) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>. The 
+<code>genes
+</code> are the rows and the 
+<code>entries
+</code> are the columns.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Gene-Fold-Matrices">
+<a class="docs-heading-anchor" href="#Gene-Fold-Matrices">Gene Fold Matrices
+</a>
+<a id="Gene-Fold-Matrices-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Fold-Matrices" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_genes_fold_matrix!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_genes_fold_matrix!">
+<code>MetacellsGraphs.DataSources.fill_genes_fold_matrix!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_genes_fold_matrix!(
+    sinks::Sinks,
+    daf::DafReader;
+    genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    max_fold::Real = MAX_FOLD_FOR_GRAPHS,
+    title::Maybe{AbstractString} = &quot;fold from median&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the 
+<code>genes
+</code> fold (log base-2 minus the median) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>, shown in the range -
+<code>max_fold
+</code> (blue) to 0 (white) to +
+<code>max_fold
+</code> (red), and name the rows and the columns. The 
+<code>genes
+</code> are the rows and the 
+<code>entries
+</code> are the columns. This is based on the 
+<code>log_linear_fraction
+</code> per gene per 
+<code>axis
+</code>, which is already a log, so there&#39;s no regularization to apply here.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_genes_fold_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_genes_fold_configuration!">
+<code>MetacellsGraphs.DataSources.put_genes_fold_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_genes_fold_configuration!(
+    sinks::Sinks;
+    max_fold::Real = MAX_FOLD_FOR_GRAPHS,
+    title::Maybe{AbstractString} = &quot;fold from median&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show the genes fold (log base-2 minus the median) in the range -
+<code>max_fold
+</code> (blue) to 0 (white) to +
+<code>max_fold
+</code> (red), named by the 
+<code>title
+</code>, and include it in the legend if 
+<code>show_legend
+</code>. The folds themselves are put in by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
+<code>put_matrix_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_genes_fold_matrix">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_genes_fold_matrix">
+<code>MetacellsGraphs.DataSources.get_genes_fold_matrix
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_genes_fold_matrix(
+    daf::DafReader;
+    genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractMatrix{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the matrix of the 
+<code>genes
+</code> fold (log base-2 minus the median) per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>. The 
+<code>genes
+</code> are the rows and the 
+<code>entries
+</code> are the columns. This is based on the 
+<code>log_linear_fraction
+</code> per gene per 
+<code>axis
+</code>. The median of each gene is taken across the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Gene-Correlations">
+<a class="docs-heading-anchor" href="#Gene-Correlations">Gene Correlations
+</a>
+<a id="Gene-Correlations-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Correlations" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_gene_correlation!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_gene_correlation!">
+<code>MetacellsGraphs.DataSources.fill_gene_correlation!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_gene_correlation!(
+    sinks::Sinks,
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;base_block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = &quot;correlation&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the correlation of the 
+<code>gene
+</code> per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_gene_correlation_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_gene_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_gene_correlation_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_gene_correlation_vector(
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;base_block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the correlation of the 
+<code>gene
+</code> between the cells of the neighborhood of each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code> and their punctuated metacells. A zero is the gene saying nothing about that entry, rather than a correlation which happens to be zero.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Gene-Correlation-Changes">
+<a class="docs-heading-anchor" href="#Gene-Correlation-Changes">Gene Correlation Changes
+</a>
+<a id="Gene-Correlation-Changes-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Correlation-Changes" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_gene_correlation_change!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_gene_correlation_change!">
+<code>MetacellsGraphs.DataSources.fill_gene_correlation_change!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_gene_correlation_change!(
+    sinks::Sinks,
+    daf::DafReader,
+    base_daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;base_block&quot;,
+    base_axis::AbstractString = &quot;base_block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = &quot;correlation change&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with how much the correlation of the 
+<code>gene
+</code> changed between the 
+<code>base_daf
+</code> and the 
+<code>daf
+</code>, per each of the 
+<code>entries
+</code>, and name the entities after them.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
+<code>MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_gene_correlation_change_configuration!(
+    sinks::Sinks;
+    title::Maybe{AbstractString} = &quot;correlation change&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Name the correlation change in the configuration, and include it in the legend if 
+<code>show_legend
+</code> where it is the colors. There is nothing else to say about how to show it: it is a difference of two correlations, so it is already on the scale it is read in.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_gene_correlation_change_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_gene_correlation_change_vector">
+<code>MetacellsGraphs.DataSources.get_gene_correlation_change_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_gene_correlation_change_vector(
+    daf::DafReader,
+    base_daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;base_block&quot;,
+    base_axis::AbstractString = &quot;base_block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get how much the correlation of the 
+<code>gene
+</code> changed between the 
+<code>base_daf
+</code> and the 
+<code>daf
+</code>, per each of the 
+<code>entries
+</code>. A value above zero is an entry whose metacells describe the gene better than the base does.
+</p>
+<p>The same entries are the 
+<code>axis
+</code> of the 
+<code>daf
+</code> and the 
+<code>base_axis
+</code> of the 
+<code>base_daf
+</code>. They must therefore list the same names in the same order.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="UMAP-Coordinates">
+<a class="docs-heading-anchor" href="#UMAP-Coordinates">UMAP Coordinates
+</a>
+<a id="UMAP-Coordinates-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#UMAP-Coordinates" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_umap!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_umap!">
+<code>MetacellsGraphs.DataSources.fill_umap!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_umap!(
+    sinks::Sinks,
+    daf::DafReader;
+    coordinate::AbstractString,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = &quot;UMAP $(uppercase(coordinate))&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the UMAP 
+<code>coordinate
+</code> per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>, shown without ticks or a grid, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_umap_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_umap_data!">
+<code>MetacellsGraphs.DataSources.put_umap_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_umap_data!(
+    sinks::Sinks,
+    coordinate_per_entry::AbstractVector{&lt;:AbstractFloat};
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Put a UMAP 
+<code>coordinate_per_entry
+</code> into the 
+<code>sinks
+</code>, as the values of a role.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_umap_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_umap_configuration!">
+<code>MetacellsGraphs.DataSources.put_umap_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_umap_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+</code>
+</pre>
+<p>Show UMAP coordinates without ticks or a grid, named by the 
+<code>title
+</code>. Only which points are near which other points means anything, so the values themselves are not worth labelling.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_umap_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_umap_vector">
+<code>MetacellsGraphs.DataSources.get_umap_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_umap_vector(
+    daf::DafReader;
+    coordinate::AbstractString,
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the vector of the UMAP 
+<code>coordinate
+</code> per each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Gene-Selection">
+<a class="docs-heading-anchor" href="#Gene-Selection">Gene Selection
+</a>
+<a id="Gene-Selection-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Selection" title="Permalink">
+</a>
+</h2>
+<p>These pick which genes a graph shows, and return indices to pass as the 
+<code>genes
+</code> of another data source.
+</p>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_top_marker_gene_indices">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_top_marker_gene_indices">
+<code>MetacellsGraphs.DataSources.get_top_marker_gene_indices
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_top_marker_gene_indices(daf::DafReader; markers_count::Integer)::Vector{Int}
+</code>
+</pre>
+<p>Get the indices of the 
+<code>markers_count
+</code> best marker genes of a 
+<code>daf
+</code> repository, to pass as the 
+<code>genes
+</code> of another data source.
+</p>
+<p>A rank of 1 is the gene which best distinguishes between the cell states, and a non-marker gene is ranked above any count that can be asked for, so this is simply the genes ranked that high; a repository with fewer markers than that gives all of them.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_skeleton_gene_indices">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_skeleton_gene_indices">
+<code>MetacellsGraphs.DataSources.get_skeleton_gene_indices
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_skeleton_gene_indices(daf::DafReader)::Vector{Int}
+</code>
+</pre>
+<p>Get the indices of the skeleton genes of a 
+<code>daf
+</code> repository, to pass as the 
+<code>genes
+</code> of another data source.
+</p>
+<p>Unlike the markers these are not ranked, and there are few enough of them to show them all. They are the genes the blocks were computed from, so they show what the blocks were told apart by.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Counts">
+<a class="docs-heading-anchor" href="#Counts">Counts
+</a>
+<a id="Counts-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Counts" title="Permalink">
+</a>
+</h2>
+<p>Every count-like quantity is shown the same way, so they share one configuration.
+</p>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_count_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_count_configuration!">
+<code>MetacellsGraphs.DataSources.put_count_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_count_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+</code>
+</pre>
+<p>Show a count on a log-base-2 scale, in the 
+<code>YlOrRd
+</code> color scale, named by the 
+<code>title
+</code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for.
+</p>
+<p>The color scale runs from yellow through orange to red, so the low end is still visible; one which starts at white would lose it against the background.
+</p>
+<p>There is no regularization, because anything real has at least one of whatever is being counted.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Total-UMIs">
+<a class="docs-heading-anchor" href="#Total-UMIs">Total UMIs
+</a>
+<a id="Total-UMIs-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Total-UMIs" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_total_UMIs!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_total_UMIs!">
+<code>MetacellsGraphs.DataSources.fill_total_UMIs!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_total_UMIs!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+    title::Maybe{AbstractString} = &quot;total UMIs&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the total UMIs of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown in log base 2 in the 
+<code>YlOrRd
+</code> color scale, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_total_UMIs_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_total_UMIs_vector">
+<code>MetacellsGraphs.DataSources.get_total_UMIs_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_total_UMIs_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the total UMIs of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By default this is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect counts (e.g., the total UMIs of the block of the metacell of each cell).
+</p>
+<p>An entry whose 
+<code>via
+</code> chain breaks gets the 
+<code>empty_value
+</code>, which is a count like any other, so the log scale has something to work with.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Cells-and-Metacells">
+<a class="docs-heading-anchor" href="#Cells-and-Metacells">Cells and Metacells
+</a>
+<a id="Cells-and-Metacells-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Cells-and-Metacells" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_n_cells!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_n_cells!">
+<code>MetacellsGraphs.DataSources.fill_n_cells!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_n_cells!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+    title::Maybe{AbstractString} = &quot;cells&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the number of cells of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as a count, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_n_cells_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_n_cells_vector">
+<code>MetacellsGraphs.DataSources.get_n_cells_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_n_cells_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the number of cells of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. Both metacells and blocks have one.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_n_metacells!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_n_metacells!">
+<code>MetacellsGraphs.DataSources.fill_n_metacells!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_n_metacells!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+    title::Maybe{AbstractString} = &quot;metacells&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the number of metacells of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as a count, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_n_metacells_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_n_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_n_metacells_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_n_metacells_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the number of metacells of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. Only blocks have one, so unlike most sources the default 
+<code>axis
+</code> here is the block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h3 id="Means">
+<a class="docs-heading-anchor" href="#Means">Means
+</a>
+<a id="Means-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Means" title="Permalink">
+</a>
+</h3>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!">
+<code>MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_mean_cells_per_metacell!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = &quot;mean cells per metacell&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the mean number of cells per metacell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as a count, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_mean_cells_per_metacell_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_mean_cells_per_metacell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_cells_per_metacell_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_mean_cells_per_metacell_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the mean number of cells per metacell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, which is its number of cells divided by its number of metacells.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_metacell!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_metacell!">
+<code>MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_metacell!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_mean_total_UMIs_per_metacell!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = &quot;mean UMIs per metacell&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the mean total UMIs per metacell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as a count, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_mean_total_UMIs_per_metacell_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_mean_total_UMIs_per_metacell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_total_UMIs_per_metacell_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_mean_total_UMIs_per_metacell_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the mean total UMIs per metacell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, which is its total UMIs divided by its number of metacells.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_cell!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_cell!">
+<code>MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_cell!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_mean_total_UMIs_per_cell!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = &quot;mean UMIs per cell&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the mean total UMIs per cell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as a count, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_mean_total_UMIs_per_cell_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the mean total UMIs per cell of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, which is its total UMIs divided by its number of cells. Both metacells and blocks have both.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Blocks">
+<a class="docs-heading-anchor" href="#Blocks">Blocks
+</a>
+<a id="Blocks-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Blocks" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_block!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_block!">
+<code>MetacellsGraphs.DataSources.fill_block!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_block!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+    title::Maybe{AbstractString} = &quot;block&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the block of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, and name the entities after the 
+<code>entries
+</code>. Blocks are shown as a grouping of an axis, as a hover, or both; grouping by them puts a gap between the blocks, and the hover says which block an entry is in.
+</p>
+<p>Aim this at a whole data source view to get the values and a hover line, or at its 
+<code>values
+</code> alone to get only the values.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_block_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_block_vector">
+<code>MetacellsGraphs.DataSources.get_block_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_block_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the block of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By default this is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect blocks (e.g., the block of the metacell of each cell). An entry whose chain breaks gets the 
+<code>empty_value
+</code>, which names no block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Global-Flow-Order">
+<a class="docs-heading-anchor" href="#Global-Flow-Order">Global Flow Order
+</a>
+<a id="Global-Flow-Order-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Global-Flow-Order" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_global_flow_order!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_global_flow_order!">
+<code>MetacellsGraphs.DataSources.fill_global_flow_order!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_global_flow_order!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    type_property::AbstractString = &quot;type&quot;,
+    empty_value::Real = 0,
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the global flow order of the type of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_global_flow_order_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_global_flow_order_vector">
+<code>MetacellsGraphs.DataSources.get_global_flow_order_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_global_flow_order_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    type_property::AbstractString = &quot;type&quot;,
+    empty_value::Real = 0,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the global flow order of the type of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. An entry with no type gets the 
+<code>empty_value
+</code>, so it forms a group of its own at that end of the order.
+</p>
+<p>The order is a property of the type, so all the entries of a type get the same number. Grouping an axis by it therefore groups the entries by their type, and lays the groups out in the flow order, so that every graph shows the types in the same order.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Types">
+<a class="docs-heading-anchor" href="#Types">Types
+</a>
+<a id="Types-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Types" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_type!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_type!">
+<code>MetacellsGraphs.DataSources.fill_type!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_type!(
+    sinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    type_property::AbstractString = &quot;type&quot;,
+    type_axis::AbstractString = &quot;type&quot;,
+    via::Maybe{Union{Tuple{&lt;:AbstractString}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = type_axis,
+    show_legend::Bool = true,
+    empty_type_color::AbstractString = EMPTY_TYPE_COLOR,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the 
+<code>type_property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, and name the entities after the 
+<code>entries
+</code>. By default the type is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect types (e.g., the type of the block of the metacell of each cell). Types are shown using the 
+<code>color
+</code> of each entry of the 
+<code>type_axis
+</code>, with an additional 
+<code>empty_type_color
+</code> for 
+<code>entries
+</code> w/ no type (empty string).
+</p>
+<p>This fetches the data with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_vector">
+<code>get_type_vector
+</code>
+</a> and 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_colors">
+<code>get_type_colors
+</code>
+</a>, puts the types in with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a>, and says how to show them with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_type_configuration!">
+<code>put_type_configuration!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_type_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_type_configuration!">
+<code>MetacellsGraphs.DataSources.put_type_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_type_configuration!(
+    sinks::Sinks,
+    color_per_type::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show the types of the 
+<code>sinks
+</code> using the 
+<code>color_per_type
+</code> palette, named by the 
+<code>title
+</code>. The types themselves are put in by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>A color says nothing without a legend to read it by, so 
+<code>show_legend
+</code> is on. Turn it off for an annotation of a graph whose colors already name the same types.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_type_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_type_vector">
+<code>MetacellsGraphs.DataSources.get_type_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_type_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    type_property::AbstractString = &quot;type&quot;,
+    via::Maybe{Union{Tuple{&lt;:AbstractString}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the 
+<code>type_property
+</code> for each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By default this is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect types (e.g., the type of the block of the metacell of each cell).
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_type_colors">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_type_colors">
+<code>MetacellsGraphs.DataSources.get_type_colors
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_type_colors(
+    daf::DafReader;
+    type_axis::AbstractString = &quot;type&quot;,
+    empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
+)::Dict{AbstractString, AbstractString}
+</code>
+</pre>
+<p>Get the palette mapping each entry of the 
+<code>daf
+</code> 
+<code>type_axis
+</code> to its 
+<code>color
+</code>, with an additional 
+<code>empty_type_color
+</code> for entries w/ no type (empty string). The 
+<code>type_axis
+</code> must exist and must have a 
+<code>color
+</code>; asking to color by a type is the caller&#39;s decision, so a repository which can&#39;t answer is an error rather than an empty palette.
+</p>
+<p>A 
+<code>nothing
+</code> 
+<code>empty_type_color
+</code> leaves the empty type out of the palette, which says you expect every entry to have a type. An entry which doesn&#39;t is then rejected, because its type isn&#39;t a key of the palette.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The color to give to entities without any type annotation (empty string type). This should be different from the color given to any explicit type. The 
+<code>&quot;magenta&quot;
+</code> color was chosen as it isn&#39;t often used and visibly stands out.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Boolean-Annotations">
+<a class="docs-heading-anchor" href="#Boolean-Annotations">Boolean Annotations
+</a>
+<a id="Boolean-Annotations-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Boolean-Annotations" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_boolean_annotation!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_boolean_annotation!">
+<code>MetacellsGraphs.DataSources.fill_boolean_annotation!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_boolean_annotation!(
+    sinks::Sinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the Boolean mask 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, shown as 
+<code>true
+</code> in black and 
+<code>false
+</code> in light grey, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
+<code>MetacellsGraphs.DataSources.put_boolean_annotation_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_boolean_annotation_configuration!(
+    sinks::Sinks;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Show Boolean 
+<em>string
+</em> annotations: 
+<code>true
+</code> in black and 
+<code>false
+</code> in light grey, named by the 
+<code>title
+</code>. The values themselves are put in by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>Black against light grey has only two values and is named by its title, so 
+<code>show_legend
+</code> is off.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_boolean_annotation_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_boolean_annotation_vector">
+<code>MetacellsGraphs.DataSources.get_boolean_annotation_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_boolean_annotation_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the Boolean mask 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, as the 
+<em>strings
+</em> 
+<code>&quot;true&quot;
+</code> and 
+<code>&quot;false&quot;
+</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Low-Level-Functions">
+<a class="docs-heading-anchor" href="#Low-Level-Functions">Low Level Functions
+</a>
+<a id="Low-Level-Functions-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Low-Level-Functions" title="Permalink">
+</a>
+</h2>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_vector_query">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_vector_query">
+<code>MetacellsGraphs.DataSources.get_vector_query
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_vector_query(
+    daf::DafReader;
+    query::AbstractString,
+    indices::Maybe{AbstractVector{&lt;:Integer}} = nothing,
+)::AbstractVector{&lt;:StorageScalarBase}
+</code>
+</pre>
+<p>Execute a vector 
+<code>query
+</code> on a 
+<code>daf
+</code> repository and optionally access specific 
+<code>indices
+</code> in it. This always returns a dense vector. If indices are specified this returns a copy of the data, not a view.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_matrix_query">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_matrix_query">
+<code>MetacellsGraphs.DataSources.get_matrix_query
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_matrix_query(
+    daf::DafReader;
+    query::AbstractString,
+    row_indices::Maybe{AbstractVector{&lt;:Integer}} = nothing,
+    column_indices::Maybe{AbstractVector{&lt;:Integer}} = nothing,
+)::AbstractMatrix{&lt;:StorageScalarBase}
+</code>
+</pre>
+<p>Execute a matrix 
+<code>query
+</code> on a 
+<code>daf
+</code> repository and optionally access specific 
+<code>row_indices
+</code> and/or 
+<code>column_indices
+</code> in it. This always returns a dense matrix. If indices are specified this returns a copy of the data, not a view.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Index">
+<a class="docs-heading-anchor" href="#Index">Index
+</a>
+<a id="Index-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Index" title="Permalink">
+</a>
+</h2>
+<ul>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources">
+<code>MetacellsGraphs.DataSources
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axes_matrix_data!">
+<code>MetacellsGraphs.DataSources.fill_axes_matrix_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axes_names_data!">
+<code>MetacellsGraphs.DataSources.fill_axes_names_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_names_data!">
+<code>MetacellsGraphs.DataSources.fill_axis_names_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
+<code>MetacellsGraphs.DataSources.fill_axis_vector_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_block!">
+<code>MetacellsGraphs.DataSources.fill_block!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean_annotation!">
+<code>MetacellsGraphs.DataSources.fill_boolean_annotation!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_column_boolean_annotation!">
+<code>MetacellsGraphs.DataSources.fill_column_boolean_annotation!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_column_names_data!">
+<code>MetacellsGraphs.DataSources.fill_column_names_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_column_vector_data!">
+<code>MetacellsGraphs.DataSources.fill_column_vector_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_gene_correlation!">
+<code>MetacellsGraphs.DataSources.fill_gene_correlation!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_gene_correlation_change!">
+<code>MetacellsGraphs.DataSources.fill_gene_correlation_change!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_gene_expression!">
+<code>MetacellsGraphs.DataSources.fill_gene_expression!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_genes_expression_matrix!">
+<code>MetacellsGraphs.DataSources.fill_genes_expression_matrix!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_genes_fold_matrix!">
+<code>MetacellsGraphs.DataSources.fill_genes_fold_matrix!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_global_flow_order!">
+<code>MetacellsGraphs.DataSources.fill_global_flow_order!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!">
+<code>MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_cell!">
+<code>MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_cell!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_metacell!">
+<code>MetacellsGraphs.DataSources.fill_mean_total_UMIs_per_metacell!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_module_regulators_hovers!">
+<code>MetacellsGraphs.DataSources.fill_module_regulators_hovers!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_n_cells!">
+<code>MetacellsGraphs.DataSources.fill_n_cells!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_n_metacells!">
+<code>MetacellsGraphs.DataSources.fill_n_metacells!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_total_UMIs!">
+<code>MetacellsGraphs.DataSources.fill_total_UMIs!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_type!">
+<code>MetacellsGraphs.DataSources.fill_type!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_umap!">
+<code>MetacellsGraphs.DataSources.fill_umap!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axes_matrix">
+<code>MetacellsGraphs.DataSources.get_axes_matrix
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_entries_vector">
+<code>MetacellsGraphs.DataSources.get_axis_entries_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_vector">
+<code>MetacellsGraphs.DataSources.get_axis_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_vector">
+<code>MetacellsGraphs.DataSources.get_block_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_annotation_vector">
+<code>MetacellsGraphs.DataSources.get_boolean_annotation_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_column_vector">
+<code>MetacellsGraphs.DataSources.get_column_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_correlation_change_vector">
+<code>MetacellsGraphs.DataSources.get_gene_correlation_change_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_gene_correlation_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_expression_vector">
+<code>MetacellsGraphs.DataSources.get_gene_expression_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_genes_expression_matrix">
+<code>MetacellsGraphs.DataSources.get_genes_expression_matrix
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_genes_fold_matrix">
+<code>MetacellsGraphs.DataSources.get_genes_fold_matrix
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_global_flow_order_vector">
+<code>MetacellsGraphs.DataSources.get_global_flow_order_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_matrix_query">
+<code>MetacellsGraphs.DataSources.get_matrix_query
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_mean_cells_per_metacell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_cells_per_metacell_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_mean_total_UMIs_per_metacell_vector">
+<code>MetacellsGraphs.DataSources.get_mean_total_UMIs_per_metacell_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_module_regulators_hovers">
+<code>MetacellsGraphs.DataSources.get_module_regulators_hovers
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_n_cells_vector">
+<code>MetacellsGraphs.DataSources.get_n_cells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_n_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_n_metacells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_skeleton_gene_indices">
+<code>MetacellsGraphs.DataSources.get_skeleton_gene_indices
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_top_marker_gene_indices">
+<code>MetacellsGraphs.DataSources.get_top_marker_gene_indices
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_total_UMIs_vector">
+<code>MetacellsGraphs.DataSources.get_total_UMIs_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_colors">
+<code>MetacellsGraphs.DataSources.get_type_colors
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_vector">
+<code>MetacellsGraphs.DataSources.get_type_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_umap_vector">
+<code>MetacellsGraphs.DataSources.get_umap_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_vector_query">
+<code>MetacellsGraphs.DataSources.get_vector_query
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
+<code>MetacellsGraphs.DataSources.put_boolean_annotation_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_count_configuration!">
+<code>MetacellsGraphs.DataSources.put_count_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
+<code>MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_genes_expression_configuration!">
+<code>MetacellsGraphs.DataSources.put_genes_expression_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_genes_fold_configuration!">
+<code>MetacellsGraphs.DataSources.put_genes_fold_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
+<code>MetacellsGraphs.DataSources.put_matrix_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
+<code>MetacellsGraphs.DataSources.put_matrix_names_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_type_configuration!">
+<code>MetacellsGraphs.DataSources.put_type_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_umap_configuration!">
+<code>MetacellsGraphs.DataSources.put_umap_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_umap_data!">
+<code>MetacellsGraphs.DataSources.put_umap_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<code>MetacellsGraphs.DataSources.put_vector_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_mask_data!">
+<code>MetacellsGraphs.DataSources.put_vector_mask_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
+<code>MetacellsGraphs.DataSources.put_vector_names_data!
+</code>
+</a>
+</li>
+</ul>
+</article>
+<nav class="docs-footer">
+<a class="docs-footer-prevpage" href="index.html">« MetacellsGraphs
+</a>
+<a class="docs-footer-nextpage" href="scatter_graphs.html">Scatter Graphs »
+</a>
+<div class="flexbox-break">
+</div>
+<p class="footer-message">Powered by 
+<a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl
+</a> and the 
+<a href="https://julialang.org/">Julia Programming Language
+</a>.
+</p>
+</nav>
+</div>
+<div class="modal" id="documenter-settings">
+<div class="modal-background">
+</div>
+<div class="modal-card">
+<header class="modal-card-head">
+<p class="modal-card-title">Settings
+</p>
+<button class="delete">
+</button>
+</header>
+<section class="modal-card-body">
+<p>
+<label class="label">Theme
+</label>
+<div class="select">
+<select id="documenter-themepicker">
+<option value="auto">Automatic (OS)
+</option>
+<option value="documenter-light">documenter-light
+</option>
+<option value="documenter-dark">documenter-dark
+</option>
+<option value="catppuccin-latte">catppuccin-latte
+</option>
+<option value="catppuccin-frappe">catppuccin-frappe
+</option>
+<option value="catppuccin-macchiato">catppuccin-macchiato
+</option>
+<option value="catppuccin-mocha">catppuccin-mocha
+</option>
+</select>
+</div>
+</p>
+<hr/>
+<p>This document was generated with 
+<a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl
+</a> version 1.17.0. Using Julia version 1.12.6.
+</p>
+</section>
+<footer class="modal-card-foot">
+</footer>
+</div>
+</div>
+</div>
+</body>
+</html>

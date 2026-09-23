@@ -22,7 +22,8 @@ using Reexport
 using SomeGraphs
 using TanayLabUtilities
 
-include("utilities.jl")
+include("data_sources.jl")
+@reexport using .DataSources
 
 include("scatter_graphs.jl")
 @reexport using .ScatterGraphs

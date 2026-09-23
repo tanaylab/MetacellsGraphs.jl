@@ -57,6 +57,10 @@
 </a>
 </li>
 <li>
+<a class="tocitem" href="data_sources.html">Data Sources
+</a>
+</li>
+<li>
 <a class="tocitem" href="scatter_graphs.html">Scatter Graphs
 </a>
 </li>
@@ -144,15 +148,32 @@
 <div>
 <p>Heatmap graphs of a metacells repository.
 </p>
+<p>A graph function fills in the data the graph is about, and nothing else. In particular it does not group the columns and does not annotate them. The caller says how, in a second call, so that any property can group or annotate:
+</p>
+<pre>
+<code class="language-julia hljs">graph = genes_heatmap_graph(daf; genes = get_skeleton_gene_indices(daf))
+fill_type!(columns_annotations_colors_vector_fields(graph, add_columns_annotation!(graph)), daf)
+fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
+fill_block!(columns_subgroups_vector_data_fields(graph), daf)
+</code>
+</pre>
+<p>Grouping a level constrains the clustering to it and puts a gap between the groups. Naming both levels nests them: the blocks are grouped inside the types, which is how they nest. A level given numbers is laid out in the order of these numbers, and a level given names is laid out by the clustering.
+</p>
+<p>The second call must name the same 
+<code>axis
+</code> and 
+<code>entries
+</code> as the first, or the vectors will not match.
+</p>
 </div>
 </section>
 </details>
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph
+<summary id="MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -161,382 +182,40 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">markers_metacells_heatmap_graph(
+<code class="language-julia hljs">genes_heatmap_graph(
     daf::DafReader;
-    markers_count::Integer = ```100```,
-    group_by_type::Bool = ```false```,
-    group_by_block::Bool = ```false```,
-    use_global_flow_order::Bool = ```false```,
+    axis::AbstractString = &quot;metacell&quot;,
+    genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    rows_axis_title::Maybe{AbstractString} = &quot;Genes&quot;,
+    columns_axis_title::Maybe{AbstractString} = &quot;$(uppercasefirst(axis))s&quot;,
+    max_fold::Real = 3.0,
 )::HeatmapGraph
 </code>
 </pre>
 <p>The expression of the 
-<code>markers_count
-</code> best marker genes in each metacell, as the fold factor of the gene from its median across all the metacells.
+<code>genes
+</code> in each of the 
+<code>entries
+</code> of the 
+<code>axis
+</code>, as the fold factor of the gene from its median across the 
+<code>entries
+</code>.
 </p>
-<p>The genes are the rows and the metacells are the columns; both are clustered. There are too many metacells to name them, so each is identified in its hover, together with the block and the type it belongs to. If the metacells have a type, it is also shown as a color annotation of the columns, using the colors of the type axis.
-</p>
-<p>Given 
-<code>group_by_type
-</code> and/or 
-<code>group_by_block
-</code>, the columns are grouped by the type and/or by the block of each metacell, which both constrains the clustering to the groups and puts a gap between them. Given both, the grouping is hierarchical: the blocks are grouped inside the types, which is how they nest. Given 
-<code>use_global_flow_order
-</code>, the type groups run in the global flow order of the types, so that every graph lays them out the same way; otherwise the clustering places them, as it always places the blocks.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>metacell
-</strong> (required): Minimal-sized groups of cells for robust point estimates.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ marker_rank
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
-</p>
-<p>
-<strong>metacell @ block
-</strong>::AbstractString (optional): The unique block each metacell belongs to.
-</p>
-<p>
-<strong>metacell @ type
-</strong>::AbstractString (optional): The type each metacell belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>type @ global
-<em>flow
-</em>order
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, metacell @ log
-<em>linear
-</em>fraction
-</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph
+<p>The genes are the rows and the entries are the columns; both are clustered. Pick the genes with a data source such as 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_top_marker_gene_indices">
+<code>get_top_marker_gene_indices
 </code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">skeletons_metacells_heatmap_graph(
-    daf::DafReader;
-    group_by_type::Bool = ```false```,
-    group_by_block::Bool = ```false```,
-    use_global_flow_order::Bool = ```false```,
-)::HeatmapGraph
+</a> or 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_skeleton_gene_indices">
+<code>get_skeleton_gene_indices
 </code>
-</pre>
-<p>The expression of the skeleton genes in each metacell, as the fold factor of the gene from its median across all the metacells.
+</a>, and name them in the 
+<code>rows_axis_title
+</code>.
 </p>
-<p>This is 
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
-<code>markers_metacells_heatmap_graph
-</code>
-</a> of the skeleton genes, and reads the same way. The skeletons are the genes the blocks were computed from, so this shows what the blocks were told apart by, rather than everything which tells the metacells apart.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>metacell
-</strong> (required): Minimal-sized groups of cells for robust point estimates.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_skeleton
-</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
-</p>
-<p>
-<strong>metacell @ block
-</strong>::AbstractString (optional): The unique block each metacell belongs to.
-</p>
-<p>
-<strong>metacell @ type
-</strong>::AbstractString (optional): The type each metacell belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>type @ global
-<em>flow
-</em>order
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, metacell @ log
-<em>linear
-</em>fraction
-</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene in each metacell, out of the total UMIs.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">markers_blocks_heatmap_graph(
-    daf::DafReader;
-    markers_count::Integer = ```100```,
-    group_by_type::Bool = ```false```,
-    use_global_flow_order::Bool = ```false```,
-)::HeatmapGraph
-</code>
-</pre>
-<p>The expression of the 
-<code>markers_count
-</code> best marker genes in each block, as the fold factor of the gene from its median across all the blocks.
-</p>
-<p>This is 
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
-<code>markers_metacells_heatmap_graph
-</code>
-</a> of the blocks the metacells were grouped into, and reads the same way, except that a block belongs to nothing below its type, so there is no 
-<code>group_by_block
-</code> and the hover names just the block and its type.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ marker_rank
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (required): The relative ranks of the marker genes.
-</p>
-<p>
-<strong>block @ type
-</strong>::AbstractString (optional): The type each block belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>type @ global
-<em>flow
-</em>order
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, block @ log
-<em>linear
-</em>fraction
-</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">skeletons_blocks_heatmap_graph(
-    daf::DafReader;
-    group_by_type::Bool = ```false```,
-    use_global_flow_order::Bool = ```false```,
-)::HeatmapGraph
-</code>
-</pre>
-<p>The expression of the skeleton genes in each block, as the fold factor of the gene from its median across all the blocks.
-</p>
-<p>This is 
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
-<code>markers_blocks_heatmap_graph
-</code>
-</a> of the skeleton genes, and reads the same way. The skeletons are the genes the blocks were computed from, so this shows what the blocks were told apart by, rather than everything which tells them apart.
-</p>
-<p>
-<strong>Inputs
-</strong>
-</p>
-<p>
-<strong>Axes
-</strong>
-</p>
-<p>
-<strong>gene
-</strong> (required): Sequenced genes.
-</p>
-<p>
-<strong>block
-</strong> (required): Distinct groups of metacells with &quot;very close&quot; cell state.
-</p>
-<p>
-<strong>type
-</strong> (optional): Distinct named biological cell states.
-</p>
-<p>
-<strong>Vectors
-</strong>
-</p>
-<p>
-<strong>gene @ is_skeleton
-</strong>::Bool (required): A mask of genes that are used to predict the values of the rest of the genes.
-</p>
-<p>
-<strong>block @ type
-</strong>::AbstractString (optional): The type each block belongs to.
-</p>
-<p>
-<strong>type @ color
-</strong>::AbstractString (optional): A unique color for each type for visualizations.
-</p>
-<p>
-<strong>type @ global
-<em>flow
-</em>order
-</strong>::Union{UInt16, UInt32, UInt64, UInt8} (optional): The position of each type in a global ordering minimizing the weighted crossings between consecutive rounds.
-</p>
-<p>
-<strong>Matrices
-</strong>
-</p>
-<p>
-<strong>gene, block @ log
-<em>linear
-</em>fraction
-</strong>::Union{Float32, Float64} (required): The log base 2 of the linear fraction of the UMIs of each non-excluded gene out of the total UMIs in each block.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
-<code>MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The extreme of the color scale of the fold factors. A fold factor is a log2, so a gene is drawn in full blue where it is 3 below its median (an eighth of it), in white where it is at it, and in full red where it is 3 above it (eight times it); anything more extreme is drawn in the same color as this. All the heatmaps use the same extreme, so that they can be compared to each other.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
-<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
-<code>MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The fraction of a grouped axis given over to the gaps between its groups. A gap is measured in entries, so a gap of a fixed number of them is invisible in an axis holding thousands and is most of an axis holding a few dozen. Sizing the gaps so that together they take this fraction of the axis makes them visible whatever the axis holds, while an axis holding many small groups keeps the single entry it takes to separate them at all instead of becoming mostly gaps.
+<p>There are too many columns to label, so they are named in the hover of each cell instead. The rows are labelled.
 </p>
 </div>
 </section>
@@ -558,38 +237,8 @@
 </a>
 </li>
 <li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS">
-<code>MetacellsGraphs.HeatmapGraphs.MAX_FOLD_FOR_GRAPHS
-</code>
-</a>
-</li>
-<li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION">
-<code>MetacellsGraphs.HeatmapGraphs.TOTAL_GROUPS_GAP_FRACTION
-</code>
-</a>
-</li>
-<li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.markers_blocks_heatmap_graph
-</code>
-</a>
-</li>
-<li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.markers_metacells_heatmap_graph
-</code>
-</a>
-</li>
-<li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.skeletons_blocks_heatmap_graph
-</code>
-</a>
-</li>
-<li>
-<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph">
-<code>MetacellsGraphs.HeatmapGraphs.skeletons_metacells_heatmap_graph
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<code>MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph
 </code>
 </a>
 </li>
