@@ -444,6 +444,14 @@
 </code>
 </a>, so a mixed collection is fine and either may match nothing at all.
 </p>
+<p>A 
+<code>put_
+</code> has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a 
+<code>MethodError
+</code>; in particular a matrix leaf handed to a vector 
+<code>put_
+</code>, or the other way around.
+</p>
 <p>In general the data and the configuration functions take different sets of parameters (e.g., axis for data and gene regularization for configuration of log scale). The 
 <code>title
 </code> is a notable exception that gets passed to both sides, as it is used for computing hover values (data) and as an axis/legend title (configuration).
@@ -486,7 +494,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_axis_names_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -530,7 +538,7 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">put_vector_names_data!(sinks::Sinks, name_per_entry::AbstractVector{&lt;:AbstractString})::Nothing
+<code class="language-julia hljs">put_vector_names_data!(sinks::VectorDataSinks, name_per_entry::AbstractVector{&lt;:AbstractString})::Nothing
 </code>
 </pre>
 <p>Name the entities of the 
@@ -599,7 +607,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_axis_vector_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     query_suffix::AbstractString,
@@ -650,7 +658,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">put_vector_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     value_per_entry::AbstractVector{&lt;:StorageScalarBase};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -755,7 +763,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">put_vector_mask_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
 )::Nothing
 </code>
@@ -802,7 +810,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_column_vector_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = nothing,
@@ -844,7 +852,7 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">fill_column_names_data!(sinks::Sinks, frame::DataFrame; column::AbstractString)::Nothing
+<code class="language-julia hljs">fill_column_names_data!(sinks::VectorDataSinks, frame::DataFrame; column::AbstractString)::Nothing
 </code>
 </pre>
 <p>Name the entities of the 
@@ -873,7 +881,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_column_boolean_annotation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = column,
@@ -961,7 +969,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_module_regulators_hovers!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     prefix::AbstractString,
     side_name::AbstractString,
@@ -1042,7 +1050,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_axes_names_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     rows_axis::AbstractString,
     columns_axis::AbstractString,
@@ -1093,7 +1101,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">put_matrix_names_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     name_per_row::AbstractVector{&lt;:AbstractString},
     name_per_column::AbstractVector{&lt;:AbstractString},
 )::Nothing
@@ -1115,7 +1123,7 @@
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.visit_data_sinks">
 <code>visit_data_sinks
 </code>
-</a>, which doesn&#39;t walk into them because they are sized by one axis each while the entries are sized by both.
+</a>, which doesn&#39;t walk into them because they are sized by one axis each while the entries are sized by both. A vector sink has no rows or columns to name, so it is an error here.
 </p>
 </div>
 </section>
@@ -1143,7 +1151,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_axes_matrix_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     rows_axis::AbstractString,
     columns_axis::AbstractString,
@@ -1182,7 +1190,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">put_matrix_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     value_per_row_per_column::AbstractMatrix{&lt;:StorageScalarBase};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -1340,7 +1348,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_gene_expression!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     gene::AbstractString,
     axis::AbstractString = &quot;metacell&quot;,
@@ -1428,7 +1436,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_genes_expression_matrix!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     axis::AbstractString = &quot;metacell&quot;,
@@ -1522,7 +1530,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_genes_fold_matrix!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     axis::AbstractString = &quot;metacell&quot;,
@@ -1685,7 +1693,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_gene_correlation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     gene::AbstractString,
     axis::AbstractString = &quot;base_block&quot;,
@@ -1769,7 +1777,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_gene_correlation_change!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader,
     base_daf::DafReader;
     gene::AbstractString,
@@ -1894,7 +1902,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_umap!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     coordinate::AbstractString,
     axis::AbstractString = &quot;metacell&quot;,
@@ -1935,7 +1943,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">put_umap_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     coordinate_per_entry::AbstractVector{&lt;:AbstractFloat};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -2142,7 +2150,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_total_UMIs!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2235,7 +2243,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_n_cells!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2310,7 +2318,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_n_metacells!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;block&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2395,7 +2403,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_mean_cells_per_metacell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;block&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2468,7 +2476,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_mean_total_UMIs_per_metacell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;block&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2541,7 +2549,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_mean_total_UMIs_per_cell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2622,7 +2630,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_block!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -2712,7 +2720,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_global_flow_order!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
@@ -3022,7 +3030,7 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_boolean_annotation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     property::AbstractString,

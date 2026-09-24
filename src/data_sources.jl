@@ -47,6 +47,10 @@ labels, hovers). A data function writes only the sinks which are a
 [`ConfigurationSink`](@extref SomeGraphs SomeGraphs.Sources.ConfigurationSink), so a mixed collection is fine and
 either may match nothing at all.
 
+A `put_` has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a
+colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a
+`MethodError`; in particular a matrix leaf handed to a vector `put_`, or the other way around.
+
 In general the data and the configuration functions take different sets of parameters (e.g., axis for data and gene
 regularization for configuration of log scale). The `title` is a notable exception that gets passed to both sides, as it
 is used for computing hover values (data) and as an axis/legend title (configuration).
@@ -181,13 +185,22 @@ would lose it against the background.
 There is no regularization, because anything real has at least one of whatever is being counted.
 """
 function put_count_configuration!(
-    sinks::Sinks;
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
         return put_count_configuration!(sink; title, show_legend)
     end
+    return nothing
+end
+
+# A count is not shown as a size.
+function put_count_configuration!(
+    ::SizesConfiguration;
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+    show_legend::Bool = true,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -228,7 +241,7 @@ end
 
 """
     fill_total_UMIs!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -242,7 +255,7 @@ Fill the `sinks` with the total UMIs of each of the `entries` of the `daf` `axis
 color scale, and name the entities after the `entries`.
 """
 function fill_total_UMIs!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -280,7 +293,7 @@ end
 
 """
     fill_n_cells!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -294,7 +307,7 @@ Fill the `sinks` with the number of cells of each of the `entries` of the `daf` 
 entities after the `entries`.
 """
 function fill_n_cells!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -333,7 +346,7 @@ end
 
 """
     fill_n_metacells!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "block",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -347,7 +360,7 @@ Fill the `sinks` with the number of metacells of each of the `entries` of the `d
 the entities after the `entries`.
 """
 function fill_n_metacells!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "block",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -384,7 +397,7 @@ end
 
 """
     fill_mean_cells_per_metacell!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "block",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -397,7 +410,7 @@ Fill the `sinks` with the mean number of cells per metacell of each of the `entr
 count, and name the entities after the `entries`.
 """
 function fill_mean_cells_per_metacell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "block",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -433,7 +446,7 @@ end
 
 """
     fill_mean_total_UMIs_per_metacell!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "block",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -446,7 +459,7 @@ Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` 
 and name the entities after the `entries`.
 """
 function fill_mean_total_UMIs_per_metacell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "block",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -482,7 +495,7 @@ end
 
 """
     fill_mean_total_UMIs_per_cell!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -495,7 +508,7 @@ Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of t
 name the entities after the `entries`.
 """
 function fill_mean_total_UMIs_per_cell!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -561,7 +574,7 @@ end
 
 """
     fill_block!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -578,7 +591,7 @@ Aim this at a whole data source view to get the values and a hover line, or at i
 values.
 """
 function fill_block!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -626,7 +639,7 @@ end
 
 """
     fill_global_flow_order!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -639,7 +652,7 @@ Fill the `sinks` with the global flow order of the type of each of the `entries`
 entities after the `entries`.
 """
 function fill_global_flow_order!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -685,13 +698,22 @@ themselves are put in by [`put_vector_data!`](@ref).
 Black against light grey has only two values and is named by its title, so `show_legend` is off.
 """
 function put_boolean_annotation_configuration!(
-    sinks::Sinks;
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
         return put_boolean_annotation_configuration!(sink; title, show_legend)
     end
+    return nothing
+end
+
+# An annotation is only ever colors.
+function put_boolean_annotation_configuration!(
+    ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration};
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+    show_legend::Bool = false,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -710,7 +732,7 @@ end
 
 """
     fill_boolean_annotation!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString,
         property::AbstractString,
@@ -723,7 +745,7 @@ Fill the `sinks` with the Boolean mask `property` of each of the `entries` of th
 black and `false` in light grey, and name the entities after the `entries`.
 """
 function fill_boolean_annotation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     property::AbstractString,
@@ -739,7 +761,7 @@ end
 
 """
     fill_gene_expression!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         gene::AbstractString,
         axis::AbstractString = "metacell",
@@ -753,7 +775,7 @@ Fill the `sinks` with the `gene` expression level (linear fraction) per each of 
 shown in log base 2 using the `gene_fraction_regularization`, and name the entities after the `entries`.
 """
 function fill_gene_expression!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     gene::AbstractString,
     axis::AbstractString = "metacell",
@@ -816,7 +838,7 @@ end
 
 """
     fill_gene_correlation!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         gene::AbstractString,
         axis::AbstractString = "base_block",
@@ -828,7 +850,7 @@ Fill the `sinks` with the correlation of the `gene` per each of the `entries` of
 entities after the `entries`.
 """
 function fill_gene_correlation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     gene::AbstractString,
     axis::AbstractString = "base_block",
@@ -881,13 +903,22 @@ There is nothing else to say about how to show it: it is a difference of two cor
 scale it is read in.
 """
 function put_gene_correlation_change_configuration!(
-    sinks::Sinks;
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = "correlation change",
     show_legend::Bool = true,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
         return put_gene_correlation_change_configuration!(sink; title, show_legend)
     end
+    return nothing
+end
+
+# A correlation change is already on the scale it is read in, and is not shown as a size.
+function put_gene_correlation_change_configuration!(
+    ::Union{ScaleConfiguration, SizesConfiguration};
+    title::Maybe{AbstractString} = "correlation change",  # NOLINT
+    show_legend::Bool = true,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -916,7 +947,7 @@ end
 
 """
     fill_gene_correlation_change!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader,
         base_daf::DafReader;
         gene::AbstractString,
@@ -931,7 +962,7 @@ Fill the `sinks` with how much the correlation of the `gene` changed between the
 the `entries`, and name the entities after them.
 """
 function fill_gene_correlation_change!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader,
     base_daf::DafReader;
     gene::AbstractString,
@@ -949,7 +980,7 @@ end
 
 """
     fill_genes_expression_matrix!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         daf::DafReader;
         genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         axis::AbstractString = "metacell",
@@ -964,7 +995,7 @@ shown in log base 2 using the `gene_fraction_regularization`, and name the rows 
 rows and the `entries` are the columns.
 """
 function fill_genes_expression_matrix!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     axis::AbstractString = "metacell",
@@ -1028,7 +1059,7 @@ the `title`. The fractions themselves are put in by [`put_vector_data!`](@ref) o
 The `show_legend` applies where the fractions are the colors. An axis is read off its own ticks and ignores it.
 """
 function put_genes_expression_configuration!(
-    sinks::Sinks;
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
@@ -1037,6 +1068,16 @@ function put_genes_expression_configuration!(
     visit_configuration_sinks(sinks) do sink
         return put_genes_expression_configuration!(sink; gene_fraction_regularization, title, show_legend)
     end
+    return nothing
+end
+
+# Gene expression is not shown as a size.
+function put_genes_expression_configuration!(
+    ::SizesConfiguration;
+    gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
+    title::Maybe{AbstractString} = "fraction",  # NOLINT
+    show_legend::Bool = true,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -1080,7 +1121,7 @@ end
 
 """
     put_umap_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         coordinate_per_entry::AbstractVector{<:AbstractFloat};
         title::Maybe{AbstractString} = nothing,
     )::Nothing
@@ -1088,7 +1129,7 @@ end
 Put a UMAP `coordinate_per_entry` into the `sinks`, as the values of a role.
 """
 function put_umap_data!(
-    sinks::Sinks,
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
     coordinate_per_entry::AbstractVector{<:AbstractFloat};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -1118,7 +1159,7 @@ end
 
 """
     fill_umap!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         coordinate::AbstractString,
         axis::AbstractString = "metacell",
@@ -1130,7 +1171,7 @@ Fill the `sinks` with the UMAP `coordinate` per each of the `entries` of some `d
 grid, and name the entities after the `entries`.
 """
 function fill_umap!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     coordinate::AbstractString,
     axis::AbstractString = "metacell",
@@ -1168,10 +1209,21 @@ end
 Show UMAP coordinates without ticks or a grid, named by the `title`. Only which points are near which other points
 means anything, so the values themselves are not worth labelling.
 """
-function put_umap_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+function put_umap_configuration!(
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
+    title::Maybe{AbstractString} = nothing,
+)::Nothing
     visit_configuration_sinks(sinks) do sink
         return put_umap_configuration!(sink; title)
     end
+    return nothing
+end
+
+# UMAP coordinates are only ever an axis.
+function put_umap_configuration!(
+    ::Union{ScaleConfiguration, ColorsConfiguration, SizesConfiguration};
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -1186,7 +1238,7 @@ end
 
 """
     fill_genes_fold_matrix!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         daf::DafReader;
         genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         axis::AbstractString = "metacell",
@@ -1202,7 +1254,7 @@ are the rows and the `entries` are the columns. This is based on the `log_linear
 already a log, so there's no regularization to apply here.
 """
 function fill_genes_fold_matrix!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     axis::AbstractString = "metacell",
@@ -1266,7 +1318,7 @@ named by the `title`, and include it in the legend if `show_legend`. The folds t
 [`put_matrix_data!`](@ref).
 """
 function put_genes_fold_configuration!(
-    sinks::Sinks;
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fold from median",
     show_legend::Bool = true,
@@ -1275,6 +1327,16 @@ function put_genes_fold_configuration!(
     visit_configuration_sinks(sinks) do sink
         return put_genes_fold_configuration!(sink; max_fold, title, show_legend)
     end
+    return nothing
+end
+
+# A fold is only ever colors.
+function put_genes_fold_configuration!(
+    ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration};
+    max_fold::Real = MAX_FOLD_FOR_GRAPHS,  # NOLINT
+    title::Maybe{AbstractString} = "fold from median",  # NOLINT
+    show_legend::Bool = true,  # NOLINT
+)::Nothing
     return nothing
 end
 
@@ -1296,7 +1358,7 @@ end
 
 """
     fill_axis_names_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -1307,7 +1369,7 @@ Name the entities of the `sinks` after each of the `entries` of the `daf` `axis`
 This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to [`put_vector_names_data!`](@ref).
 """
 function fill_axis_names_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -1317,12 +1379,15 @@ function fill_axis_names_data!(
 end
 
 """
-    put_vector_names_data!(sinks::Sinks, name_per_entry::AbstractVector{<:AbstractString})::Nothing
+    put_vector_names_data!(sinks::VectorDataSinks, name_per_entry::AbstractVector{<:AbstractString})::Nothing
 
 Name the entities of the `sinks` after the `name_per_entry`. Where the graph has room to label the entities, these
 become their tick labels. They are also the first line of the hover of each entity.
 """
-function put_vector_names_data!(sinks::Sinks, name_per_entry::AbstractVector{<:AbstractString})::Nothing
+function put_vector_names_data!(
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
+    name_per_entry::AbstractVector{<:AbstractString},
+)::Nothing
     visit_data_sinks(sinks) do sink
         return put_vector_names_data!(sink, name_per_entry)
     end
@@ -1341,14 +1406,17 @@ end
 
 """
     put_vector_mask_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
     )::Nothing
 
 Hide the entities of the `sinks` which are not shown by the `is_shown_per_entry` mask. Hidden entities are still part
 of the data, so they take part in whatever is computed from it, unless the relevant configuration says otherwise.
 """
-function put_vector_mask_data!(sinks::Sinks, is_shown_per_entry::Union{AbstractVector{Bool}, BitVector})::Nothing
+function put_vector_mask_data!(
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
+    is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
+)::Nothing
     visit_data_sinks(sinks) do sink
         return put_vector_mask_data!(sink, is_shown_per_entry)
     end
@@ -1428,7 +1496,7 @@ end
 
 """
     put_vector_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         value_per_entry::AbstractVector{<:StorageScalarBase};
         title::Maybe{AbstractString} = nothing,
     )::Nothing
@@ -1440,7 +1508,7 @@ The `title` prefixes the hover line, as `title: value`. Nothing is configured he
 on which property it is; a specific data source says that in its own `put_..._configuration!`.
 """
 function put_vector_data!(
-    sinks::Sinks,
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
     value_per_entry::AbstractVector{<:StorageScalarBase};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -1470,7 +1538,7 @@ end
 
 """
     put_matrix_data!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
         title::Maybe{AbstractString} = nothing,
     )::Nothing
@@ -1482,7 +1550,7 @@ The row and the column entities are not written here. They belong to their axes 
 are named separately; see [`put_matrix_names_data!`](@ref).
 """
 function put_matrix_data!(
-    sinks::Sinks,
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
     value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
@@ -1512,7 +1580,7 @@ end
 
 """
     put_matrix_names_data!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         name_per_row::AbstractVector{<:AbstractString},
         name_per_column::AbstractVector{<:AbstractString},
     )::Nothing
@@ -1522,23 +1590,60 @@ Name the rows and the columns of the `sinks` after the `name_per_row` and the `n
 
 The two axes are named together here rather than through
 [`visit_data_sinks`](@extref SomeGraphs SomeGraphs.Sources.visit_data_sinks), which doesn't walk into them because
-they are sized by one axis each while the entries are sized by both.
+they are sized by one axis each while the entries are sized by both. A vector sink has no rows or columns to name, so
+it is an error here.
 """
 function put_matrix_names_data!(
-    sinks::Sinks,
+    sinks::Union{Tuple, AbstractVector},
     name_per_row::AbstractVector{<:AbstractString},
     name_per_column::AbstractVector{<:AbstractString},
 )::Nothing
-    for sink in matrix_data_sinks(sinks)
-        put_vector_names_data!(sink.rows_entities, name_per_row)
-        put_vector_names_data!(sink.columns_entities, name_per_column)
+    for sink in sinks
+        put_matrix_names_data!(sink, name_per_row, name_per_column)
     end
     return nothing
 end
 
+function put_matrix_names_data!(
+    fields::MatrixFields,
+    name_per_row::AbstractVector{<:AbstractString},
+    name_per_column::AbstractVector{<:AbstractString},
+)::Nothing
+    put_matrix_names_data!(fields.data, name_per_row, name_per_column)
+    return nothing
+end
+
+function put_matrix_names_data!(
+    data_fields::MatrixDataFields,
+    name_per_row::AbstractVector{<:AbstractString},
+    name_per_column::AbstractVector{<:AbstractString},
+)::Nothing
+    put_vector_names_data!(data_fields.rows_entities, name_per_row)
+    put_vector_names_data!(data_fields.columns_entities, name_per_column)
+    return nothing
+end
+
+# A configuration has no rows or columns to name, and the entries or cells of a matrix hold no entities of either.
+function put_matrix_names_data!(
+    ::Union{AbstractConfigurationFields, ConfigurationLeaf, MatrixDataLeaf},
+    ::AbstractVector{<:AbstractString},
+    ::AbstractVector{<:AbstractString},
+)::Nothing
+    return nothing
+end
+
+# A vector sink is admitted by `MatrixDataSinks` since it is a container, but it has no rows or columns to name.
+function put_matrix_names_data!(
+    sinks::Union{VectorFields, VectorDataFields},
+    ::AbstractVector{<:AbstractString},
+    ::AbstractVector{<:AbstractString},
+)::Nothing
+    return throw(ArgumentError("can't name the rows and columns of a vector sink: $(typeof(sinks))"))
+end
+
 """
     fill_axes_names_data!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         daf::DafReader;
         rows_axis::AbstractString,
         columns_axis::AbstractString,
@@ -1552,7 +1657,7 @@ Name the rows of the `sinks` after the `row_entries` of the `daf` `rows_axis`, a
 This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to [`put_matrix_names_data!`](@ref).
 """
 function fill_axes_names_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     rows_axis::AbstractString,
     columns_axis::AbstractString,
@@ -1598,7 +1703,7 @@ end
 
 """
     fill_axes_matrix_data!(
-        sinks::Sinks,
+        sinks::MatrixDataSinks,
         daf::DafReader;
         rows_axis::AbstractString,
         columns_axis::AbstractString,
@@ -1612,7 +1717,7 @@ Fill the `sinks` with the result of the query `@ rows_axis @ columns_axis query_
 columns. The matrix twin of [`fill_axis_vector_data!`](@ref).
 """
 function fill_axes_matrix_data!(
-    sinks::Sinks,
+    sinks::MatrixDataSinks,
     daf::DafReader;
     rows_axis::AbstractString,
     columns_axis::AbstractString,
@@ -1630,19 +1735,6 @@ function fill_axes_matrix_data!(
     return nothing
 end
 
-# The `MatrixDataFields` of the `sinks`, which are the only ones which have row and column entities to name.
-function matrix_data_sinks(sinks::Sinks)::Vector{MatrixDataFields}
-    matrix_sinks = MatrixDataFields[]
-    for sink in (sinks isa Union{Tuple, AbstractVector} ? sinks : (sinks,))
-        if sink isa MatrixFields
-            push!(matrix_sinks, sink.data)
-        elseif sink isa MatrixDataFields
-            push!(matrix_sinks, sink)
-        end
-    end
-    return matrix_sinks
-end
-
 # The values as the strings a hover shows. Only strings can be a hover, so anything else is converted.
 function hover_strings(value_per_entry::AbstractArray{<:AbstractString})::AbstractArray{<:AbstractString}
     return value_per_entry
@@ -1654,7 +1746,7 @@ end
 
 """
     fill_axis_vector_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString,
         query_suffix::AbstractString,
@@ -1668,7 +1760,7 @@ name the entities after the `entries`.
 This fetches the data with [`get_axis_vector`](@ref), then hands it to [`put_vector_data!`](@ref).
 """
 function fill_axis_vector_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     query_suffix::AbstractString,
@@ -1694,7 +1786,7 @@ end
 
 """
     fill_column_vector_data!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         frame::DataFrame;
         column::AbstractString,
         title::Maybe{AbstractString} = nothing,
@@ -1706,7 +1798,7 @@ The entities are not named here, unlike [`fill_axis_vector_data!`](@ref); a fram
 its rows, so say which one does with [`fill_column_names_data!`](@ref).
 """
 function fill_column_vector_data!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = nothing,
@@ -1716,18 +1808,18 @@ function fill_column_vector_data!(
 end
 
 """
-    fill_column_names_data!(sinks::Sinks, frame::DataFrame; column::AbstractString)::Nothing
+    fill_column_names_data!(sinks::VectorDataSinks, frame::DataFrame; column::AbstractString)::Nothing
 
 Name the entities of the `sinks` after the `column` of a `frame`, one name per row.
 """
-function fill_column_names_data!(sinks::Sinks, frame::DataFrame; column::AbstractString)::Nothing
+function fill_column_names_data!(sinks::VectorDataSinks, frame::DataFrame; column::AbstractString)::Nothing
     put_vector_names_data!(sinks, string.(get_column_vector(frame; column)))
     return nothing
 end
 
 """
     fill_column_boolean_annotation!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         frame::DataFrame;
         column::AbstractString,
         title::Maybe{AbstractString} = column,
@@ -1738,7 +1830,7 @@ Fill the `sinks` with the Boolean `column` of a `frame`, shown as `true` in blac
 `DataFrame` twin of [`fill_boolean_annotation!`](@ref).
 """
 function fill_column_boolean_annotation!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = column,
@@ -1803,7 +1895,7 @@ end
 
 """
     fill_module_regulators_hovers!(
-        sinks::Sinks,
+        sinks::VectorDataSinks,
         frame::DataFrame;
         prefix::AbstractString,
         side_name::AbstractString,
@@ -1814,13 +1906,13 @@ Add a hover per row of a gene report `frame` to the `sinks`, saying which regula
 the base blocks of one side. The lines carry their own labels, so nothing is prefixed to them.
 """
 function fill_module_regulators_hovers!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     frame::DataFrame;
     prefix::AbstractString,
     side_name::AbstractString,
     regulators_count::Integer,
 )::Nothing
-    put_vector_data!(sinks, get_module_regulators_hovers(frame; prefix, side_name, regulators_count))
+    put_vector_data!(sinks, get_module_regulators_hovers(frame; prefix, side_name, regulators_count))  # NOJET
     return nothing
 end
 
@@ -1847,7 +1939,7 @@ This fetches the data with [`get_type_vector`](@ref) and [`get_type_colors`](@re
 [`put_vector_data!`](@ref), and says how to show them with [`put_type_configuration!`](@ref).
 """
 function fill_type!(
-    sinks::Sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
@@ -1879,7 +1971,7 @@ A color says nothing without a legend to read it by, so `show_legend` is on. Tur
 whose colors already name the same types.
 """
 function put_type_configuration!(
-    sinks::Sinks,
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector},
     color_per_type::CategoricalColors;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
@@ -1887,6 +1979,16 @@ function put_type_configuration!(
     visit_configuration_sinks(sinks) do sink
         return put_type_configuration!(sink, color_per_type; title, show_legend)
     end
+    return nothing
+end
+
+# A type is only ever colors.
+function put_type_configuration!(
+    ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration},
+    ::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+    show_legend::Bool = true,  # NOLINT
+)::Nothing
     return nothing
 end
 
