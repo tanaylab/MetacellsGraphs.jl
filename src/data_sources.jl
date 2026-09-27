@@ -27,18 +27,11 @@ variants and no overall fill wrapper. Specific data (e.g., `gene_expression`, `t
 but add specific configuration for how to display the data in the graph.
 
 A `get_` and a `fill_` are named after where the data comes from, so a generic one says which `daf` axes it queries
-(`axis_vector` for one, `axes_matrix` for two). A `put_` is named after where the data goes, so a generic one says
-which shape of sink it writes:
-
-| function                 | writes                                |
-|:------------------------ |:------------------------------------- |
-| `put_vector_data!`       | values and a hover, into vector sinks |
-| `put_matrix_data!`       | values and a hover, into matrix sinks |
-| `put_vector_names_data!` | names, into vector sinks              |
-| `put_matrix_names_data!` | names of both axes, into matrix sinks |
-
-A specific `put_` is named after its source instead, since there is only one shape it can take. Nothing about a
-generic `put_` depends on `daf`, so the same one serves a `DataFrame` or any other source of a vector.
+(`axis_vector` for one, `axes_matrix` for two). The generic `put_` functions depend on nothing but the graph, so they
+are in [`SomeGraphs.Sources`](@extref SomeGraphs SomeGraphs.Sources) (e.g., `put_vector_data!`,
+`put_matrix_names_data!`). They are named after where the data goes, so they say which shape of sink they write, and
+the same one serves a `DataFrame` or any other source of a vector. A specific `put_` here is named after its source
+instead, since there is only one shape it can take.
 
 The fill and put functions take [`Sinks`](@extref SomeGraphs SomeGraphs.Sources.Sinks): a single graph struct, or a
 tuple or vector of them. This allows easily reusing the same data in multiple places in the graph (e.g., values,
@@ -115,15 +108,9 @@ export put_count_configuration!
 export put_gene_correlation_change_configuration!
 export put_genes_expression_configuration!
 export put_genes_fold_configuration!
-export put_matrix_data!
-export put_matrix_names_data!
 export put_type_configuration!
 export put_umap_configuration!
 export put_umap_data!
-export put_vector_data!
-export put_vector_mask_data!
-export put_vector_names_data!
-export put_vector_order_data!
 
 using DataAxesFormats
 using DataFrames
@@ -694,7 +681,7 @@ end
     )::Nothing
 
 Show Boolean *string* annotations: `true` in black and `false` in light grey, named by the `title`. The values
-themselves are put in by [`put_vector_data!`](@ref).
+themselves are put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
 Black against light grey has only two values and is named by its title, so `show_legend` is off.
 """
@@ -1054,8 +1041,9 @@ end
     )::Nothing
 
 Show gene expression (linear fraction) on a log-base-2 scale, regularized by `gene_fraction_regularization`, named by
-the `title`. The fractions themselves are put in by [`put_vector_data!`](@ref) or
-[`put_matrix_data!`](@ref).
+the `title`. The fractions themselves are put in by
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
+[`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
 The `show_legend` applies where the fractions are the colors. An axis is read off its own ticks and ignores it.
 """
@@ -1317,7 +1305,7 @@ end
 
 Show the genes fold (log base-2 minus the median) in the range -`max_fold` (blue) to 0 (white) to +`max_fold` (red),
 named by the `title`, and include it in the legend if `show_legend`. The folds themselves are put in by
-[`put_matrix_data!`](@ref).
+[`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 """
 function put_genes_fold_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
@@ -1368,7 +1356,8 @@ end
 
 Name the entities of the `sinks` after each of the `entries` of the `daf` `axis`.
 
-This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to [`put_vector_names_data!`](@ref).
+This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to
+[`put_vector_names_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_names_data!).
 """
 function fill_axis_names_data!(
     sinks::VectorDataSinks,
@@ -1377,97 +1366,6 @@ function fill_axis_names_data!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
 )::Nothing
     put_vector_names_data!(sinks, get_axis_entries_vector(daf; axis, entries))
-    return nothing
-end
-
-"""
-    put_vector_names_data!(sinks::VectorDataSinks, name_per_entry::AbstractVector{<:AbstractString})::Nothing
-
-Name the entities of the `sinks` after the `name_per_entry`. Where the graph has room to label the entities, these
-become their tick labels. They are also the first line of the hover of each entity.
-"""
-function put_vector_names_data!(
-    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
-    name_per_entry::AbstractVector{<:AbstractString},
-)::Nothing
-    visit_data_sinks(sinks) do sink
-        return put_vector_names_data!(sink, name_per_entry)
-    end
-    return nothing
-end
-
-function put_vector_names_data!(entities::VectorEntitiesData, name_per_entry::AbstractVector{<:AbstractString})::Nothing
-    entities.names = name_per_entry
-    return nothing
-end
-
-# A name identifies an entity, so it belongs to the entities rather than to any one role's values or to the arrangement.
-function put_vector_names_data!(::Union{VectorValuesData, ArrangementData}, ::AbstractVector{<:AbstractString})::Nothing
-    return nothing
-end
-
-"""
-    put_vector_mask_data!(
-        sinks::VectorDataSinks,
-        is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
-    )::Nothing
-
-Hide the entities of the `sinks` which are not shown by the `is_shown_per_entry` mask. Hidden entities are still part
-of the data, so they take part in whatever is computed from it, unless the relevant configuration says otherwise.
-"""
-function put_vector_mask_data!(
-    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
-    is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
-)::Nothing
-    visit_data_sinks(sinks) do sink
-        return put_vector_mask_data!(sink, is_shown_per_entry)
-    end
-    return nothing
-end
-
-function put_vector_mask_data!(
-    entities::VectorEntitiesData,
-    is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
-)::Nothing
-    entities.mask = is_shown_per_entry
-    return nothing
-end
-
-# A mask hides an entity, so it belongs to the entities rather than to any one role's values or to the arrangement.
-function put_vector_mask_data!(
-    ::Union{VectorValuesData, ArrangementData},
-    ::Union{AbstractVector{Bool}, BitVector},
-)::Nothing
-    return nothing
-end
-
-"""
-    put_vector_order_data!(
-        sinks::VectorDataSinks,
-        order::AbstractVector{<:Integer},
-    )::Nothing
-
-Give the entities of the `sinks` the `order` (a permutation of their indices). What the order means depends on the graph;
-for a heatmap side, see `HeatmapSideConfiguration`.
-"""
-function put_vector_order_data!(
-    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
-    order::AbstractVector{<:Integer},
-)::Nothing
-    visit_data_sinks(sinks) do sink
-        return put_vector_order_data!(sink, order)
-    end
-    return nothing
-end
-
-function put_vector_order_data!(entities::VectorEntitiesData, order::AbstractVector{<:Integer})::Nothing
-    entities.order = order
-    return nothing
-end
-
-# An order belongs to the entities rather than to any one role's values. It is not one of the other inputs to arranging
-# a heatmap side, which are what the arrangement holds.
-function put_vector_order_data!(::Union{VectorValuesData, ArrangementData}, ::AbstractVector{<:Integer})::Nothing
     return nothing
 end
 
@@ -1530,163 +1428,6 @@ function empty_query(empty_value::StorageScalarBase)::AbstractString
 end
 
 """
-    put_vector_data!(
-        sinks::VectorDataSinks,
-        value_per_entry::AbstractVector{<:StorageScalarBase};
-        title::Maybe{AbstractString} = nothing,
-    )::Nothing
-
-Put a `value_per_entry` of an axis into the `sinks`: as the values of a role, and as a hover line on the entities. Use
-this when you have the data already; [`fill_axis_vector_data!`](@ref) fetches it from a `daf` repository for you.
-
-The `title` prefixes the hover line, as `title: value`. Nothing is configured here, because how to show a value depends
-on which property it is; a specific data source says that in its own `put_..._configuration!`.
-"""
-function put_vector_data!(
-    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
-    value_per_entry::AbstractVector{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-    visit_data_sinks(sinks) do sink
-        return put_vector_data!(sink, value_per_entry; title)
-    end
-    return nothing
-end
-
-function put_vector_data!(
-    values::VectorValuesData,
-    value_per_entry::AbstractVector{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,  # NOLINT
-)::Nothing
-    values.vector = value_per_entry
-    return nothing
-end
-
-function put_vector_data!(
-    entities::VectorEntitiesData,
-    value_per_entry::AbstractVector{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-    add_hovers!(entities, hover_strings(value_per_entry); title)
-    return nothing
-end
-
-# The arrangement of a heatmap side is reached through its own views (the groups, the subgroups), not by a value of a
-# role.
-function put_vector_data!(
-    ::ArrangementData,
-    ::AbstractVector{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,  # NOLINT
-)::Nothing
-    return nothing
-end
-
-"""
-    put_matrix_data!(
-        sinks::MatrixDataSinks,
-        value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
-        title::Maybe{AbstractString} = nothing,
-    )::Nothing
-
-Put a `value_per_row_per_column` of two axes into the `sinks`: as the values of the entries, and as a hover line on
-each entry. The matrix twin of [`put_vector_data!`](@ref).
-
-The row and the column entities are not written here. They belong to their axes and are sized by one axis each, so they
-are named separately; see [`put_matrix_names_data!`](@ref).
-"""
-function put_matrix_data!(
-    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
-    value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-    visit_data_sinks(sinks) do sink
-        return put_matrix_data!(sink, value_per_row_per_column; title)
-    end
-    return nothing
-end
-
-function put_matrix_data!(
-    values::MatrixValuesData,
-    value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,  # NOLINT
-)::Nothing
-    values.matrix = value_per_row_per_column
-    return nothing
-end
-
-function put_matrix_data!(
-    entities::MatrixEntitiesData,
-    value_per_row_per_column::AbstractMatrix{<:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-    add_hovers!(entities, hover_strings(value_per_row_per_column); title)
-    return nothing
-end
-
-"""
-    put_matrix_names_data!(
-        sinks::MatrixDataSinks,
-        name_per_row::AbstractVector{<:AbstractString},
-        name_per_column::AbstractVector{<:AbstractString},
-    )::Nothing
-
-Name the rows and the columns of the `sinks` after the `name_per_row` and the `name_per_column`. The matrix twin of
-[`put_vector_names_data!`](@ref).
-
-The two axes are named together here rather than through
-[`visit_data_sinks`](@extref SomeGraphs SomeGraphs.Sources.visit_data_sinks), which doesn't walk into them because
-they are sized by one axis each while the entries are sized by both. A vector sink has no rows or columns to name, so
-it is an error here.
-"""
-function put_matrix_names_data!(
-    sinks::Union{Tuple, AbstractVector},
-    name_per_row::AbstractVector{<:AbstractString},
-    name_per_column::AbstractVector{<:AbstractString},
-)::Nothing
-    for sink in sinks
-        put_matrix_names_data!(sink, name_per_row, name_per_column)
-    end
-    return nothing
-end
-
-function put_matrix_names_data!(
-    fields::MatrixFields,
-    name_per_row::AbstractVector{<:AbstractString},
-    name_per_column::AbstractVector{<:AbstractString},
-)::Nothing
-    put_matrix_names_data!(fields.data, name_per_row, name_per_column)
-    return nothing
-end
-
-function put_matrix_names_data!(
-    data_fields::MatrixDataFields,
-    name_per_row::AbstractVector{<:AbstractString},
-    name_per_column::AbstractVector{<:AbstractString},
-)::Nothing
-    put_vector_names_data!(data_fields.rows_entities, name_per_row)
-    put_vector_names_data!(data_fields.columns_entities, name_per_column)
-    return nothing
-end
-
-# A configuration has no rows or columns to name, and the entries or cells of a matrix hold no entities of either.
-function put_matrix_names_data!(
-    ::Union{AbstractConfigurationFields, ConfigurationLeaf, MatrixDataLeaf},
-    ::AbstractVector{<:AbstractString},
-    ::AbstractVector{<:AbstractString},
-)::Nothing
-    return nothing
-end
-
-# A vector sink is admitted by `MatrixDataSinks` since it is a container, but it has no rows or columns to name.
-function put_matrix_names_data!(
-    sinks::Union{VectorFields, VectorDataFields, HeatmapSide},
-    ::AbstractVector{<:AbstractString},
-    ::AbstractVector{<:AbstractString},
-)::Nothing
-    return throw(ArgumentError("can't name the rows and columns of a vector sink: $(typeof(sinks))"))
-end
-
-"""
     fill_axes_names_data!(
         sinks::MatrixDataSinks,
         daf::DafReader;
@@ -1699,7 +1440,8 @@ end
 Name the rows of the `sinks` after the `row_entries` of the `daf` `rows_axis`, and their columns after the
 `column_entries` of its `columns_axis`.
 
-This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to [`put_matrix_names_data!`](@ref).
+This fetches the names with [`get_axis_entries_vector`](@ref), then hands them to
+[`put_matrix_names_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_names_data!).
 """
 function fill_axes_names_data!(
     sinks::MatrixDataSinks,
@@ -1780,15 +1522,6 @@ function fill_axes_matrix_data!(
     return nothing
 end
 
-# The values as the strings a hover shows. Only strings can be a hover, so anything else is converted.
-function hover_strings(value_per_entry::AbstractArray{<:AbstractString})::AbstractArray{<:AbstractString}
-    return value_per_entry
-end
-
-function hover_strings(value_per_entry::AbstractArray{<:StorageScalarBase})::AbstractArray{<:AbstractString}
-    return string.(value_per_entry)
-end
-
 """
     fill_axis_vector_data!(
         sinks::VectorDataSinks,
@@ -1802,7 +1535,8 @@ end
 Fill the `sinks` with the result of the query `@ axis query_suffix` for each of the `entries` of the `daf` `axis`, and
 name the entities after the `entries`.
 
-This fetches the data with [`get_axis_vector`](@ref), then hands it to [`put_vector_data!`](@ref).
+This fetches the data with [`get_axis_vector`](@ref), then hands it to
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 """
 function fill_axis_vector_data!(
     sinks::VectorDataSinks,
@@ -1981,7 +1715,8 @@ to access indirect types (e.g., the type of the block of the metacell of each ce
 of each entry of the `type_axis`, with an additional `empty_type_color` for `entries` w/ no type (empty string).
 
 This fetches the data with [`get_type_vector`](@ref) and [`get_type_colors`](@ref), puts the types in with
-[`put_vector_data!`](@ref), and says how to show them with [`put_type_configuration!`](@ref).
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!), and says how to show them with
+[`put_type_configuration!`](@ref).
 """
 function fill_type!(
     sinks::VectorDataSinks,
@@ -2010,7 +1745,7 @@ end
     )::Nothing
 
 Show the types of the `sinks` using the `color_per_type` palette, named by the `title`. The types themselves are put in
-by [`put_vector_data!`](@ref).
+by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
 A color says nothing without a legend to read it by, so `show_legend` is on. Turn it off for an annotation of a graph
 whose colors already name the same types.

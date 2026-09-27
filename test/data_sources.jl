@@ -118,49 +118,14 @@ nested_test("data_sources") do
                 return nothing
             end
         end
-
-        # A value per entry goes to the values of a role and to a hover line, and only the values half is a vector.
-        nested_test("halves") do
-            put_vector_data!(graph.data.x, Float32[1.0, 2.0, 3.0, 4.0]; title = "ignored")
-            @test graph.data.x.vector == Float32[1.0, 2.0, 3.0, 4.0]
-            @test graph.data.points.entities.hovers === nothing
-
-            put_vector_data!(points_entities(graph), Float32[1.0, 2.0, 3.0, 4.0]; title = "X")
-            @test graph.data.points.entities.hovers[1] == "X: 1.0"
-            return nothing
-        end
     end
 
-    nested_test("mask") do
-        graph = points_graph()
-        put_vector_mask_data!(x_axis_vector_fields(graph), [true, false, true, false])
-        @test graph.data.points.entities.mask == [true, false, true, false]
-        return nothing
-    end
-
-    nested_test("order") do
-        graph = points_graph()
-        put_vector_order_data!(x_axis_vector_fields(graph), [2, 1, 4, 3])
-        @test graph.data.points.entities.order == [2, 1, 4, 3]
-        return nothing
-    end
-
-    # A side of a heatmap reaches its entities and its arrangement; the puts write the entities and pass over the
-    # arrangement.
+    # A side of a heatmap reaches its entities and its arrangement; a UMAP coordinate is put into neither.
     nested_test("side") do
         graph = heatmap_graph()
-        side = rows_side(graph)
-        put_vector_names_data!(side, ["A", "B"])
-        put_vector_mask_data!(side, [true, false])
-        put_vector_order_data!(side, [2, 1])
-        put_vector_data!(side, Float32[1.0, 2.0]; title = "X")
-        put_umap_data!(side, Float32[1.0, 2.0])
-        @test graph.data.rows.entities.names == ["A", "B"]
-        @test graph.data.rows.entities.mask == [true, false]
-        @test graph.data.rows.entities.order == [2, 1]
-        @test graph.data.rows.entities.hovers == ["X: 1.0", "X: 2.0"]
+        put_umap_data!(rows_side(graph), Float32[1.0, 2.0])
+        @test graph.data.rows.entities.hovers === nothing
         @test graph.data.rows.arrangement.groups.vector === nothing
-        @test_throws "can't name the rows and columns of a vector sink" put_matrix_names_data!(side, ["A"], ["B"])
         return nothing
     end
 
@@ -586,38 +551,13 @@ nested_test("data_sources") do
 
         nested_test("other") do
             put_count_configuration!(points.data.x)
-            put_vector_data!(points.configuration.x_axis, [1.0, 2.0])
-            put_matrix_names_data!(heatmap.configuration.entries.colors, ["a", "b"], ["c", "d"])
+            put_umap_data!(points.configuration.x_axis, Float32[1.0, 2.0])
             @test points.data.x.vector === nothing
-            @test heatmap.data.rows.entities.names === nothing
             return nothing
         end
 
         nested_test("mismatched") do
-            @test_throws MethodError put_vector_data!(entries_matrix_fields(heatmap), [1.0, 2.0])
-            @test_throws MethodError put_vector_names_data!(entries_matrix_fields(heatmap), ["a", "b"])
-            @test_throws MethodError put_matrix_data!(x_axis_vector_fields(points), [1.0 2.0; 3.0 4.0])
-            @test_throws "can't name the rows and columns of a vector sink" put_matrix_names_data!(
-                x_axis_vector_fields(points),
-                ["a", "b"],
-                ["c", "d"],
-            )
-            return nothing
-        end
-
-        nested_test("matrix_names") do
-            put_matrix_names_data!(entries_matrix_fields(heatmap).data, ["r1", "r2"], ["c1", "c2"])
-            @test heatmap.data.rows.entities.names == ["r1", "r2"]
-            @test heatmap.data.columns.entities.names == ["c1", "c2"]
-
-            other = heatmap_graph()
-            put_matrix_names_data!(
-                (entries_matrix_fields(other), heatmap.configuration.entries.colors),
-                ["r3", "r4"],
-                ["c3", "c4"],
-            )
-            @test other.data.rows.entities.names == ["r3", "r4"]
-            @test other.data.columns.entities.names == ["c3", "c4"]
+            @test_throws MethodError put_umap_data!(entries_matrix_fields(heatmap), Float32[1.0, 2.0])
             return nothing
         end
     end

@@ -7,13 +7,13 @@ MetacellsGraphs.DataSources
 ## Generic
 
 These fill the data half of any role from a `daf` query. A specific data source uses them under the hood and adds only
-how to show the result.
+how to show the result. They hand the data to the generic puts of
+[`SomeGraphs.Sources`](@extref SomeGraphs SomeGraphs.Sources).
 
 ### Axis Names
 
 ```@docs
 MetacellsGraphs.DataSources.fill_axis_names_data!
-MetacellsGraphs.DataSources.put_vector_names_data!
 MetacellsGraphs.DataSources.get_axis_entries_vector
 ```
 
@@ -21,15 +21,7 @@ MetacellsGraphs.DataSources.get_axis_entries_vector
 
 ```@docs
 MetacellsGraphs.DataSources.fill_axis_vector_data!
-MetacellsGraphs.DataSources.put_vector_data!
 MetacellsGraphs.DataSources.get_axis_vector
-```
-
-### Masks and Orders
-
-```@docs
-MetacellsGraphs.DataSources.put_vector_mask_data!
-MetacellsGraphs.DataSources.put_vector_order_data!
 ```
 
 ### Frame Columns
@@ -55,14 +47,12 @@ MetacellsGraphs.DataSources.get_module_regulators_hovers
 
 ```@docs
 MetacellsGraphs.DataSources.fill_axes_names_data!
-MetacellsGraphs.DataSources.put_matrix_names_data!
 ```
 
 ### Axes Matrices
 
 ```@docs
 MetacellsGraphs.DataSources.fill_axes_matrix_data!
-MetacellsGraphs.DataSources.put_matrix_data!
 MetacellsGraphs.DataSources.get_axes_matrix
 ```
 
