@@ -59,8 +59,8 @@ function genes_heatmap_graph(
         configuration = HeatmapGraphConfiguration(;
             figure = FigureConfiguration(; margins = MarginsConfiguration(; left = 100, bottom = 100)),
             origin = HeatmapTopLeft,
-            rows = HeatmapAxisConfiguration(; title = rows_axis_title),
-            columns = HeatmapAxisConfiguration(; title = columns_axis_title, show_ticks = false),
+            rows = HeatmapSideConfiguration(; title = rows_axis_title),
+            columns = HeatmapSideConfiguration(; title = columns_axis_title, show_ticks = false),
         ),
     )
 

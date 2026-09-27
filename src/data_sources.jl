@@ -1150,8 +1150,9 @@ function put_umap_data!(
 end
 
 # A UMAP coordinate is the arbitrary output of the projection, so there is nothing worth saying about one in a hover.
+# It is not something a heatmap side is arranged by, either.
 function put_umap_data!(
-    ::VectorEntitiesData,
+    ::Union{VectorEntitiesData, ArrangementData},
     ::AbstractVector{<:AbstractFloat};
     title::Maybe{AbstractString} = nothing,  # NOLINT
 )::Nothing
@@ -1400,8 +1401,8 @@ function put_vector_names_data!(entities::VectorEntitiesData, name_per_entry::Ab
     return nothing
 end
 
-# A name identifies an entity, so it belongs to the entities rather than to any one role's values.
-function put_vector_names_data!(::VectorValuesData, ::AbstractVector{<:AbstractString})::Nothing
+# A name identifies an entity, so it belongs to the entities rather than to any one role's values or to the arrangement.
+function put_vector_names_data!(::Union{VectorValuesData, ArrangementData}, ::AbstractVector{<:AbstractString})::Nothing
     return nothing
 end
 
@@ -1432,8 +1433,11 @@ function put_vector_mask_data!(
     return nothing
 end
 
-# A mask hides an entity, so it belongs to the entities rather than to any one role's values.
-function put_vector_mask_data!(::VectorValuesData, ::Union{AbstractVector{Bool}, BitVector})::Nothing
+# A mask hides an entity, so it belongs to the entities rather than to any one role's values or to the arrangement.
+function put_vector_mask_data!(
+    ::Union{VectorValuesData, ArrangementData},
+    ::Union{AbstractVector{Bool}, BitVector},
+)::Nothing
     return nothing
 end
 
@@ -1444,7 +1448,7 @@ end
     )::Nothing
 
 Give the entities of the `sinks` the `order` (a permutation of their indices). What the order means depends on the graph;
-for a heatmap axis, see `HeatmapAxisConfiguration`.
+for a heatmap side, see `HeatmapSideConfiguration`.
 """
 function put_vector_order_data!(
     sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
@@ -1461,8 +1465,9 @@ function put_vector_order_data!(entities::VectorEntitiesData, order::AbstractVec
     return nothing
 end
 
-# An order arranges the entities, so it belongs to them rather than to any one role's values.
-function put_vector_order_data!(::VectorValuesData, ::AbstractVector{<:Integer})::Nothing
+# An order belongs to the entities rather than to any one role's values. It is not one of the other inputs to arranging
+# a heatmap side, which are what the arrangement holds.
+function put_vector_order_data!(::Union{VectorValuesData, ArrangementData}, ::AbstractVector{<:Integer})::Nothing
     return nothing
 end
 
@@ -1566,6 +1571,16 @@ function put_vector_data!(
     return nothing
 end
 
+# The arrangement of a heatmap side is reached through its own views (the groups, the subgroups), not by a value of a
+# role.
+function put_vector_data!(
+    ::ArrangementData,
+    ::AbstractVector{<:StorageScalarBase};
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+)::Nothing
+    return nothing
+end
+
 """
     put_matrix_data!(
         sinks::MatrixDataSinks,
@@ -1664,7 +1679,7 @@ end
 
 # A vector sink is admitted by `MatrixDataSinks` since it is a container, but it has no rows or columns to name.
 function put_matrix_names_data!(
-    sinks::Union{VectorFields, VectorDataFields},
+    sinks::Union{VectorFields, VectorDataFields, HeatmapSide},
     ::AbstractVector{<:AbstractString},
     ::AbstractVector{<:AbstractString},
 )::Nothing

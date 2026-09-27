@@ -145,6 +145,25 @@ nested_test("data_sources") do
         return nothing
     end
 
+    # A side of a heatmap reaches its entities and its arrangement; the puts write the entities and pass over the
+    # arrangement.
+    nested_test("side") do
+        graph = heatmap_graph()
+        side = rows_side(graph)
+        put_vector_names_data!(side, ["A", "B"])
+        put_vector_mask_data!(side, [true, false])
+        put_vector_order_data!(side, [2, 1])
+        put_vector_data!(side, Float32[1.0, 2.0]; title = "X")
+        put_umap_data!(side, Float32[1.0, 2.0])
+        @test graph.data.rows.entities.names == ["A", "B"]
+        @test graph.data.rows.entities.mask == [true, false]
+        @test graph.data.rows.entities.order == [2, 1]
+        @test graph.data.rows.entities.hovers == ["X: 1.0", "X: 2.0"]
+        @test graph.data.rows.arrangement.groups.vector === nothing
+        @test_throws "can't name the rows and columns of a vector sink" put_matrix_names_data!(side, ["A"], ["B"])
+        return nothing
+    end
+
     nested_test("gene_expression") do
         nested_test("vector") do
             graph = points_graph()
