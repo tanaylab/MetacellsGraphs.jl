@@ -123,6 +123,7 @@ export put_umap_data!
 export put_vector_data!
 export put_vector_mask_data!
 export put_vector_names_data!
+export put_vector_order_data!
 
 using DataAxesFormats
 using DataFrames
@@ -1433,6 +1434,35 @@ end
 
 # A mask hides an entity, so it belongs to the entities rather than to any one role's values.
 function put_vector_mask_data!(::VectorValuesData, ::Union{AbstractVector{Bool}, BitVector})::Nothing
+    return nothing
+end
+
+"""
+    put_vector_order_data!(
+        sinks::VectorDataSinks,
+        order::AbstractVector{<:Integer},
+    )::Nothing
+
+Give the entities of the `sinks` the `order` (a permutation of their indices). What the order means depends on the graph;
+for a heatmap axis, see `HeatmapAxisConfiguration`.
+"""
+function put_vector_order_data!(
+    sinks::Union{AnyContainer, ConfigurationLeaf, Tuple, AbstractVector},
+    order::AbstractVector{<:Integer},
+)::Nothing
+    visit_data_sinks(sinks) do sink
+        return put_vector_order_data!(sink, order)
+    end
+    return nothing
+end
+
+function put_vector_order_data!(entities::VectorEntitiesData, order::AbstractVector{<:Integer})::Nothing
+    entities.order = order
+    return nothing
+end
+
+# An order arranges the entities, so it belongs to them rather than to any one role's values.
+function put_vector_order_data!(::VectorValuesData, ::AbstractVector{<:Integer})::Nothing
     return nothing
 end
 

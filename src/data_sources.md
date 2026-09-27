@@ -25,10 +25,11 @@ MetacellsGraphs.DataSources.put_vector_data!
 MetacellsGraphs.DataSources.get_axis_vector
 ```
 
-### Masks
+### Masks and Orders
 
 ```@docs
 MetacellsGraphs.DataSources.put_vector_mask_data!
+MetacellsGraphs.DataSources.put_vector_order_data!
 ```
 
 ### Frame Columns

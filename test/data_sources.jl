@@ -138,6 +138,13 @@ nested_test("data_sources") do
         return nothing
     end
 
+    nested_test("order") do
+        graph = points_graph()
+        put_vector_order_data!(x_axis_vector_fields(graph), [2, 1, 4, 3])
+        @test graph.data.points.entities.order == [2, 1, 4, 3]
+        return nothing
+    end
+
     nested_test("gene_expression") do
         nested_test("vector") do
             graph = points_graph()
@@ -314,7 +321,7 @@ nested_test("data_sources") do
             set_vector!(daf, "type", "global_flow_order", UInt32[9, 5])
             graph = heatmap_graph()
             fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
-            @test graph.data.columns.groups.vector == UInt32[9, 9, 5, 5]
+            @test graph.data.columns.arrangement.groups.vector == UInt32[9, 9, 5, 5]
             @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
             return nothing
         end
@@ -323,7 +330,7 @@ nested_test("data_sources") do
     nested_test("block") do
         graph = heatmap_graph()
         fill_block!(columns_groups_vector_data_fields(graph), daf)
-        @test graph.data.columns.groups.vector == ["B1", "B1", "B2", "B2"]
+        @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
         @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
         return nothing
     end

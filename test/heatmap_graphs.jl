@@ -47,8 +47,8 @@ nested_test("heatmap_graphs") do
             @test graph.data.entries.matrix[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
             @test graph.configuration.rows.title == "Marker genes"
             @test graph.configuration.columns.title == "Metacells"
-            @test graph.configuration.rows.reorder == OptimalHclust
-            @test graph.configuration.columns.reorder == OptimalHclust
+            @test graph.configuration.rows.order_source == OptimalTreeReorder
+            @test graph.configuration.columns.order_source == OptimalTreeReorder
             @test graph.configuration.entries.colors.scale.minimum == -3
             @test graph.configuration.entries.colors.scale.maximum == 3
             @test graph.configuration.entries.colors.palette == "BuWtRd"
@@ -59,8 +59,8 @@ nested_test("heatmap_graphs") do
 
             # The graph groups nothing and annotates nothing; the caller does.
             @test isempty(graph.data.columns.annotations)
-            @test graph.data.columns.groups.vector === nothing
-            @test graph.data.columns.subgroups.vector === nothing
+            @test graph.data.columns.arrangement.groups.vector === nothing
+            @test graph.data.columns.arrangement.subgroups.vector === nothing
             return nothing
         end
 
@@ -94,8 +94,8 @@ nested_test("heatmap_graphs") do
         nested_test("one") do
             graph = genes_heatmap_graph(daf; genes = ["A"])
             @test graph.data.rows.entities.names == ["A"]
-            @test graph.configuration.rows.reorder === nothing
-            @test graph.configuration.columns.reorder == OptimalHclust
+            @test graph.configuration.rows.order_source === nothing
+            @test graph.configuration.columns.order_source == OptimalTreeReorder
             return nothing
         end
     end
@@ -127,14 +127,14 @@ nested_test("heatmap_graphs") do
         nested_test("group_by_type") do
             graph = genes_heatmap_graph(daf; genes)
             fill_type!(columns_groups_vector_data_fields(graph), daf)
-            @test graph.data.columns.groups.vector == ["X", "X", "Y", "Y"]
+            @test graph.data.columns.arrangement.groups.vector == ["X", "X", "Y", "Y"]
             return nothing
         end
 
         nested_test("group_by_block") do
             graph = genes_heatmap_graph(daf; genes)
             fill_block!(columns_groups_vector_data_fields(graph), daf)
-            @test graph.data.columns.groups.vector == ["B1", "B1", "B2", "B2"]
+            @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
             @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
             return nothing
         end
@@ -144,8 +144,8 @@ nested_test("heatmap_graphs") do
             graph = genes_heatmap_graph(daf; genes)
             fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
             fill_block!(columns_subgroups_vector_data_fields(graph), daf)
-            @test graph.data.columns.groups.vector == UInt32[2, 2, 1, 1]
-            @test graph.data.columns.subgroups.vector == ["B1", "B1", "B2", "B2"]
+            @test graph.data.columns.arrangement.groups.vector == UInt32[2, 2, 1, 1]
+            @test graph.data.columns.arrangement.subgroups.vector == ["B1", "B1", "B2", "B2"]
             return nothing
         end
     end

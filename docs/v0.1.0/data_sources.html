@@ -741,12 +741,12 @@
 </section>
 </details>
 </article>
-<h3 id="Masks">
-<a class="docs-heading-anchor" href="#Masks">Masks
+<h3 id="Masks-and-Orders">
+<a class="docs-heading-anchor" href="#Masks-and-Orders">Masks and Orders
 </a>
-<a id="Masks-1">
+<a id="Masks-and-Orders-1">
 </a>
-<a class="docs-heading-anchor-permalink" href="#Masks" title="Permalink">
+<a class="docs-heading-anchor-permalink" href="#Masks-and-Orders" title="Permalink">
 </a>
 </h3>
 <article>
@@ -773,6 +773,37 @@
 </code> which are not shown by the 
 <code>is_shown_per_entry
 </code> mask. Hidden entities are still part of the data, so they take part in whatever is computed from it, unless the relevant configuration says otherwise.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_vector_order_data!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_order_data!">
+<code>MetacellsGraphs.DataSources.put_vector_order_data!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_vector_order_data!(
+    sinks::VectorDataSinks,
+    order::AbstractVector{&lt;:Integer},
+)::Nothing
+</code>
+</pre>
+<p>Give the entities of the 
+<code>sinks
+</code> the 
+<code>order
+</code> (a permutation of their indices). What the order means depends on the graph; for a heatmap axis, see 
+<code>HeatmapAxisConfiguration
+</code>.
 </p>
 </div>
 </section>
@@ -3628,6 +3659,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
 <code>MetacellsGraphs.DataSources.put_vector_names_data!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_order_data!">
+<code>MetacellsGraphs.DataSources.put_vector_order_data!
 </code>
 </a>
 </li>

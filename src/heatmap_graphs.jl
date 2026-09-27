@@ -68,8 +68,8 @@ function genes_heatmap_graph(
 
     # A single entry has nothing to be ordered against, so there is nothing to cluster.
     n_genes, n_entries = size(graph.data.entries.matrix)
-    graph.configuration.rows.reorder = n_genes > 1 ? OptimalHclust : nothing
-    graph.configuration.columns.reorder = n_entries > 1 ? OptimalHclust : nothing
+    graph.configuration.rows.order_source = n_genes > 1 ? OptimalTreeReorder : nothing
+    graph.configuration.columns.order_source = n_entries > 1 ? OptimalTreeReorder : nothing
 
     return graph
 end
