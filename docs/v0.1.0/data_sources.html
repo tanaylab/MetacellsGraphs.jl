@@ -376,59 +376,21 @@
 <code>axis_vector
 </code> for one, 
 <code>axes_matrix
-</code> for two). A 
+</code> for two). The generic 
 <code>put_
-</code> is named after where the data goes, so a generic one says which shape of sink it writes:
-</p>
-<table>
-<tr>
-<th style="text-align: left">function
-</th>
-<th style="text-align: left">writes
-</th>
-</tr>
-<tr>
-<td style="text-align: left">
+</code> functions depend on nothing but the graph, so they are in 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources">
+<code>SomeGraphs.Sources
+</code>
+</a> (e.g., 
 <code>put_vector_data!
-</code>
-</td>
-<td style="text-align: left">values and a hover, into vector sinks
-</td>
-</tr>
-<tr>
-<td style="text-align: left">
-<code>put_matrix_data!
-</code>
-</td>
-<td style="text-align: left">values and a hover, into matrix sinks
-</td>
-</tr>
-<tr>
-<td style="text-align: left">
-<code>put_vector_names_data!
-</code>
-</td>
-<td style="text-align: left">names, into vector sinks
-</td>
-</tr>
-<tr>
-<td style="text-align: left">
+</code>, 
 <code>put_matrix_names_data!
-</code>
-</td>
-<td style="text-align: left">names of both axes, into matrix sinks
-</td>
-</tr>
-</table>
-<p>A specific 
-<code>put_
-</code> is named after its source instead, since there is only one shape it can take. Nothing about a generic 
-<code>put_
-</code> depends on 
-<code>daf
-</code>, so the same one serves a 
+</code>). They are named after where the data goes, so they say which shape of sink they write, and the same one serves a 
 <code>DataFrame
-</code> or any other source of a vector.
+</code> or any other source of a vector. A specific 
+<code>put_
+</code> here is named after its source instead, since there is only one shape it can take.
 </p>
 <p>The fill and put functions take 
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.Sinks">
@@ -470,7 +432,11 @@
 </h2>
 <p>These fill the data half of any role from a 
 <code>daf
-</code> query. A specific data source uses them under the hood and adds only how to show the result.
+</code> query. A specific data source uses them under the hood and adds only how to show the result. They hand the data to the generic puts of 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources">
+<code>SomeGraphs.Sources
+</code>
+</a>.
 </p>
 <h3 id="Axis-Names">
 <a class="docs-heading-anchor" href="#Axis-Names">Axis Names
@@ -516,36 +482,10 @@
 <code>get_axis_entries_vector
 </code>
 </a>, then hands them to 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_names_data%21">
 <code>put_vector_names_data!
 </code>
 </a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_vector_names_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_names_data!">
-<code>MetacellsGraphs.DataSources.put_vector_names_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_vector_names_data!(sinks::VectorDataSinks, name_per_entry::AbstractVector{&lt;:AbstractString})::Nothing
-</code>
-</pre>
-<p>Name the entities of the 
-<code>sinks
-</code> after the 
-<code>name_per_entry
-</code>. Where the graph has room to label the entities, these become their tick labels. They are also the first line of the hover of each entity.
 </p>
 </div>
 </section>
@@ -635,54 +575,10 @@
 <code>get_axis_vector
 </code>
 </a>, then hands it to 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
 </a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_vector_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_data!">
-<code>MetacellsGraphs.DataSources.put_vector_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_vector_data!(
-    sinks::VectorDataSinks,
-    value_per_entry::AbstractVector{&lt;:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-</code>
-</pre>
-<p>Put a 
-<code>value_per_entry
-</code> of an axis into the 
-<code>sinks
-</code>: as the values of a role, and as a hover line on the entities. Use this when you have the data already; 
-<a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
-<code>fill_axis_vector_data!
-</code>
-</a> fetches it from a 
-<code>daf
-</code> repository for you.
-</p>
-<p>The 
-<code>title
-</code> prefixes the hover line, as 
-<code>title: value
-</code>. Nothing is configured here, because how to show a value depends on which property it is; a specific data source says that in its own 
-<code>put_..._configuration!
-</code>.
 </p>
 </div>
 </section>
@@ -736,74 +632,6 @@
 </code> for a property or 
 <code>&quot;:: linear_fraction @ gene = FOXA1&quot;
 </code> for a slice of a matrix. It is written by the caller, so it is used as it is; everything else is escaped.
-</p>
-</div>
-</section>
-</details>
-</article>
-<h3 id="Masks-and-Orders">
-<a class="docs-heading-anchor" href="#Masks-and-Orders">Masks and Orders
-</a>
-<a id="Masks-and-Orders-1">
-</a>
-<a class="docs-heading-anchor-permalink" href="#Masks-and-Orders" title="Permalink">
-</a>
-</h3>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_vector_mask_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_mask_data!">
-<code>MetacellsGraphs.DataSources.put_vector_mask_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_vector_mask_data!(
-    sinks::VectorDataSinks,
-    is_shown_per_entry::Union{AbstractVector{Bool}, BitVector},
-)::Nothing
-</code>
-</pre>
-<p>Hide the entities of the 
-<code>sinks
-</code> which are not shown by the 
-<code>is_shown_per_entry
-</code> mask. Hidden entities are still part of the data, so they take part in whatever is computed from it, unless the relevant configuration says otherwise.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_vector_order_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_vector_order_data!">
-<code>MetacellsGraphs.DataSources.put_vector_order_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_vector_order_data!(
-    sinks::VectorDataSinks,
-    order::AbstractVector{&lt;:Integer},
-)::Nothing
-</code>
-</pre>
-<p>Give the entities of the 
-<code>sinks
-</code> the 
-<code>order
-</code> (a permutation of their indices). What the order means depends on the graph; for a heatmap side, see 
-<code>HeatmapSideConfiguration
-</code>.
 </p>
 </div>
 </section>
@@ -1109,52 +937,10 @@
 <code>get_axis_entries_vector
 </code>
 </a>, then hands them to 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_names_data%21">
 <code>put_matrix_names_data!
 </code>
 </a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_matrix_names_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_matrix_names_data!">
-<code>MetacellsGraphs.DataSources.put_matrix_names_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_matrix_names_data!(
-    sinks::MatrixDataSinks,
-    name_per_row::AbstractVector{&lt;:AbstractString},
-    name_per_column::AbstractVector{&lt;:AbstractString},
-)::Nothing
-</code>
-</pre>
-<p>Name the rows and the columns of the 
-<code>sinks
-</code> after the 
-<code>name_per_row
-</code> and the 
-<code>name_per_column
-</code>. The matrix twin of 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
-<code>put_vector_names_data!
-</code>
-</a>.
-</p>
-<p>The two axes are named together here rather than through 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.visit_data_sinks">
-<code>visit_data_sinks
-</code>
-</a>, which doesn&#39;t walk into them because they are sized by one axis each while the entries are sized by both. A vector sink has no rows or columns to name, so it is an error here.
 </p>
 </div>
 </section>
@@ -1200,46 +986,6 @@
 </code>, and name the rows and the columns. The matrix twin of 
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
 <code>fill_axis_vector_data!
-</code>
-</a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_matrix_data!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_matrix_data!">
-<code>MetacellsGraphs.DataSources.put_matrix_data!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_matrix_data!(
-    sinks::MatrixDataSinks,
-    value_per_row_per_column::AbstractMatrix{&lt;:StorageScalarBase};
-    title::Maybe{AbstractString} = nothing,
-)::Nothing
-</code>
-</pre>
-<p>Put a 
-<code>value_per_row_per_column
-</code> of two axes into the 
-<code>sinks
-</code>: as the values of the entries, and as a hover line on each entry. The matrix twin of 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
-<code>put_vector_data!
-</code>
-</a>.
-</p>
-<p>The row and the column entities are not written here. They belong to their axes and are sized by one axis each, so they are named separately; see 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
-<code>put_matrix_names_data!
 </code>
 </a>.
 </p>
@@ -1322,11 +1068,11 @@
 </code>, named by the 
 <code>title
 </code>. The fractions themselves are put in by 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
 </a> or 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_data%21">
 <code>put_matrix_data!
 </code>
 </a>.
@@ -1630,7 +1376,7 @@
 </code>, and include it in the legend if 
 <code>show_legend
 </code>. The folds themselves are put in by 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_data%21">
 <code>put_matrix_data!
 </code>
 </a>.
@@ -2883,7 +2629,7 @@
 <code>get_type_colors
 </code>
 </a>, puts the types in with 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
 </a>, and says how to show them with 
@@ -2924,7 +2670,7 @@
 </code> palette, named by the 
 <code>title
 </code>. The types themselves are put in by 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
 </a>.
@@ -3122,7 +2868,7 @@
 </code> in light grey, named by the 
 <code>title
 </code>. The values themselves are put in by 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
 </a>.
@@ -3615,18 +3361,6 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_data!">
-<code>MetacellsGraphs.DataSources.put_matrix_data!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_matrix_names_data!">
-<code>MetacellsGraphs.DataSources.put_matrix_names_data!
-</code>
-</a>
-</li>
-<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_type_configuration!">
 <code>MetacellsGraphs.DataSources.put_type_configuration!
 </code>
@@ -3641,30 +3375,6 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_umap_data!">
 <code>MetacellsGraphs.DataSources.put_umap_data!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_data!">
-<code>MetacellsGraphs.DataSources.put_vector_data!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_mask_data!">
-<code>MetacellsGraphs.DataSources.put_vector_mask_data!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_names_data!">
-<code>MetacellsGraphs.DataSources.put_vector_names_data!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_vector_order_data!">
-<code>MetacellsGraphs.DataSources.put_vector_order_data!
 </code>
 </a>
 </li>
