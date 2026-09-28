@@ -161,7 +161,11 @@ function get_total_UMIs_vector(
 end
 
 """
-    put_count_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+    put_count_configuration!(
+        sinks::Sinks;
+        title::Maybe{AbstractString} = nothing,
+        show_legend::Bool = true,
+    )::Nothing
 
 Show a count on a log-base-2 scale, in the `YlOrRd` color scale, named by the `title`. This is how every count-like
 quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of
@@ -169,6 +173,9 @@ magnitude, which is what the log scale is for.
 
 The color scale runs from yellow through orange to red, so the low end is still visible; one which starts at white
 would lose it against the background.
+
+A count shown as sizes uses a log-base-10 scale instead. The base does not change the sizes, but it gives the legend of
+sizes round values such as 100, 200 and 500.
 
 There is no regularization, because anything real has at least one of whatever is being counted.
 """
@@ -183,12 +190,16 @@ function put_count_configuration!(
     return nothing
 end
 
-# A count is not shown as a size.
 function put_count_configuration!(
-    ::SizesConfiguration;
-    title::Maybe{AbstractString} = nothing,  # NOLINT
-    show_legend::Bool = true,  # NOLINT
+    sizes::SizesConfiguration;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
 )::Nothing
+    sizes.show_legend = show_legend
+    sizes.scale.log_base = Log10Base
+    if title !== nothing
+        sizes.title = title
+    end
     return nothing
 end
 

@@ -1888,7 +1888,11 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">put_count_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+<code class="language-julia hljs">put_count_configuration!(
+    sinks::Sinks;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
 </code>
 </pre>
 <p>Show a count on a log-base-2 scale, in the 
@@ -1898,6 +1902,8 @@
 </code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for.
 </p>
 <p>The color scale runs from yellow through orange to red, so the low end is still visible; one which starts at white would lose it against the background.
+</p>
+<p>A count shown as sizes uses a log-base-10 scale instead. The base does not change the sizes, but it gives the legend of sizes round values such as 100, 200 and 500.
 </p>
 <p>There is no regularization, because anything real has at least one of whatever is being counted.
 </p>

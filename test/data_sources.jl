@@ -355,6 +355,16 @@ nested_test("data_sources") do
             return nothing
         end
 
+        nested_test("sizes") do
+            graph = points_graph()
+            fill_total_UMIs!(points_sizes_vector_fields(graph), daf)
+            @test graph.data.points.sizes.vector == UInt32[100, 200, 300, 400]
+            @test graph.configuration.points.sizes.title == "total UMIs"
+            @test graph.configuration.points.sizes.show_legend
+            @test graph.configuration.points.sizes.scale.log_base == Log10Base
+            return nothing
+        end
+
         nested_test("n_cells") do
             graph = points_graph()
             fill_n_cells!(points_colors_vector_fields(graph), daf)
@@ -538,7 +548,6 @@ nested_test("data_sources") do
             before = string(points.configuration)
 
             put_boolean_annotation_configuration!(axis)
-            put_count_configuration!(sizes)
             put_gene_correlation_change_configuration!(sizes)
             put_genes_expression_configuration!(sizes)
             put_genes_fold_configuration!(axis)
