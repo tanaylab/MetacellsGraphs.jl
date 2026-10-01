@@ -12,6 +12,6 @@ for env in ("aqua_env", "coverage_env", "document_env", "format_env", "jet_env",
     env_path = joinpath("deps", env)
     println("Instantiating $(env):")
     Pkg.activate(env_path)
-    Pkg.resolve()
+    Pkg.resolve();
     Pkg.instantiate()
 end

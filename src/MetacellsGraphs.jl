@@ -13,6 +13,10 @@ number is worth storing, it belongs in a computation in `Metacells`, and nothing
 
 The figures are meant to be asked for from a notebook: a call takes a repository and a few names and returns a figure,
 writes no files, and needs no output directory.
+
+The included modules are:
+
+![](assets/modules.svg)
 """
 module MetacellsGraphs
 
