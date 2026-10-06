@@ -114,6 +114,7 @@ export put_umap_data!
 
 using DataAxesFormats
 using DataFrames
+using OrderedCollections
 using SomeGraphs
 using Statistics
 using TanayLabUtilities
@@ -1825,11 +1826,12 @@ end
         daf::DafReader;
         type_axis::AbstractString = "type",
         empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
-    )::Dict{AbstractString, AbstractString}
+    )::OrderedDict{AbstractString, AbstractString}
 
 Get the palette mapping each entry of the `daf` `type_axis` to its `color`, with an additional `empty_type_color` for
 entries w/ no type (empty string). The `type_axis` must exist and must have a `color`; asking to color by a type is the
-caller's decision, so a repository which can't answer is an error rather than an empty palette.
+caller's decision, so a repository which can't answer is an error rather than an empty palette. The palette is in the
+order of the `type_axis`, followed by the empty type, so this is the order of the legend.
 
 A `nothing` `empty_type_color` leaves the empty type out of the palette, which says you expect every entry to have a
 type. An entry which doesn't is then rejected, because its type isn't a key of the palette.
@@ -1838,9 +1840,9 @@ function get_type_colors(
     daf::DafReader;
     type_axis::AbstractString = "type",
     empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
-)::Dict{AbstractString, AbstractString}
+)::OrderedDict{AbstractString, AbstractString}
     color_per_type = get_vector(daf, type_axis, "color")
-    color_palette = Dict{AbstractString, AbstractString}(zip(names(color_per_type)[1], color_per_type))
+    color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_type)[1], color_per_type))
     if empty_type_color !== nothing
         color_palette[""] = empty_type_color
     end

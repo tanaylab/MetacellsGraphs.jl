@@ -2744,7 +2744,7 @@
     daf::DafReader;
     type_axis::AbstractString = &quot;type&quot;,
     empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
-)::Dict{AbstractString, AbstractString}
+)::OrderedDict{AbstractString, AbstractString}
 </code>
 </pre>
 <p>Get the palette mapping each entry of the 
@@ -2759,7 +2759,9 @@
 <code>type_axis
 </code> must exist and must have a 
 <code>color
-</code>; asking to color by a type is the caller&#39;s decision, so a repository which can&#39;t answer is an error rather than an empty palette.
+</code>; asking to color by a type is the caller&#39;s decision, so a repository which can&#39;t answer is an error rather than an empty palette. The palette is in the order of the 
+<code>type_axis
+</code>, followed by the empty type, so this is the order of the legend.
 </p>
 <p>A 
 <code>nothing

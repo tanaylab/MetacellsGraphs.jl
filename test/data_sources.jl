@@ -264,9 +264,10 @@ nested_test("data_sources") do
     end
 
     nested_test("type") do
-        add_axis!(daf, "type", ["X", "Y"])
+        # Not in sorted order, so the palette's order shows it follows the axis.
+        add_axis!(daf, "type", ["Y", "X"])
         set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
-        set_vector!(daf, "type", "color", ["red", "blue"])
+        set_vector!(daf, "type", "color", ["blue", "red"])
         set_vector!(daf, "block", "type", ["X", "Y"])
 
         nested_test("()") do
@@ -290,6 +291,7 @@ nested_test("data_sources") do
         nested_test("colors") do
             @test get_type_colors(daf) == Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
             @test get_type_colors(daf; empty_type_color = nothing) == Dict("X" => "red", "Y" => "blue")
+            @test collect(keys(get_type_colors(daf))) == ["Y", "X", ""]
             return nothing
         end
 
@@ -302,7 +304,7 @@ nested_test("data_sources") do
         # The order is a property of the type, so all the entries of a type get the same number. The numbers are used
         # as they are, since the groups are laid out in the order of their numbers.
         nested_test("global_flow_order") do
-            set_vector!(daf, "type", "global_flow_order", UInt32[9, 5])
+            set_vector!(daf, "type", "global_flow_order", UInt32[5, 9])
             graph = heatmap_graph()
             fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
             @test graph.data.columns.arrangement.groups.vector == UInt32[9, 9, 5, 5]
