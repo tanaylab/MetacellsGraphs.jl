@@ -1159,6 +1159,14 @@ function put_umap_data!(
     return nothing
 end
 
+function put_umap_data!(
+    leaf::MatrixDataLeaf,
+    ::AbstractVector{<:AbstractFloat};
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+)::Nothing
+    return throw(matrix_sink_error(leaf))
+end
+
 """
     fill_umap!(
         sinks::VectorDataSinks,

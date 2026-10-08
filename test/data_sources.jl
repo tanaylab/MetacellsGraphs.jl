@@ -568,7 +568,10 @@ nested_test("data_sources") do
         end
 
         nested_test("mismatched") do
-            @test_throws MethodError put_umap_data!(entries_matrix_fields(heatmap), Float32[1.0, 2.0])
+            @test_throws "can't put a value per entity into a matrix sink: MatrixValuesData" put_umap_data!(
+                entries_matrix_fields(heatmap),
+                Float32[1.0, 2.0],
+            )
             return nothing
         end
     end
