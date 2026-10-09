@@ -1711,7 +1711,7 @@ function fill_module_regulators_hovers!(
     side_name::AbstractString,
     regulators_count::Integer,
 )::Nothing
-    put_vector_data!(sinks, get_module_regulators_hovers(frame; prefix, side_name, regulators_count))  # NOJET
+    put_vector_data!(sinks, get_module_regulators_hovers(frame; prefix, side_name, regulators_count))
     return nothing
 end
 
@@ -1894,7 +1894,7 @@ function get_vector_query(
     query::AbstractString,
     indices::Maybe{AbstractVector{<:Integer}} = nothing,
 )::AbstractVector{<:StorageScalarBase}
-    data = daf[query].array
+    data = daf[query].array  # NOJET
     if indices !== nothing
         data = data[indices]
     else

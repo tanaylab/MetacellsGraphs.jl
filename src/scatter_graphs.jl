@@ -48,7 +48,7 @@ function gene_gene_graph(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
 )::PointsGraph
     graph = points_graph()
-    fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = x_gene, axis, entries, gene_fraction_regularization)  # NOJET
+    fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = x_gene, axis, entries, gene_fraction_regularization)
     fill_gene_expression!(y_axis_vector_fields(graph), daf; gene = y_gene, axis, entries, gene_fraction_regularization)
     return graph
 end

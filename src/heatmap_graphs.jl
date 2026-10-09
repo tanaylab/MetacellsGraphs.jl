@@ -64,7 +64,7 @@ function genes_heatmap_graph(
         ),
     )
 
-    fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes, axis, entries, max_fold)  # NOJET
+    fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes, axis, entries, max_fold)
 
     # A single entry has nothing to be ordered against, so there is nothing to cluster.
     n_genes, n_entries = size(graph.data.entries.matrix)
