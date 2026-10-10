@@ -314,11 +314,36 @@ nested_test("data_sources") do
     end
 
     nested_test("block") do
-        graph = heatmap_graph()
-        fill_block!(columns_groups_vector_data_fields(graph), daf)
-        @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
-        @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
-        return nothing
+        nested_test("groups") do
+            graph = heatmap_graph()
+            fill_block!(columns_groups_vector_data_fields(graph), daf)
+            @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
+            @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
+            return nothing
+        end
+
+        nested_test("annotation") do
+            graph = heatmap_graph()
+            index = add_columns_annotation!(graph)
+            fill_block!(columns_annotations_colors_vector_fields(graph, index), daf)
+            annotation = graph.data.columns.annotations[1]
+            @test annotation.values.vector == ["B1", "B1", "B2", "B2"]
+            @test annotation.colors.palette == get_block_colors(daf)
+            @test annotation.colors.title == "block"
+            @test !annotation.colors.show_legend
+            return nothing
+        end
+
+        # Each block has a color of its own, and an entry with no block is given a color which is not one of them.
+        nested_test("colors") do
+            color_per_block = get_block_colors(daf)
+            @test collect(keys(color_per_block)) == ["B1", "B2", ""]
+            @test color_per_block["B1"] != color_per_block["B2"]
+            @test color_per_block[""] == EMPTY_BLOCK_COLOR
+            @test collect(keys(get_block_colors(daf; empty_block_color = nothing))) == ["B1", "B2"]
+            @test collect(keys(get_block_colors(daf; empty_value = "none"))) == ["B1", "B2", "none"]
+            return nothing
+        end
     end
 
     nested_test("boolean_annotation") do
@@ -549,6 +574,7 @@ nested_test("data_sources") do
             axis = x_axis_vector_fields(points)
             before = string(points.configuration)
 
+            put_block_configuration!(axis, Dict("B1" => "red"))
             put_boolean_annotation_configuration!(axis)
             put_gene_correlation_change_configuration!(sizes)
             put_genes_expression_configuration!(sizes)

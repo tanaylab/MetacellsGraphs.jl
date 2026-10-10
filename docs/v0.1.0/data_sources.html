@@ -2420,6 +2420,8 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::AbstractString = &quot;&quot;,
     title::Maybe{AbstractString} = &quot;block&quot;,
+    show_legend::Bool = false,
+    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
 )::Nothing
 </code>
 </pre>
@@ -2433,11 +2435,58 @@
 <code>axis
 </code>, and name the entities after the 
 <code>entries
-</code>. Blocks are shown as a grouping of an axis, as a hover, or both; grouping by them puts a gap between the blocks, and the hover says which block an entry is in.
+</code>. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. Grouping by them puts a gap between the blocks. As colors, each block gets its own color from 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_colors">
+<code>get_block_colors
+</code>
+</a>, and an entry with no block gets the 
+<code>empty_block_color
+</code>. The hover says which block an entry is in.
 </p>
 <p>Aim this at a whole data source view to get the values and a hover line, or at its 
 <code>values
 </code> alone to get only the values.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_block_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_block_configuration!">
+<code>MetacellsGraphs.DataSources.put_block_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_block_configuration!(
+    sinks::Sinks,
+    color_per_block::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Show the blocks of the 
+<code>sinks
+</code> using the 
+<code>color_per_block
+</code> palette, named by the 
+<code>title
+</code>. The blocks themselves are put in by 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>There are too many blocks for a legend to help, so 
+<code>show_legend
+</code> is off.
 </p>
 </div>
 </section>
@@ -2476,6 +2525,76 @@
 </code>, it is possible to access indirect blocks (e.g., the block of the metacell of each cell). An entry whose chain breaks gets the 
 <code>empty_value
 </code>, which names no block.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_block_colors">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_block_colors">
+<code>MetacellsGraphs.DataSources.get_block_colors
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_block_colors(
+    daf::DafReader;
+    empty_value::AbstractString = &quot;&quot;,
+    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+)::OrderedDict{AbstractString, AbstractString}
+</code>
+</pre>
+<p>Get the palette mapping each entry of the 
+<code>daf
+</code> 
+<code>block
+</code> axis to its own color, with an additional 
+<code>empty_block_color
+</code> for the 
+<code>empty_value
+</code> of entries with no block. The colors come from 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/common.html#SomeGraphs.Common.categorical_palette">
+<code>categorical_palette
+</code>
+</a>, which spreads the blocks over the cyclical 
+<code>HSV
+</code> palette. The palette covers all the blocks, so each block has the same color in every graph, whichever entries the graph shows.
+</p>
+<p>A 
+<code>nothing
+</code> 
+<code>empty_block_color
+</code> leaves the 
+<code>empty_value
+</code> out of the palette, which says you expect every entry to have a block. An entry which doesn&#39;t is then rejected, because its block isn&#39;t a key of the palette.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The color to give to entities without any block (empty string block). The blocks get their colors from the 
+<code>HSV
+</code> palette, which holds only fully saturated colors. The 
+<code>&quot;grey&quot;
+</code> color isn&#39;t one of them.
 </p>
 </div>
 </section>
@@ -3021,6 +3140,12 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
 <code>MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
 </code>
@@ -3201,6 +3326,12 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_colors">
+<code>MetacellsGraphs.DataSources.get_block_colors
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_block_vector">
 <code>MetacellsGraphs.DataSources.get_block_vector
 </code>
@@ -3335,6 +3466,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_vector_query">
 <code>MetacellsGraphs.DataSources.get_vector_query
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_block_configuration!">
+<code>MetacellsGraphs.DataSources.put_block_configuration!
 </code>
 </a>
 </li>

@@ -158,7 +158,10 @@ MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector
 
 ```@docs
 MetacellsGraphs.DataSources.fill_block!
+MetacellsGraphs.DataSources.put_block_configuration!
 MetacellsGraphs.DataSources.get_block_vector
+MetacellsGraphs.DataSources.get_block_colors
+MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
 ```
 
 ## Global Flow Order

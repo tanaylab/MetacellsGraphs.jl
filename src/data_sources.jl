@@ -50,6 +50,7 @@ is used for computing hover values (data) and as an axis/legend title (configura
 """
 module DataSources
 
+export EMPTY_BLOCK_COLOR
 export EMPTY_TYPE_COLOR
 export fill_axes_matrix_data!
 export fill_axes_names_data!
@@ -79,6 +80,7 @@ export GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
 export get_axes_matrix
 export get_axis_entries_vector
 export get_axis_vector
+export get_block_colors
 export get_block_vector
 export get_boolean_annotation_vector
 export get_column_vector
@@ -103,6 +105,7 @@ export get_type_vector
 export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
+export put_block_configuration!
 export put_boolean_annotation_configuration!
 export put_count_configuration!
 export put_gene_correlation_change_configuration!
@@ -134,6 +137,12 @@ The color to give to entities without any type annotation (empty string type). T
 given to any explicit type. The `"magenta"` color was chosen as it isn't often used and visibly stands out.
 """
 EMPTY_TYPE_COLOR::AbstractString = "magenta"
+
+"""
+The color to give to entities without any block (empty string block). The blocks get their colors from the `HSV`
+palette, which holds only fully saturated colors. The `"grey"` color isn't one of them.
+"""
+EMPTY_BLOCK_COLOR::AbstractString = "grey"
 
 """
     get_total_UMIs_vector(
@@ -581,11 +590,14 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         empty_value::AbstractString = "",
         title::Maybe{AbstractString} = "block",
+        show_legend::Bool = false,
+        empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
     )::Nothing
 
 Fill the `sinks` with the block of each of the `entries` of the `daf` `axis`, and name the entities after the
-`entries`. Blocks are shown as a grouping of an axis, as a hover, or both; grouping by them puts a gap between the
-blocks, and the hover says which block an entry is in.
+`entries`. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. Grouping by them puts a
+gap between the blocks. As colors, each block gets its own color from [`get_block_colors`](@ref), and an entry with no
+block gets the `empty_block_color`. The hover says which block an entry is in.
 
 Aim this at a whole data source view to get the values and a hover line, or at its `values` alone to get only the
 values.
@@ -598,10 +610,90 @@ function fill_block!(
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     empty_value::AbstractString = "",
     title::Maybe{AbstractString} = "block",
+    show_legend::Bool = false,
+    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
 )::Nothing
     put_vector_data!(sinks, get_block_vector(daf; axis, entries, via, empty_value); title)
+    put_block_configuration!(sinks, get_block_colors(daf; empty_value, empty_block_color); title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
+end
+
+"""
+    put_block_configuration!(
+        sinks::Sinks,
+        color_per_block::CategoricalColors;
+        title::Maybe{AbstractString} = nothing,
+        show_legend::Bool = false,
+    )::Nothing
+
+Show the blocks of the `sinks` using the `color_per_block` palette, named by the `title`. The blocks themselves are put
+in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
+
+There are too many blocks for a legend to help, so `show_legend` is off.
+"""
+function put_block_configuration!(
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector},
+    color_per_block::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+    visit_configuration_sinks(sinks) do sink
+        return put_block_configuration!(sink, color_per_block; title, show_legend)
+    end
+    return nothing
+end
+
+# A block is only ever colors.
+function put_block_configuration!(
+    ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration},
+    ::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,  # NOLINT
+    show_legend::Bool = false,  # NOLINT
+)::Nothing
+    return nothing
+end
+
+function put_block_configuration!(
+    colors::ColorsConfiguration,
+    color_per_block::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+    colors.palette = color_per_block
+    colors.show_legend = show_legend
+    if title !== nothing
+        colors.title = title
+    end
+    return nothing
+end
+
+"""
+    get_block_colors(
+        daf::DafReader;
+        empty_value::AbstractString = "",
+        empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+    )::OrderedDict{AbstractString, AbstractString}
+
+Get the palette mapping each entry of the `daf` `block` axis to its own color, with an additional `empty_block_color`
+for the `empty_value` of entries with no block. The colors come from
+[`categorical_palette`](@extref SomeGraphs SomeGraphs.Common.categorical_palette), which spreads the blocks over the
+cyclical `HSV` palette. The palette covers all the blocks, so each block has the same color in every graph, whichever
+entries the graph shows.
+
+A `nothing` `empty_block_color` leaves the `empty_value` out of the palette, which says you expect every entry to have
+a block. An entry which doesn't is then rejected, because its block isn't a key of the palette.
+"""
+function get_block_colors(
+    daf::DafReader;
+    empty_value::AbstractString = "",
+    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+)::OrderedDict{AbstractString, AbstractString}
+    color_palette = OrderedDict{AbstractString, AbstractString}(categorical_palette(axis_vector(daf, "block")))  # NOJET
+    if empty_block_color !== nothing
+        color_palette[empty_value] = empty_block_color
+    end
+    return color_palette
 end
 
 """
