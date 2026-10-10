@@ -407,6 +407,24 @@
 </a>, so a mixed collection is fine and either may match nothing at all.
 </p>
 <p>A 
+<code>fill_
+</code> takes the 
+<code>entries
+</code> of the axis to fill (and a matrix one also the 
+<code>genes
+</code> or 
+<code>row_entries
+</code> of its rows). When these aren&#39;t given, it uses the entries the 
+<code>sinks
+</code> are already named after (see 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.get_vector_names_data">
+<code>get_vector_names_data
+</code>
+</a>). Only when the 
+<code>sinks
+</code> have no names does it use the whole axis. So when the first data source of a graph picks some entries, the rest follow it without being told which they are. Sinks named after different entries are an error.
+</p>
+<p>A 
 <code>put_
 </code> has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a 
 <code>MethodError

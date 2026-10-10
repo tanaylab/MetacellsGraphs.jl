@@ -7,8 +7,8 @@ The caller says how to color them in a second call, so that any property can be 
     graph = umap_graph(daf)
     fill_type!(points_colors_vector_fields(graph), daf)
 
-The second call must name the same `axis` and `entries` as the first, or the vectors will not match. The same goes for
-the sizes of the points, and for anything else the graph leaves empty.
+The second call must name the same `axis` as the first. It needn't name the `entries`, since it fills the entries the
+graph was named after. The same goes for the sizes of the points, and for anything else the graph leaves empty.
 """
 module ScatterGraphs
 

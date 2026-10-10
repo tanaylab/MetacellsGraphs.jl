@@ -40,6 +40,12 @@ labels, hovers). A data function writes only the sinks which are a
 [`ConfigurationSink`](@extref SomeGraphs SomeGraphs.Sources.ConfigurationSink), so a mixed collection is fine and
 either may match nothing at all.
 
+A `fill_` takes the `entries` of the axis to fill (and a matrix one also the `genes` or `row_entries` of its rows). When
+these aren't given, it uses the entries the `sinks` are already named after (see
+[`get_vector_names_data`](@extref SomeGraphs SomeGraphs.Sources.get_vector_names_data)). Only when the `sinks` have no
+names does it use the whole axis. So when the first data source of a graph picks some entries, the rest follow it
+without being told which they are. Sinks named after different entries are an error.
+
 A `put_` has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a
 colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a
 `MethodError`; in particular a matrix leaf handed to a vector `put_`, or the other way around.
@@ -273,6 +279,7 @@ function fill_total_UMIs!(
     title::Maybe{AbstractString} = "total UMIs",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_total_UMIs_vector(daf; axis, entries, via, empty_value); title)  # NOJET
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -325,6 +332,7 @@ function fill_n_cells!(
     title::Maybe{AbstractString} = "cells",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_n_cells_vector(daf; axis, entries, via, empty_value); title)
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -378,6 +386,7 @@ function fill_n_metacells!(
     title::Maybe{AbstractString} = "metacells",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_n_metacells_vector(daf; axis, entries, via, empty_value); title)
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -427,6 +436,7 @@ function fill_mean_cells_per_metacell!(
     title::Maybe{AbstractString} = "mean cells per metacell",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_cells_per_metacell_vector(daf; axis, entries, via); title)
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -476,6 +486,7 @@ function fill_mean_total_UMIs_per_metacell!(
     title::Maybe{AbstractString} = "mean UMIs per metacell",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via); title)
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -525,6 +536,7 @@ function fill_mean_total_UMIs_per_cell!(
     title::Maybe{AbstractString} = "mean UMIs per cell",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via); title)
     put_count_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -613,6 +625,7 @@ function fill_block!(
     show_legend::Bool = false,
     empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_block_vector(daf; axis, entries, via, empty_value); title)
     put_block_configuration!(sinks, get_block_colors(daf; empty_value, empty_block_color); title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -752,6 +765,7 @@ function fill_global_flow_order!(
     empty_value::Real = 0,
     title::Maybe{AbstractString} = nothing,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_global_flow_order_vector(daf; axis, entries, type_property, empty_value); title)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
@@ -845,6 +859,7 @@ function fill_boolean_annotation!(
     title::Maybe{AbstractString} = property,
     show_legend::Bool = false,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_boolean_annotation_vector(daf; axis, property, entries); title)
     put_boolean_annotation_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -876,6 +891,7 @@ function fill_gene_expression!(
     title::Maybe{AbstractString} = "$(gene) fraction",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title)
     put_genes_expression_configuration!(sinks; gene_fraction_regularization, title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -949,6 +965,7 @@ function fill_gene_correlation!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = "correlation",
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_correlation_vector(daf; gene, axis, entries); title)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
@@ -1064,6 +1081,7 @@ function fill_gene_correlation_change!(
     title::Maybe{AbstractString} = "correlation change",
     show_legend::Bool = true,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries); title)
     put_gene_correlation_change_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -1096,6 +1114,7 @@ function fill_genes_expression_matrix!(
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
 )::Nothing
+    genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title)
     put_genes_expression_configuration!(sinks; gene_fraction_regularization, title, show_legend)
     fill_axes_names_data!(
@@ -1280,6 +1299,7 @@ function fill_umap!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = "UMAP $(uppercase(coordinate))",
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_umap_data!(sinks, get_umap_vector(daf; coordinate, axis, entries); title)
     put_umap_configuration!(sinks; title)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -1365,6 +1385,7 @@ function fill_genes_fold_matrix!(
     title::Maybe{AbstractString} = "fold from median",
     show_legend::Bool = true,
 )::Nothing
+    genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_fold_matrix(daf; genes, axis, entries); title)  # NOJET
     put_genes_fold_configuration!(sinks; max_fold, title, show_legend)
     fill_axes_names_data!(
@@ -1477,6 +1498,7 @@ function fill_axis_names_data!(
     axis::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_names_data!(sinks, get_axis_entries_vector(daf; axis, entries))
     return nothing
 end
@@ -1563,6 +1585,7 @@ function fill_axes_names_data!(
     row_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     column_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
 )::Nothing
+    row_entries, column_entries = sinks_matrix_entries(sinks, row_entries, column_entries)
     put_matrix_names_data!(
         sinks,
         get_axis_entries_vector(daf; axis = rows_axis, entries = row_entries),
@@ -1625,6 +1648,7 @@ function fill_axes_matrix_data!(
     column_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
 )::Nothing
+    row_entries, column_entries = sinks_matrix_entries(sinks, row_entries, column_entries)
     put_matrix_data!(
         sinks,
         get_axes_matrix(daf; rows_axis, columns_axis, query_suffix, row_entries, column_entries);
@@ -1660,6 +1684,7 @@ function fill_axis_vector_data!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_axis_vector(daf; axis, query_suffix, via, empty_value, entries); title)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
@@ -1842,6 +1867,7 @@ function fill_type!(
     show_legend::Bool = true,
     empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
 )::Nothing
+    entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_type_vector(daf; axis, entries, type_property, via); title)
     put_type_configuration!(sinks, get_type_colors(daf; type_axis, empty_type_color); title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
@@ -2071,6 +2097,40 @@ function entries_indices(
     entries::AbstractVector{<:AbstractString},
 )::AbstractVector{<:Integer}
     return axis_indices(daf, axis, entries)
+end
+
+# The `entries` a vector fill uses: the given ones, or else the names its `sinks` already hold. A `nothing` means all of
+# them, which is left to the caller to resolve.
+function sinks_entries(
+    sinks::VectorDataSinks,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}},
+)::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}}
+    if entries === nothing
+        return get_vector_names_data(sinks)
+    else
+        return entries
+    end
+end
+
+# The `row_entries` and `column_entries` a matrix fill uses, each chosen the way `sinks_entries` chooses them.
+function sinks_matrix_entries(
+    sinks::MatrixDataSinks,
+    row_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}},
+    column_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}},
+)::Tuple{
+    Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}},
+    Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}},
+}
+    if row_entries === nothing || column_entries === nothing
+        name_per_row, name_per_column = get_matrix_names_data(sinks)
+        if row_entries === nothing
+            row_entries = name_per_row
+        end
+        if column_entries === nothing
+            column_entries = name_per_column
+        end
+    end
+    return (row_entries, column_entries)
 end
 
 end  # module

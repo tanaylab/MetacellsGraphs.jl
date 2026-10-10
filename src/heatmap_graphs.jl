@@ -13,7 +13,8 @@ Grouping a level constrains the clustering to it and puts a gap between the grou
 blocks are grouped inside the types, which is how they nest. A level given numbers is laid out in the order of these
 numbers, and a level given names is laid out by the clustering.
 
-The second call must name the same `axis` and `entries` as the first, or the vectors will not match.
+The second call must name the same `axis` as the first. It needn't name the `entries`, since it fills the entries the
+graph was named after.
 """
 module HeatmapGraphs
 

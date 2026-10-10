@@ -346,6 +346,50 @@ nested_test("data_sources") do
         end
     end
 
+    # A fill which isn't given its entries fills the entries its sinks are already named after.
+    nested_test("named_entries") do
+        nested_test("vector") do
+            graph = heatmap_graph()
+            fill_genes_expression_matrix!(entries_matrix_fields(graph), daf; genes = ["A", "C"], entries = ["M2", "M4"])
+            fill_block!(columns_annotations_colors_vector_fields(graph, add_columns_annotation!(graph)), daf)
+            @test graph.data.columns.annotations[1].values.vector == ["B1", "B2"]
+            @test graph.data.columns.entities.names == ["M2", "M4"]
+            return nothing
+        end
+
+        nested_test("matrix") do
+            graph = heatmap_graph()
+            put_matrix_names_data!(entries_matrix_fields(graph), ["C", "A"], ["M3", "M1"])
+            fill_genes_expression_matrix!(entries_matrix_fields(graph), daf)
+            @test graph.data.entries.matrix == Float32[0.0 0.0; 0.3 0.1]
+            @test graph.data.rows.entities.names == ["C", "A"]
+            @test graph.data.columns.entities.names == ["M3", "M1"]
+            return nothing
+        end
+
+        # Given entries are used as they are, and rename the entities.
+        nested_test("given") do
+            graph = points_graph()
+            fill_axis_names_data!(points_entities(graph), daf; axis = "metacell", entries = ["M1", "M2"])
+            fill_block!(points_colors_vector_fields(graph), daf; entries = ["M3", "M4"])
+            @test graph.data.points.colors.vector == ["B2", "B2"]
+            @test graph.data.points.entities.names == ["M3", "M4"]
+            return nothing
+        end
+
+        nested_test("different") do
+            graph = points_graph()
+            other = points_graph()
+            fill_axis_names_data!(points_entities(graph), daf; axis = "metacell", entries = ["M1", "M2"])
+            fill_axis_names_data!(points_entities(other), daf; axis = "metacell", entries = ["M3", "M4"])
+            @test_throws "the sinks have entities with different names" fill_block!(
+                (points_colors_vector_fields(graph), points_colors_vector_fields(other)),
+                daf,
+            )
+            return nothing
+        end
+    end
+
     nested_test("boolean_annotation") do
         set_vector!(daf, "gene", "is_skeleton", [true, false, true])
         graph = heatmap_graph()
