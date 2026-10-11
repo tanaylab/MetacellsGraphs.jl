@@ -61,14 +61,29 @@ MetacellsGraphs.DataSources.get_axes_matrix
 Properties fall into a few buckets by how they are shown. Each bucket has one configuration function, and the data
 source of each property uses the function of its bucket.
 
+Most buckets also have generic data sources, taking the name of a property: a get, which fetches it, a fill, which
+fetches and shows it, and a put, which shows values already fetched. The data sources of the stored properties of each
+bucket (e.g. [`fill_n_cells!`](@ref)) are generated from a table. Each fetches with its own get, and shows the values
+with the put of its bucket.
+
 ```@docs
 MetacellsGraphs.DataSources.put_size_configuration!
+MetacellsGraphs.DataSources.get_size_vector
+MetacellsGraphs.DataSources.fill_size!
+MetacellsGraphs.DataSources.put_size_values!
 MetacellsGraphs.DataSources.put_expression_level_configuration!
 MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
 MetacellsGraphs.DataSources.put_fold_configuration!
 MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
 MetacellsGraphs.DataSources.put_boolean_configuration!
+MetacellsGraphs.DataSources.get_boolean_vector
+MetacellsGraphs.DataSources.fill_boolean!
+MetacellsGraphs.DataSources.put_boolean_values!
 MetacellsGraphs.DataSources.put_category_configuration!
+MetacellsGraphs.DataSources.get_category_vector
+MetacellsGraphs.DataSources.fill_category!
+MetacellsGraphs.DataSources.put_category_values!
+MetacellsGraphs.DataSources.get_category_colors
 MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR
 MetacellsGraphs.DataSources.put_coordinates_configuration!
 ```
@@ -180,11 +195,29 @@ MetacellsGraphs.DataSources.get_type_vector
 MetacellsGraphs.DataSources.get_type_colors
 ```
 
-## Boolean Annotations
+## Gene Flags
 
 ```@docs
-MetacellsGraphs.DataSources.fill_boolean_annotation!
-MetacellsGraphs.DataSources.get_boolean_annotation_vector
+MetacellsGraphs.DataSources.fill_is_lateral!
+MetacellsGraphs.DataSources.get_is_lateral_vector
+MetacellsGraphs.DataSources.fill_is_marker!
+MetacellsGraphs.DataSources.get_is_marker_vector
+MetacellsGraphs.DataSources.fill_is_transcription_factor!
+MetacellsGraphs.DataSources.get_is_transcription_factor_vector
+MetacellsGraphs.DataSources.fill_is_regulator!
+MetacellsGraphs.DataSources.get_is_regulator_vector
+MetacellsGraphs.DataSources.fill_is_forbidden!
+MetacellsGraphs.DataSources.get_is_forbidden_vector
+MetacellsGraphs.DataSources.fill_is_skeleton!
+MetacellsGraphs.DataSources.get_is_skeleton_vector
+MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!
+MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector
+MetacellsGraphs.DataSources.fill_is_mitochondrial!
+MetacellsGraphs.DataSources.get_is_mitochondrial_vector
+MetacellsGraphs.DataSources.fill_is_ribosomal!
+MetacellsGraphs.DataSources.get_is_ribosomal_vector
+MetacellsGraphs.DataSources.fill_is_excluded!
+MetacellsGraphs.DataSources.get_is_excluded_vector
 ```
 
 ## Low Level Functions

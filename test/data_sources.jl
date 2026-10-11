@@ -289,17 +289,52 @@ nested_test("data_sources") do
             return nothing
         end
 
-        # An entry with no type is given a color of its own, so that it is still drawn.
+        # The types have a `color` vector, so the palette uses it, in the order of the type axis. An entry with no type
+        # is given a color of its own, so that it is still drawn.
         nested_test("colors") do
-            @test get_type_colors(daf) == Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
-            @test get_type_colors(daf; empty_type_color = nothing) == Dict("X" => "red", "Y" => "blue")
-            @test collect(keys(get_type_colors(daf))) == ["Y", "X", ""]
+            @test get_category_colors(daf; axis = "type") ==
+                  Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
+            @test get_category_colors(daf; axis = "type", empty_color = nothing) == Dict("X" => "red", "Y" => "blue")
+            @test collect(keys(get_category_colors(daf; axis = "type"))) == ["Y", "X", ""]
+            @test get_type_colors(daf; empty_color = nothing) == Dict("X" => "red", "Y" => "blue")
             return nothing
         end
 
         # The type of the block of the metacell is reached by naming the way there.
         nested_test("via") do
             @test get_type_vector(daf; axis = "metacell", via = ["block"]) == ["X", "X", "Y", "Y"]
+            return nothing
+        end
+
+        # Every keyword of the category bucket passes through a generated data source.
+        nested_test("keywords") do
+            graph = points_graph()
+            fill_type!(
+                points_colors_vector_fields(graph),
+                daf;
+                axis = "metacell",
+                entries = ["M1", "M3"],
+                via = nothing,
+                title = "kind",
+                empty_value = "",
+                colors_axis = "type",
+                empty_color = nothing,
+                show_legend = false,
+            )
+            @test graph.data.points.colors.vector == ["X", "Y"]
+            @test graph.configuration.points.colors.palette == Dict("X" => "red", "Y" => "blue")
+            @test graph.configuration.points.colors.title == "kind"
+            @test !graph.configuration.points.colors.show_legend
+            return nothing
+        end
+
+        # The palette of a generic category is of the axis named after its property, unless told otherwise.
+        nested_test("generic") do
+            graph = points_graph()
+            fill_category!(points_colors_vector_fields(graph), daf; axis = "metacell", property = "type")
+            @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
+            @test graph.configuration.points.colors.palette == get_type_colors(daf)
+            @test graph.configuration.points.colors.title == "type"
             return nothing
         end
 
@@ -330,20 +365,22 @@ nested_test("data_sources") do
             fill_block!(columns_annotations_colors_vector_fields(graph, index), daf)
             annotation = graph.data.columns.annotations[1]
             @test annotation.values.vector == ["B1", "B1", "B2", "B2"]
-            @test annotation.colors.palette == get_block_colors(daf)
+            @test annotation.colors.palette == get_category_colors(daf; axis = "block")
             @test annotation.colors.title == "block"
             @test !annotation.colors.show_legend
             return nothing
         end
 
-        # Each block has a color of its own, and an entry with no block is given a color which is not one of them.
+        # The blocks have no `color` vector, so each block is given a computed color of its own, and an entry with no
+        # block is given a color which is not one of them.
         nested_test("colors") do
-            color_per_block = get_block_colors(daf)
+            color_per_block = get_category_colors(daf; axis = "block")
             @test collect(keys(color_per_block)) == ["B1", "B2", ""]
             @test color_per_block["B1"] != color_per_block["B2"]
             @test color_per_block[""] == EMPTY_CATEGORY_COLOR
-            @test collect(keys(get_block_colors(daf; empty_block_color = nothing))) == ["B1", "B2"]
-            @test collect(keys(get_block_colors(daf; empty_value = "none"))) == ["B1", "B2", "none"]
+            @test collect(keys(get_category_colors(daf; axis = "block", empty_color = nothing))) == ["B1", "B2"]
+            @test collect(keys(get_category_colors(daf; axis = "block", empty_value = "none"))) == ["B1", "B2", "none"]
+            @test get_block_colors(daf) == color_per_block
             return nothing
         end
     end
@@ -392,21 +429,45 @@ nested_test("data_sources") do
         end
     end
 
-    nested_test("boolean_annotation") do
+    nested_test("boolean") do
         set_vector!(daf, "gene", "is_skeleton", [true, false, true])
-        graph = heatmap_graph()
-        index = add_rows_annotation!(graph)
-        fill_boolean_annotation!(
-            rows_annotations_colors_vector_fields(graph, index),
-            daf;
-            axis = "gene",
-            property = "is_skeleton",
-        )
-        @test graph.data.rows.annotations[1].values.vector == ["true", "false", "true"]
-        @test graph.data.rows.annotations[1].colors.title == "is_skeleton"
-        @test graph.data.rows.annotations[1].colors.palette == Dict("true" => "black", "false" => "lightgrey")
-        @test !graph.data.rows.annotations[1].colors.show_legend
-        return nothing
+
+        nested_test("generic") do
+            graph = heatmap_graph()
+            index = add_rows_annotation!(graph)
+            fill_boolean!(
+                rows_annotations_colors_vector_fields(graph, index),
+                daf;
+                axis = "gene",
+                property = "is_skeleton",
+            )
+            @test graph.data.rows.annotations[1].values.vector == ["true", "false", "true"]
+            @test graph.data.rows.annotations[1].colors.title == "is_skeleton"
+            @test graph.data.rows.annotations[1].colors.palette == Dict("true" => "black", "false" => "lightgrey")
+            @test !graph.data.rows.annotations[1].colors.show_legend
+            return nothing
+        end
+
+        # Every keyword of the Boolean bucket passes through a generated data source.
+        nested_test("keywords") do
+            graph = heatmap_graph()
+            index = add_rows_annotation!(graph)
+            fill_is_skeleton!(
+                rows_annotations_colors_vector_fields(graph, index),
+                daf;
+                axis = "gene",
+                entries = ["A", "B"],
+                via = nothing,
+                title = "skeleton!",
+                empty_value = false,
+                show_legend = true,
+            )
+            @test graph.data.rows.annotations[1].values.vector == ["true", "false"]
+            @test graph.data.rows.annotations[1].colors.title == "skeleton!"
+            @test graph.data.rows.annotations[1].colors.show_legend
+            @test get_is_skeleton_vector(daf) == ["true", "false", "true"]
+            return nothing
+        end
     end
 
     nested_test("counts") do
@@ -444,6 +505,37 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_n_cells!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == UInt32[10, 20, 30, 40]
+            return nothing
+        end
+
+        # Every keyword of the size bucket passes through a generated data source.
+        nested_test("keywords") do
+            graph = points_graph()
+            fill_n_cells!(
+                points_colors_vector_fields(graph),
+                daf;
+                axis = "block",
+                entries = ["B2"],
+                via = nothing,
+                title = "cells!",
+                empty_value = 1,
+                show_legend = false,
+                log_base = Log2Base,
+            )
+            @test graph.data.points.colors.vector == UInt32[70]
+            @test graph.configuration.points.colors.title == "cells!"
+            @test !graph.configuration.points.colors.show_legend
+            @test graph.configuration.points.colors.scale.log_base == Log2Base
+            @test get_n_cells_vector(daf; axis = "block") == UInt32[30, 70]
+            return nothing
+        end
+
+        nested_test("generic") do
+            graph = points_graph()
+            fill_size!(points_colors_vector_fields(graph), daf; axis = "metacell", property = "n_cells")
+            @test graph.data.points.colors.vector == UInt32[10, 20, 30, 40]
+            @test graph.configuration.points.colors.title == "n_cells"
+            @test graph.configuration.points.colors.scale.log_base == Log10Base
             return nothing
         end
 

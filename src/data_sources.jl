@@ -56,13 +56,15 @@ is used for computing hover values (data) and as an axis/legend title (configura
 """
 module DataSources
 
+# The data sources generated from the table of each display bucket (e.g. `fill_n_cells!`) are exported where they are
+# defined, by `define_bucket_data_sources`.
 export EMPTY_CATEGORY_COLOR
 export fill_axes_matrix_data!
 export fill_axes_names_data!
 export fill_axis_names_data!
 export fill_axis_vector_data!
-export fill_block!
-export fill_boolean_annotation!
+export fill_boolean!
+export fill_category!
 export fill_column_boolean_annotation!
 export fill_column_names_data!
 export fill_column_vector_data!
@@ -76,18 +78,15 @@ export fill_mean_cells_per_metacell!
 export fill_mean_total_UMIs_per_cell!
 export fill_mean_total_UMIs_per_metacell!
 export fill_module_regulators_hovers!
-export fill_n_cells!
-export fill_n_metacells!
-export fill_total_UMIs!
-export fill_type!
+export fill_size!
 export fill_umap!
 export GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
 export get_axes_matrix
 export get_axis_entries_vector
 export get_axis_vector
-export get_block_colors
-export get_block_vector
-export get_boolean_annotation_vector
+export get_boolean_vector
+export get_category_colors
+export get_category_vector
 export get_column_vector
 export get_gene_correlation_change_vector
 export get_gene_correlation_vector
@@ -100,23 +99,22 @@ export get_mean_cells_per_metacell_vector
 export get_mean_total_UMIs_per_cell_vector
 export get_mean_total_UMIs_per_metacell_vector
 export get_module_regulators_hovers
-export get_n_cells_vector
-export get_n_metacells_vector
+export get_size_vector
 export get_skeleton_gene_indices
 export get_top_marker_gene_indices
-export get_total_UMIs_vector
-export get_type_colors
-export get_type_vector
 export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
 export put_boolean_configuration!
+export put_boolean_values!
 export put_category_configuration!
+export put_category_values!
 export put_coordinates_configuration!
 export put_expression_level_configuration!
 export put_fold_configuration!
 export put_gene_correlation_change_configuration!
 export put_size_configuration!
+export put_size_values!
 export put_umap_data!
 
 using DataAxesFormats
@@ -143,30 +141,119 @@ isn't one of them.
 """
 EMPTY_CATEGORY_COLOR::AbstractString = "grey"
 
-"""
-    get_total_UMIs_vector(
-        daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::Real = 1,
-    )::AbstractVector{<:Real}
+# The keywords which every generated data source takes after its `axis`, as declarations to splice into its signature.
+const ENTRIES_KEYWORDS = (
+    :(entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing),
+    :(via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing),
+)
 
-Get the total UMIs of each of the `entries` of the `daf` `axis`. By default this is the direct property of the axis
-entries. However, by specifying `via`, it is possible to access indirect counts (e.g., the total UMIs of the block of
-the metacell of each cell).
+# Define the `get_<property>_vector` and `fill_<property>!` of each property in the `table` of a display bucket. The get
+# calls the bucket's `get_function` with its `property`. The fill calls the get, and passes the values to the bucket's
+# `put_values_function`. The get takes the `axis`, the `ENTRIES_KEYWORDS` and the bucket's `get_keywords`. The fill also
+# takes the `title` and the bucket's `put_keywords`. A table line gives the `property`, its default `axis` and `title`,
+# and its `doc`. It may also give its own defaults for any of the bucket's keywords.
+function define_bucket_data_sources(;
+    get_function::Symbol,
+    put_values_function::Symbol,
+    get_keywords::Tuple,
+    put_keywords::Tuple,
+    table::Tuple,
+)::Nothing
+    for line in table
+        get_name = Symbol("get_$(line.property)_vector")
+        get_arguments = [
+            line_keyword(line, keyword) for
+            keyword in (:(axis::AbstractString = $(line.axis)), ENTRIES_KEYWORDS..., get_keywords...)
+        ]
+        get_names = keyword_names(get_arguments)
+        define_property_data_source(;
+            line,
+            function_name = get_name,
+            leading_arguments = (:(daf::DafReader),),
+            keyword_arguments = get_arguments,
+            result_type = :(AbstractVector),
+            doc_suffix = "This is directed at [`$(get_function)`](@ref).",
+            body = :(return $get_function(daf; property = $(line.property), $(get_names...))),
+        )
 
-An entry whose `via` chain breaks gets the `empty_value`, which is a count like any other, so the log scale has
-something to work with.
-"""
-function get_total_UMIs_vector(
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::Real = 1,
-)::AbstractVector{<:Real}
-    return get_axis_vector(daf; axis, query_suffix = ": total_UMIs", via, empty_value, entries)
+        put_arguments = [
+            line_keyword(line, keyword) for
+            keyword in (:(title::Maybe{AbstractString} = $(line.title)), put_keywords...)
+        ]
+        put_names = keyword_names(put_arguments)
+        fill_arguments =  # NOJET
+            vcat(get_arguments, [argument for argument in put_arguments if !(argument.args[1].args[1] in get_names)])
+        define_property_data_source(;
+            line,
+            function_name = Symbol("fill_$(line.property)!"),
+            leading_arguments = (:(sinks::VectorDataSinks), :(daf::DafReader)),
+            keyword_arguments = fill_arguments,
+            result_type = :(Nothing),
+            doc_suffix = "This fetches it with [`$(get_name)`](@ref), " *
+                         "and shows it with [`$(put_values_function)`](@ref).",
+            body = quote
+                entries = sinks_entries(sinks, entries)
+                value_per_entry = $get_name(daf; $(get_names...))
+                return $put_values_function(sinks, daf, value_per_entry; axis, entries, $(put_names...))
+            end,
+        )
+    end
+    return nothing
+end
+
+# Define and export one generated data source, with its docstring, which ends with the `doc_suffix`.
+function define_property_data_source(;
+    line::NamedTuple,
+    function_name::Symbol,
+    leading_arguments::Tuple,
+    keyword_arguments::AbstractVector{Expr},
+    result_type::Union{Symbol, Expr},
+    doc_suffix::AbstractString,
+    body::Expr,
+)::Nothing
+    signature_lines = [
+        ["        $(argument)," for argument in leading_arguments[1:(end - 1)]]...,
+        "        $(leading_arguments[end]);",
+        ["        $(keyword.args[1]) = $(default_text(keyword.args[2]))," for keyword in keyword_arguments]...,
+    ]
+    docstring = """
+                    $(function_name)(
+                $(join(signature_lines, "\n"))
+                    )::$(result_type)
+
+                $(strip(line.doc)) $(doc_suffix)
+                """
+    @eval begin
+        @doc $docstring function $function_name($(leading_arguments...); $(keyword_arguments...))::$result_type  # NOLINT
+            return $body
+        end
+        export $function_name
+    end
+    return nothing
+end
+
+# The names of keyword arguments.
+function keyword_names(keyword_arguments::AbstractVector{Expr})::Vector{Symbol}  # ONLY SEEMS UNTESTED
+    return [keyword.args[1].args[1] for keyword in keyword_arguments]
+end
+
+# A keyword declaration as a keyword argument, with its default given by the table `line` if it gives one.
+function line_keyword(line::NamedTuple, keyword::Expr)::Expr  # ONLY SEEMS UNTESTED
+    declaration, default = keyword.args
+    name = declaration.args[1]
+    if haskey(line, name)
+        default = line[name]
+    end
+    return Expr(:kw, declaration, default)
+end
+
+# How a default is written in a docstring.
+function default_text(default::Any)::AbstractString  # ONLY SEEMS UNTESTED
+    if default isa AbstractString
+        return repr(default)
+    else
+        return string(default)
+    end
 end
 
 """
@@ -174,12 +261,13 @@ end
         sinks::Sinks;
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Show a size (a count) on a log-base-10 scale, regularized by 1, in the `YlOrRd` color scale, named by the `title`. This
-is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these.
-They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is
-rare, a place on the scale.
+Show a size (a count) on a log scale of the `log_base`, regularized by 1, in the `YlOrRd` color scale, named by the
+`title`. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the
+means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero
+count, which is rare, a place on the scale.
 
 The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is
 visible. A scale which starts at white would lose it against the background.
@@ -188,9 +276,10 @@ function put_size_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_size_configuration!(sink; title, show_legend)
+        return put_size_configuration!(sink; title, show_legend, log_base)
     end
     return nothing
 end
@@ -199,9 +288,10 @@ function put_size_configuration!(
     sizes::SizesConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     sizes.show_legend = show_legend
-    put_size_configuration!(sizes.scale)
+    put_size_configuration!(sizes.scale; log_base)
     if title !== nothing
         sizes.title = title
     end
@@ -212,8 +302,9 @@ function put_size_configuration!(
     axis::AxisConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,  # NOLINT
+    log_base::LogBase = Log10Base,
 )::Nothing
-    put_size_configuration!(axis.scale)
+    put_size_configuration!(axis.scale; log_base)
     if title !== nothing
         axis.title = title
     end
@@ -224,10 +315,11 @@ function put_size_configuration!(
     colors::ColorsConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     colors.palette = "YlOrRd"
     colors.show_legend = show_legend
-    put_size_configuration!(colors.scale)
+    put_size_configuration!(colors.scale; log_base)
     if title !== nothing
         colors.title = title
     end
@@ -238,150 +330,133 @@ function put_size_configuration!(
     scale::ScaleConfiguration;
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
+    log_base::LogBase = Log10Base,
 )::Nothing
-    scale.log_base = Log10Base
+    scale.log_base = log_base
     scale.log_regularization = 1
     return nothing
 end
 
-"""
-    fill_total_UMIs!(
-        sinks::VectorDataSinks,
-        daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::Real = 1,
-        title::Maybe{AbstractString} = "total UMIs",
-        show_legend::Bool = true,
-    )::Nothing
-
-Fill the `sinks` with the total UMIs of each of the `entries` of the `daf` `axis`, shown as a count, and name the
-entities after the `entries`.
-"""
-function fill_total_UMIs!(
-    sinks::VectorDataSinks,
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::Real = 1,
-    title::Maybe{AbstractString} = "total UMIs",
-    show_legend::Bool = true,
-)::Nothing
-    entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_total_UMIs_vector(daf; axis, entries, via, empty_value); title)  # NOJET
-    put_size_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
-    return nothing
-end
+# The keywords of the size bucket's get and of its `put_size_values!`, other than the ones every generated data source
+# takes.
+const SIZE_GET_KEYWORDS = (:(empty_value::Real = 1),)
+const SIZE_PUT_KEYWORDS = (:(show_legend::Bool = true), :(log_base::LogBase = Log10Base))
 
 """
-    get_n_cells_vector(
+    get_size_vector(
         daf::DafReader;
-        axis::AbstractString = "metacell",
+        axis::AbstractString,
+        property::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         empty_value::Real = 1,
     )::AbstractVector{<:Real}
 
-Get the number of cells of each of the `entries` of the `daf` `axis`. Both metacells and blocks have one.
+Get the size (count) `property` of each of the `entries` of the `daf` `axis`. By default this is the direct property of
+the axis entries. However, by specifying `via`, it is possible to access indirect sizes (e.g., the total UMIs of the
+block of the metacell of each cell).
+
+An entry whose `via` chain breaks gets the `empty_value`, which is a count like any other, so the log scale has
+something to work with.
 """
-function get_n_cells_vector(
+function get_size_vector(
     daf::DafReader;
-    axis::AbstractString = "metacell",
+    axis::AbstractString,
+    property::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     empty_value::Real = 1,
 )::AbstractVector{<:Real}
-    return get_axis_vector(daf; axis, query_suffix = ": n_cells", via, empty_value, entries)
+    return get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries)
 end
 
 """
-    fill_n_cells!(
+    fill_size!(
         sinks::VectorDataSinks,
         daf::DafReader;
-        axis::AbstractString = "metacell",
+        axis::AbstractString,
+        property::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        title::Maybe{AbstractString} = property,
         empty_value::Real = 1,
-        title::Maybe{AbstractString} = "cells",
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Fill the `sinks` with the number of cells of each of the `entries` of the `daf` `axis`, shown as a count, and name the
-entities after the `entries`.
+Fill the `sinks` with the size (count) `property` of each of the `entries` of the `daf` `axis` (see
+[`get_size_vector`](@ref)), shown by [`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
-function fill_n_cells!(
+function fill_size!(
     sinks::VectorDataSinks,
     daf::DafReader;
-    axis::AbstractString = "metacell",
+    axis::AbstractString,
+    property::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
     empty_value::Real = 1,
-    title::Maybe{AbstractString} = "cells",
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_n_cells_vector(daf; axis, entries, via, empty_value); title)
-    put_size_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_size_vector(daf; axis, property, entries, via, empty_value)
+    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
     return nothing
 end
 
 """
-    get_n_metacells_vector(
-        daf::DafReader;
-        axis::AbstractString = "block",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::Real = 1,
-    )::AbstractVector{<:Real}
-
-Get the number of metacells of each of the `entries` of the `daf` `axis`. Only blocks have one, so unlike most sources
-the default `axis` here is the block.
-"""
-function get_n_metacells_vector(
-    daf::DafReader;
-    axis::AbstractString = "block",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::Real = 1,
-)::AbstractVector{<:Real}
-    return get_axis_vector(daf; axis, query_suffix = ": n_metacells", via, empty_value, entries)
-end
-
-"""
-    fill_n_metacells!(
+    put_size_values!(
         sinks::VectorDataSinks,
-        daf::DafReader;
-        axis::AbstractString = "block",
+        daf::DafReader,
+        value_per_entry::AbstractVector{<:Real};
+        axis::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::Real = 1,
-        title::Maybe{AbstractString} = "metacells",
+        title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Fill the `sinks` with the number of metacells of each of the `entries` of the `daf` `axis`, shown as a count, and name
-the entities after the `entries`.
+Put the size (count) `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
+[`put_size_configuration!`](@ref), and name the entities after the `entries`. Every size data source ends with this.
 """
-function fill_n_metacells!(
+function put_size_values!(
     sinks::VectorDataSinks,
-    daf::DafReader;
-    axis::AbstractString = "block",
+    daf::DafReader,
+    value_per_entry::AbstractVector{<:Real};
+    axis::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::Real = 1,
-    title::Maybe{AbstractString} = "metacells",
+    title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
-    entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_n_metacells_vector(daf; axis, entries, via, empty_value); title)
-    put_size_configuration!(sinks; title, show_legend)
+    put_vector_data!(sinks, value_per_entry; title)
+    put_size_configuration!(sinks; title, show_legend, log_base)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
+
+define_bucket_data_sources(;
+    get_function = :get_size_vector,
+    put_values_function = :put_size_values!,
+    get_keywords = SIZE_GET_KEYWORDS,
+    put_keywords = SIZE_PUT_KEYWORDS,
+    table = (
+        (; property = "total_UMIs", axis = "metacell", title = "total UMIs", doc = "The total UMIs of each entry."),
+        (;
+            property = "n_cells",
+            axis = "metacell",
+            title = "cells",
+            doc = "The number of cells of each entry. Both metacells and blocks have one.",
+        ),
+        (;
+            property = "n_metacells",
+            axis = "block",
+            title = "metacells",
+            doc = "The number of metacells of each entry. Only blocks have one, so the default `axis` is the block.",
+        ),
+    ),
+)
 
 """
     get_mean_cells_per_metacell_vector(
@@ -400,7 +475,7 @@ function get_mean_cells_per_metacell_vector(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
 )::AbstractVector{<:AbstractFloat}
-    return get_n_cells_vector(daf; axis, entries, via) ./ get_n_metacells_vector(daf; axis, entries, via)
+    return get_n_cells_vector(daf; axis, entries, via) ./ get_n_metacells_vector(daf; axis, entries, via)  # NOLINT
 end
 
 """
@@ -412,10 +487,11 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean cells per metacell",
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Fill the `sinks` with the mean number of cells per metacell of each of the `entries` of the `daf` `axis`, shown as a
-count, and name the entities after the `entries`.
+Fill the `sinks` with the mean number of cells per metacell of each of the `entries` of the `daf` `axis`, shown by
+[`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
 function fill_mean_cells_per_metacell!(
     sinks::VectorDataSinks,
@@ -425,11 +501,11 @@ function fill_mean_cells_per_metacell!(
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean cells per metacell",
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_mean_cells_per_metacell_vector(daf; axis, entries, via); title)
-    put_size_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_mean_cells_per_metacell_vector(daf; axis, entries, via)
+    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
     return nothing
 end
 
@@ -450,7 +526,7 @@ function get_mean_total_UMIs_per_metacell_vector(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
 )::AbstractVector{<:AbstractFloat}
-    return get_total_UMIs_vector(daf; axis, entries, via) ./ get_n_metacells_vector(daf; axis, entries, via)
+    return get_total_UMIs_vector(daf; axis, entries, via) ./ get_n_metacells_vector(daf; axis, entries, via)  # NOLINT
 end
 
 """
@@ -462,10 +538,11 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean UMIs per metacell",
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` of the `daf` `axis`, shown as a count,
-and name the entities after the `entries`.
+Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` of the `daf` `axis`, shown by
+[`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
 function fill_mean_total_UMIs_per_metacell!(
     sinks::VectorDataSinks,
@@ -475,11 +552,11 @@ function fill_mean_total_UMIs_per_metacell!(
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean UMIs per metacell",
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via); title)
-    put_size_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via)
+    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
     return nothing
 end
 
@@ -500,7 +577,7 @@ function get_mean_total_UMIs_per_cell_vector(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
 )::AbstractVector{<:AbstractFloat}
-    return get_total_UMIs_vector(daf; axis, entries, via) ./ get_n_cells_vector(daf; axis, entries, via)
+    return get_total_UMIs_vector(daf; axis, entries, via) ./ get_n_cells_vector(daf; axis, entries, via)  # NOLINT
 end
 
 """
@@ -512,10 +589,11 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean UMIs per cell",
         show_legend::Bool = true,
+        log_base::LogBase = Log10Base,
     )::Nothing
 
-Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of the `daf` `axis`, shown as a count, and
-name the entities after the `entries`.
+Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of the `daf` `axis`, shown by
+[`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
 function fill_mean_total_UMIs_per_cell!(
     sinks::VectorDataSinks,
@@ -525,11 +603,11 @@ function fill_mean_total_UMIs_per_cell!(
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean UMIs per cell",
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via); title)
-    put_size_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via)
+    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
     return nothing
 end
 
@@ -558,96 +636,6 @@ blocks were computed from, so they show what the blocks were told apart by.
 """
 function get_skeleton_gene_indices(daf::DafReader)::Vector{Int}
     return findall(get_axis_vector(daf; axis = "gene", query_suffix = ": is_skeleton"))
-end
-
-"""
-    get_block_vector(
-        daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::AbstractString = "",
-    )::AbstractVector{<:AbstractString}
-
-Get the block of each of the `entries` of the `daf` `axis`. By default this is the direct property of the axis
-entries. However, by specifying `via`, it is possible to access indirect blocks (e.g., the block of the metacell of
-each cell). An entry whose chain breaks gets the `empty_value`, which names no block.
-"""
-function get_block_vector(
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::AbstractString = "",
-)::AbstractVector{<:AbstractString}
-    return get_axis_vector(daf; axis, query_suffix = ": block", via, empty_value, entries)
-end
-
-"""
-    fill_block!(
-        sinks::VectorDataSinks,
-        daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-        empty_value::AbstractString = "",
-        title::Maybe{AbstractString} = "block",
-        show_legend::Bool = false,
-        empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
-    )::Nothing
-
-Fill the `sinks` with the block of each of the `entries` of the `daf` `axis`, and name the entities after the
-`entries`. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. Grouping by them puts a
-gap between the blocks. As colors, each block gets its own color from [`get_block_colors`](@ref), and an entry with no
-block gets the `empty_block_color`. The hover says which block an entry is in.
-
-Aim this at a whole data source view to get the values and a hover line, or at its `values` alone to get only the
-values.
-"""
-function fill_block!(
-    sinks::VectorDataSinks,
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
-    empty_value::AbstractString = "",
-    title::Maybe{AbstractString} = "block",
-    show_legend::Bool = false,
-    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
-)::Nothing
-    entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_block_vector(daf; axis, entries, via, empty_value); title)
-    put_category_configuration!(sinks, get_block_colors(daf; empty_value, empty_block_color); title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
-    return nothing
-end
-
-"""
-    get_block_colors(
-        daf::DafReader;
-        empty_value::AbstractString = "",
-        empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
-    )::OrderedDict{AbstractString, AbstractString}
-
-Get the palette mapping each entry of the `daf` `block` axis to its own color, with an additional `empty_block_color`
-for the `empty_value` of entries with no block. The colors come from
-[`categorical_palette`](@extref SomeGraphs SomeGraphs.Common.categorical_palette), which spreads the blocks over the
-cyclical `HSV` palette. The palette covers all the blocks, so each block has the same color in every graph, whichever
-entries the graph shows.
-
-A `nothing` `empty_block_color` leaves the `empty_value` out of the palette, which says you expect every entry to have
-a block. An entry which doesn't is then rejected, because its block isn't a key of the palette.
-"""
-function get_block_colors(
-    daf::DafReader;
-    empty_value::AbstractString = "",
-    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
-)::OrderedDict{AbstractString, AbstractString}
-    color_palette = OrderedDict{AbstractString, AbstractString}(categorical_palette(axis_vector(daf, "block")))  # NOJET
-    if empty_block_color !== nothing
-        color_palette[empty_value] = empty_block_color
-    end
-    return color_palette
 end
 
 """
@@ -712,24 +700,35 @@ function fill_global_flow_order!(
     return nothing
 end
 
+# The keywords of the Boolean bucket's get and of its `put_boolean_values!`, other than the ones every generated data
+# source takes.
+const BOOLEAN_GET_KEYWORDS = (:(empty_value::Bool = false),)
+const BOOLEAN_PUT_KEYWORDS = (:(show_legend::Bool = false),)
+
 """
-    get_boolean_annotation_vector(
+    get_boolean_vector(
         daf::DafReader;
         axis::AbstractString,
         property::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        empty_value::Bool = false,
     )::AbstractVector{<:AbstractString}
 
-Get the Boolean mask `property` of each of the `entries` of the `daf` `axis`, as the *strings* `"true"` and `"false"`.
-Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings.
+Get the Boolean `property` of each of the `entries` of the `daf` `axis`, as the *strings* `"true"` and `"false"`.
+Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings. By specifying `via`,
+it is possible to access an indirect property (e.g., whether the anchor gene of each module is a marker). An entry whose
+`via` chain breaks gets the `empty_value`.
 """
-function get_boolean_annotation_vector(
+function get_boolean_vector(
     daf::DafReader;
     axis::AbstractString,
     property::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    empty_value::Bool = false,
 )::AbstractVector{<:AbstractString}
-    return string.(get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", entries))
+    return string.(get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries))
 end
 
 """
@@ -778,34 +777,107 @@ function put_boolean_configuration!(
 end
 
 """
-    fill_boolean_annotation!(
+    fill_boolean!(
         sinks::VectorDataSinks,
         daf::DafReader;
         axis::AbstractString,
         property::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = property,
+        empty_value::Bool = false,
         show_legend::Bool = false,
     )::Nothing
 
-Fill the `sinks` with the Boolean mask `property` of each of the `entries` of the `daf` `axis`, shown as `true` in
-black and `false` in light grey, and name the entities after the `entries`.
+Fill the `sinks` with the Boolean `property` of each of the `entries` of the `daf` `axis` (see
+[`get_boolean_vector`](@ref)), shown by [`put_boolean_configuration!`](@ref), and name the entities after the
+`entries`.
 """
-function fill_boolean_annotation!(
+function fill_boolean!(
     sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
     property::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = property,
+    empty_value::Bool = false,
     show_legend::Bool = false,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_boolean_annotation_vector(daf; axis, property, entries); title)
+    value_per_entry = get_boolean_vector(daf; axis, property, entries, via, empty_value)
+    put_boolean_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    return nothing
+end
+
+"""
+    put_boolean_values!(
+        sinks::VectorDataSinks,
+        daf::DafReader,
+        value_per_entry::AbstractVector{<:AbstractString};
+        axis::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        title::Maybe{AbstractString} = nothing,
+        show_legend::Bool = false,
+    )::Nothing
+
+Put the Boolean *string* `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
+[`put_boolean_configuration!`](@ref), and name the entities after the `entries`. Every Boolean data source ends with
+this.
+"""
+function put_boolean_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{<:AbstractString};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+    put_vector_data!(sinks, value_per_entry; title)
     put_boolean_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
+
+define_bucket_data_sources(;
+    get_function = :get_boolean_vector,
+    put_values_function = :put_boolean_values!,
+    get_keywords = BOOLEAN_GET_KEYWORDS,
+    put_keywords = BOOLEAN_PUT_KEYWORDS,
+    table = (
+        (; property = "is_lateral", axis = "gene", title = "lateral", doc = "Whether each gene is lateral."),
+        (; property = "is_marker", axis = "gene", title = "marker", doc = "Whether each gene is a marker gene."),
+        (;
+            property = "is_transcription_factor",
+            axis = "gene",
+            title = "transcription factor",
+            doc = "Whether each gene is a transcription factor (binds to DNA).",
+        ),
+        (;
+            property = "is_regulator",
+            axis = "gene",
+            title = "regulator",
+            doc = "Whether each gene regulates the expression of other genes.",
+        ),
+        (; property = "is_forbidden", axis = "gene", title = "forbidden", doc = "Whether each gene is forbidden."),
+        (; property = "is_skeleton", axis = "gene", title = "skeleton", doc = "Whether each gene is a skeleton gene."),
+        (;
+            property = "is_correlated_with_skeleton",
+            axis = "gene",
+            title = "correlated with skeleton",
+            doc = "Whether each gene is correlated with some skeleton gene.",
+        ),
+        (;
+            property = "is_mitochondrial",
+            axis = "gene",
+            title = "mitochondrial",
+            doc = "Whether each gene is mitochondrial.",
+        ),
+        (; property = "is_ribosomal", axis = "gene", title = "ribosomal", doc = "Whether each gene is ribosomal."),
+        (; property = "is_excluded", axis = "gene", title = "excluded", doc = "Whether each gene is excluded."),
+    ),
+)
 
 """
     fill_gene_expression!(
@@ -817,10 +889,11 @@ end
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "\$(gene) fraction",
         show_legend::Bool = true,
+        log_base::LogBase = Log2Base,
     )::Nothing
 
 Fill the `sinks` with the `gene` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
-shown in log base 2 using the `gene_fraction_regularization`, and name the entities after the `entries`.
+shown by [`put_expression_level_configuration!`](@ref), and name the entities after the `entries`.
 """
 function fill_gene_expression!(
     sinks::VectorDataSinks,
@@ -831,10 +904,11 @@ function fill_gene_expression!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "$(gene) fraction",
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title)
-    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1039,11 +1113,12 @@ end
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
+        log_base::LogBase = Log2Base,
     )::Nothing
 
 Fill the `sinks` with the `genes` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
-shown in log base 2 using the `gene_fraction_regularization`, and name the rows and the columns. The `genes` are the
-rows and the `entries` are the columns.
+shown by [`put_expression_level_configuration!`](@ref), and name the rows and the columns. The `genes` are the rows
+and the `entries` are the columns.
 """
 function fill_genes_expression_matrix!(
     sinks::MatrixDataSinks,
@@ -1054,10 +1129,11 @@ function fill_genes_expression_matrix!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title)
-    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
     fill_axes_names_data!(
         sinks,
         daf;
@@ -1102,10 +1178,11 @@ end
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
+        log_base::LogBase = Log2Base,
     )::Nothing
 
-Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log-base-2 scale, regularized by
-`gene_fraction_regularization`, named by the `title`. The expression levels themselves are put in by
+Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log scale of the `log_base`,
+regularized by `gene_fraction_regularization`, named by the `title`. The expression levels themselves are put in by
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
@@ -1119,20 +1196,22 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
     @assert gene_fraction_regularization >= 0
     visit_configuration_sinks(sinks) do sink
-        return put_expression_level_configuration!(sink; gene_fraction_regularization, title, show_legend)
+        return put_expression_level_configuration!(sink; gene_fraction_regularization, title, show_legend, log_base)
     end
     return nothing
 end
 
-# Gene expression is not shown as a size.
+# Expression levels are never shown as sizes. This method ignores sizes.
 function put_expression_level_configuration!(
     ::SizesConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
     title::Maybe{AbstractString} = "fraction",  # NOLINT
     show_legend::Bool = true,  # NOLINT
+    log_base::LogBase = Log2Base,  # NOLINT
 )::Nothing
     return nothing
 end
@@ -1142,8 +1221,9 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,  # NOLINT
+    log_base::LogBase = Log2Base,
 )::Nothing
-    put_expression_level_configuration!(axis.scale; gene_fraction_regularization)
+    put_expression_level_configuration!(axis.scale; gene_fraction_regularization, log_base)
     if title !== nothing
         axis.title = title
     end
@@ -1155,8 +1235,9 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
-    put_expression_level_configuration!(colors.scale; gene_fraction_regularization)
+    put_expression_level_configuration!(colors.scale; gene_fraction_regularization, log_base)
     colors.palette = "WtYlOrRdDm"
     colors.scale.minimum = 0
     colors.show_legend = show_legend
@@ -1171,8 +1252,9 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
+    log_base::LogBase = Log2Base,
 )::Nothing
-    scale.log_base = Log2Base
+    scale.log_base = log_base
     scale.log_regularization = gene_fraction_regularization
     return nothing
 end
@@ -1690,7 +1772,7 @@ end
     )::Nothing
 
 Fill the `sinks` with the Boolean `column` of a `frame`, shown as `true` in black and `false` in light grey. The
-`DataFrame` twin of [`fill_boolean_annotation!`](@ref).
+`DataFrame` twin of [`fill_boolean!`](@ref).
 """
 function fill_column_boolean_annotation!(
     sinks::VectorDataSinks,
@@ -1780,48 +1862,6 @@ function fill_module_regulators_hovers!(
 end
 
 """
-    fill_type!(
-        sinks,
-        daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        type_property::AbstractString = "type",
-        type_axis::AbstractString = "type",
-        via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
-        title::Maybe{AbstractString} = type_axis,
-        show_legend::Bool = true,
-        empty_type_color::AbstractString = EMPTY_CATEGORY_COLOR,
-    )::Nothing
-
-Fill the `sinks` with the `type_property` of each of the `entries` of the `daf` `axis`, and name the entities after the
-`entries`. By default the type is the direct property of the axis entries. However, by specifying `via`, it is possible
-to access indirect types (e.g., the type of the block of the metacell of each cell). Types are shown using the `color`
-of each entry of the `type_axis`, with an additional `empty_type_color` for `entries` w/ no type (empty string).
-
-This fetches the data with [`get_type_vector`](@ref) and [`get_type_colors`](@ref), puts the types in with
-[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!), and says how to show them with
-[`put_category_configuration!`](@ref).
-"""
-function fill_type!(
-    sinks::VectorDataSinks,
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    type_property::AbstractString = "type",
-    type_axis::AbstractString = "type",
-    via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
-    title::Maybe{AbstractString} = type_axis,
-    show_legend::Bool = true,
-    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
-)::Nothing
-    entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_type_vector(daf; axis, entries, type_property, via); title)
-    put_category_configuration!(sinks, get_type_colors(daf; type_axis, empty_type_color); title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
-    return nothing
-end
-
-"""
     put_category_configuration!(
         sinks::Sinks,
         color_per_value::CategoricalColors;
@@ -1834,8 +1874,8 @@ Show the values of a category (e.g. types or blocks) of the `sinks` using the `c
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
 The palette is required, and covers every value, including the empty one of entries with no value. Where it comes from
-is up to the data source. For example, [`get_type_colors`](@ref) reads the colors given by the repository, and
-[`get_block_colors`](@ref) computes them.
+is up to the data source. For example, [`get_category_colors`](@ref) reads the colors given by the repository, or
+computes them.
 
 A color says nothing without a legend to read it by, so `show_legend` is on. Turn it off for a category with too many
 values to list, or for an annotation of a graph whose colors already name the same values.
@@ -1877,55 +1917,223 @@ function put_category_configuration!(
 end
 
 """
-    get_type_vector(
+    get_category_colors(
         daf::DafReader;
-        axis::AbstractString = "metacell",
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        type_property::AbstractString = "type",
-        via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
-    )::AbstractVector{<:AbstractString}
-
-Get the `type_property` for each of the `entries` of the `daf` `axis`. By default this is the direct property of the
-axis entries. However, by specifying `via`, it is possible to access indirect types (e.g., the type of the block of the
-metacell of each cell).
-"""
-function get_type_vector(
-    daf::DafReader;
-    axis::AbstractString = "metacell",
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    type_property::AbstractString = "type",
-    via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
-)::AbstractVector{<:AbstractString}
-    return get_axis_vector(daf; axis, query_suffix = ": $(escape_value(type_property))", via, empty_value = "", entries)
-end
-
-"""
-    get_type_colors(
-        daf::DafReader;
-        type_axis::AbstractString = "type",
-        empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+        axis::AbstractString,
+        empty_value::AbstractString = "",
+        empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     )::OrderedDict{AbstractString, AbstractString}
 
-Get the palette mapping each entry of the `daf` `type_axis` to its `color`, with an additional `empty_type_color` for
-entries w/ no type (empty string). The `type_axis` must exist and must have a `color`; asking to color by a type is the
-caller's decision, so a repository which can't answer is an error rather than an empty palette. The palette is in the
-order of the `type_axis`, followed by the empty type, so this is the order of the legend.
+Get the palette mapping each entry of the `daf` `axis` of a category (e.g. the types or the blocks) to its color, with
+an additional `empty_color` for the `empty_value` of entries with no value. If the `axis` has a `color` vector (as the
+types usually do), the palette uses it, in the order of the axis. Otherwise, the colors come from
+[`categorical_palette`](@extref SomeGraphs SomeGraphs.Common.categorical_palette), which spreads the entries over the
+cyclical `HSV` palette. Either way, the palette covers all the entries of the axis, so each value has the same color in
+every graph, whichever entries the graph shows.
 
-A `nothing` `empty_type_color` leaves the empty type out of the palette, which says you expect every entry to have a
-type. An entry which doesn't is then rejected, because its type isn't a key of the palette.
+A `nothing` `empty_color` leaves the `empty_value` out of the palette, which says you expect every entry to have a
+value. An entry which doesn't is then rejected, because its value isn't a key of the palette.
 """
-function get_type_colors(
+function get_category_colors(
     daf::DafReader;
-    type_axis::AbstractString = "type",
-    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    axis::AbstractString,
+    empty_value::AbstractString = "",
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
-    color_per_type = get_vector(daf, type_axis, "color")
-    color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_type)[1], color_per_type))
-    if empty_type_color !== nothing
-        color_palette[""] = empty_type_color
+    if has_vector(daf, axis, "color")
+        color_per_entry = get_vector(daf, axis, "color")
+        color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_entry)[1], color_per_entry))
+    else
+        color_palette = OrderedDict{AbstractString, AbstractString}(categorical_palette(axis_vector(daf, axis)))  # NOJET
+    end
+    if empty_color !== nothing
+        color_palette[empty_value] = empty_color
     end
     return color_palette
 end
+
+# Define and export the `get_<property>_colors` of each line of the category `table`, which gets the palette of the
+# line's `colors_axis` (see `get_category_colors`).
+function define_category_colors(table::Tuple)::Nothing
+    for line in table
+        function_name = Symbol("get_$(line.property)_colors")
+        docstring = """
+                        $(function_name)(
+                            daf::DafReader;
+                            empty_value::AbstractString = "",
+                            empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+                        )::OrderedDict{AbstractString, AbstractString}
+
+                    The palette of the `$(line.colors_axis)` axis, which shows the `$(line.property)`. This is directed
+                    at [`get_category_colors`](@ref).
+                    """
+        @eval begin
+            @doc $docstring function $function_name(  # NOLINT
+                daf::DafReader;
+                empty_value::AbstractString = "",
+                empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+            )::OrderedDict{AbstractString, AbstractString}
+                return get_category_colors(daf; axis = $(line.colors_axis), empty_value, empty_color)
+            end
+            export $function_name
+        end
+    end
+    return nothing
+end
+
+# The keywords of the category bucket's get and of its `put_category_values!`, other than the ones every generated data
+# source takes. Each line of the table gives its own `colors_axis`, since its default (the property) isn't known to the
+# generated function.
+const CATEGORY_GET_KEYWORDS = (:(empty_value::AbstractString = ""),)
+const CATEGORY_PUT_KEYWORDS = (
+    :(empty_value::AbstractString = ""),
+    :(colors_axis::AbstractString = ""),
+    :(empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR),
+    :(show_legend::Bool = true),
+)
+
+"""
+    get_category_vector(
+        daf::DafReader;
+        axis::AbstractString,
+        property::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        empty_value::AbstractString = "",
+    )::AbstractVector{<:AbstractString}
+
+Get the category `property` (e.g. the type) of each of the `entries` of the `daf` `axis`. By default this is the direct
+property of the axis entries. However, by specifying `via`, it is possible to access indirect values (e.g., the type of
+the block of the metacell of each cell). An entry whose `via` chain breaks gets the `empty_value`, which names no value.
+"""
+function get_category_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    empty_value::AbstractString = "",
+)::AbstractVector{<:AbstractString}
+    return get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries)
+end
+
+"""
+    fill_category!(
+        sinks::VectorDataSinks,
+        daf::DafReader;
+        axis::AbstractString,
+        property::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        title::Maybe{AbstractString} = property,
+        empty_value::AbstractString = "",
+        colors_axis::AbstractString = property,
+        empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+        show_legend::Bool = true,
+    )::Nothing
+
+Fill the `sinks` with the category `property` of each of the `entries` of the `daf` `axis` (see
+[`get_category_vector`](@ref)), shown by [`put_category_configuration!`](@ref), and name the entities after the
+`entries`. The palette covers the `colors_axis` (see [`get_category_colors`](@ref)).
+"""
+function fill_category!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::AbstractString = "",
+    colors_axis::AbstractString = property,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    show_legend::Bool = true,
+)::Nothing
+    entries = sinks_entries(sinks, entries)
+    value_per_entry = get_category_vector(daf; axis, property, entries, via, empty_value)
+    put_category_values!(
+        sinks,
+        daf,
+        value_per_entry;
+        axis,
+        entries,
+        title,
+        empty_value,
+        colors_axis,
+        empty_color,
+        show_legend,
+    )
+    return nothing
+end
+
+"""
+    put_category_values!(
+        sinks::VectorDataSinks,
+        daf::DafReader,
+        value_per_entry::AbstractVector{<:AbstractString};
+        axis::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        title::Maybe{AbstractString} = nothing,
+        empty_value::AbstractString = "",
+        colors_axis::AbstractString,
+        empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+        show_legend::Bool = true,
+    )::Nothing
+
+Put the category `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
+[`put_category_configuration!`](@ref) using the palette of the `colors_axis` (see [`get_category_colors`](@ref)), and
+name the entities after the `entries`. Every category data source ends with this.
+"""
+function put_category_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{<:AbstractString};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    empty_value::AbstractString = "",
+    colors_axis::AbstractString,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    show_legend::Bool = true,
+)::Nothing
+    put_vector_data!(sinks, value_per_entry; title)
+    color_palette = get_category_colors(daf; axis = colors_axis, empty_value, empty_color)
+    put_category_configuration!(sinks, color_palette; title, show_legend)
+    fill_axis_names_data!(sinks, daf; axis, entries)
+    return nothing
+end
+
+# The properties shown as categories.
+const CATEGORY_PROPERTIES = (
+    (;
+        property = "type",
+        axis = "metacell",
+        title = "type",
+        colors_axis = "type",
+        doc = "The type of each entry, shown in the `color` of each type.",
+    ),
+    (;
+        property = "block",
+        axis = "metacell",
+        title = "block",
+        colors_axis = "block",
+        show_legend = false,
+        doc = """
+              The block of each entry. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of
+              these. There are too many blocks for a legend to help, so `show_legend` is off.
+              """,
+    ),
+)
+
+define_bucket_data_sources(;
+    get_function = :get_category_vector,
+    put_values_function = :put_category_values!,
+    get_keywords = CATEGORY_GET_KEYWORDS,
+    put_keywords = CATEGORY_PUT_KEYWORDS,
+    table = CATEGORY_PROPERTIES,
+)
+
+define_category_colors(CATEGORY_PROPERTIES)
 
 """
     get_axis_entries_vector(

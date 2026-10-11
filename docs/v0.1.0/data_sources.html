@@ -127,8 +127,8 @@
 </a>
 </li>
 <li>
-<a class="tocitem" href="#Boolean-Annotations">
-<span>Boolean Annotations
+<a class="tocitem" href="#Gene-Flags">
+<span>Gene Flags
 </span>
 </a>
 </li>
@@ -785,8 +785,8 @@
 </code> in light grey. The 
 <code>DataFrame
 </code> twin of 
-<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean_annotation!">
-<code>fill_boolean_annotation!
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean!">
+<code>fill_boolean!
 </code>
 </a>.
 </p>
@@ -1068,6 +1068,12 @@
 </h2>
 <p>Properties fall into a few buckets by how they are shown. Each bucket has one configuration function, and the data source of each property uses the function of its bucket.
 </p>
+<p>Most buckets also have generic data sources, taking the name of a property: a get, which fetches it, a fill, which fetches and shows it, and a put, which shows values already fetched. The data sources of the stored properties of each bucket (e.g. 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_n_cells!">
+<code>fill_n_cells!
+</code>
+</a>) are generated from a table. Each fetches with its own get, and shows the values with the put of its bucket.
+</p>
 <article>
 <details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.put_size_configuration!">
@@ -1085,16 +1091,164 @@
     sinks::Sinks;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
-<p>Show a size (a count) on a log-base-10 scale, regularized by 1, in the 
+<p>Show a size (a count) on a log scale of the 
+<code>log_base
+</code>, regularized by 1, in the 
 <code>YlOrRd
 </code> color scale, named by the 
 <code>title
 </code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is rare, a place on the scale.
 </p>
 <p>The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is visible. A scale which starts at white would lose it against the background.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_size_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_size_vector">
+<code>MetacellsGraphs.DataSources.get_size_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_size_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 1,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the size (count) 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By default this is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect sizes (e.g., the total UMIs of the block of the metacell of each cell).
+</p>
+<p>An entry whose 
+<code>via
+</code> chain breaks gets the 
+<code>empty_value
+</code>, which is a count like any other, so the log scale has something to work with.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_size!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_size!">
+<code>MetacellsGraphs.DataSources.fill_size!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_size!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::Real = 1,
+    show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the size (count) 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_size_vector">
+<code>get_size_vector
+</code>
+</a>), shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>put_size_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_size_values!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_size_values!">
+<code>MetacellsGraphs.DataSources.put_size_values!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_size_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{&lt;:Real};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
+)::Nothing
+</code>
+</pre>
+<p>Put the size (count) 
+<code>value_per_entry
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> into the 
+<code>sinks
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>put_size_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>. Every size data source ends with this.
 </p>
 </div>
 </section>
@@ -1118,10 +1272,13 @@
     gene_fraction_regularization::Real = 1.0e-5,
     title::Maybe{AbstractString} = &quot;fraction&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
 </code>
 </pre>
-<p>Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log-base-2 scale, regularized by 
+<p>Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log scale of the 
+<code>log_base
+</code>, regularized by 
 <code>gene_fraction_regularization
 </code>, named by the 
 <code>title
@@ -1270,6 +1427,155 @@
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_boolean_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>MetacellsGraphs.DataSources.get_boolean_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_boolean_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the Boolean 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>, as the 
+<em>strings
+</em> 
+<code>&quot;true&quot;
+</code> and 
+<code>&quot;false&quot;
+</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings. By specifying 
+<code>via
+</code>, it is possible to access an indirect property (e.g., whether the anchor gene of each module is a marker). An entry whose 
+<code>via
+</code> chain breaks gets the 
+<code>empty_value
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_boolean!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_boolean!">
+<code>MetacellsGraphs.DataSources.fill_boolean!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_boolean!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::Bool = false,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the Boolean 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>), shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_configuration!">
+<code>put_boolean_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_boolean_values!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>MetacellsGraphs.DataSources.put_boolean_values!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_boolean_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{&lt;:AbstractString};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Put the Boolean 
+<em>string
+</em> 
+<code>value_per_entry
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> into the 
+<code>sinks
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_configuration!">
+<code>put_boolean_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>. Every Boolean data source ends with this.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.put_category_configuration!">
 <a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_category_configuration!">
 <code>MetacellsGraphs.DataSources.put_category_configuration!
@@ -1302,18 +1608,225 @@
 </a>.
 </p>
 <p>The palette is required, and covers every value, including the empty one of entries with no value. Where it comes from is up to the data source. For example, 
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_colors">
-<code>get_type_colors
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>get_category_colors
 </code>
-</a> reads the colors given by the repository, and 
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_colors">
-<code>get_block_colors
-</code>
-</a> computes them.
+</a> reads the colors given by the repository, or computes them.
 </p>
 <p>A color says nothing without a legend to read it by, so 
 <code>show_legend
 </code> is on. Turn it off for a category with too many values to list, or for an annotation of a graph whose colors already name the same values.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_category_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_category_vector">
+<code>MetacellsGraphs.DataSources.get_category_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_category_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+)::AbstractVector{&lt;:AbstractString}
+</code>
+</pre>
+<p>Get the category 
+<code>property
+</code> (e.g. the type) of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By default this is the direct property of the axis entries. However, by specifying 
+<code>via
+</code>, it is possible to access indirect values (e.g., the type of the block of the metacell of each cell). An entry whose 
+<code>via
+</code> chain breaks gets the 
+<code>empty_value
+</code>, which names no value.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_category!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_category!">
+<code>MetacellsGraphs.DataSources.fill_category!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_category!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::AbstractString = &quot;&quot;,
+    colors_axis::AbstractString = property,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the category 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_vector">
+<code>get_category_vector
+</code>
+</a>), shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
+<code>put_category_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>. The palette covers the 
+<code>colors_axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>get_category_colors
+</code>
+</a>).
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_category_values!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_category_values!">
+<code>MetacellsGraphs.DataSources.put_category_values!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_category_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{&lt;:AbstractString};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+    colors_axis::AbstractString,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Put the category 
+<code>value_per_entry
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> into the 
+<code>sinks
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
+<code>put_category_configuration!
+</code>
+</a> using the palette of the 
+<code>colors_axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>get_category_colors
+</code>
+</a>), and name the entities after the 
+<code>entries
+</code>. Every category data source ends with this.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_category_colors">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_category_colors">
+<code>MetacellsGraphs.DataSources.get_category_colors
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_category_colors(
+    daf::DafReader;
+    axis::AbstractString,
+    empty_value::AbstractString = &quot;&quot;,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+)::OrderedDict{AbstractString, AbstractString}
+</code>
+</pre>
+<p>Get the palette mapping each entry of the 
+<code>daf
+</code> 
+<code>axis
+</code> of a category (e.g. the types or the blocks) to its color, with an additional 
+<code>empty_color
+</code> for the 
+<code>empty_value
+</code> of entries with no value. If the 
+<code>axis
+</code> has a 
+<code>color
+</code> vector (as the types usually do), the palette uses it, in the order of the axis. Otherwise, the colors come from 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/common.html#SomeGraphs.Common.categorical_palette">
+<code>categorical_palette
+</code>
+</a>, which spreads the entries over the cyclical 
+<code>HSV
+</code> palette. Either way, the palette covers all the entries of the axis, so each value has the same color in every graph, whichever entries the graph shows.
+</p>
+<p>A 
+<code>nothing
+</code> 
+<code>empty_color
+</code> leaves the 
+<code>empty_value
+</code> out of the palette, which says you expect every entry to have a value. An entry which doesn&#39;t is then rejected, because its value isn&#39;t a key of the palette.
 </p>
 </div>
 </section>
@@ -1403,6 +1916,7 @@
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = &quot;$(gene) fraction&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
 </code>
 </pre>
@@ -1416,9 +1930,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown in log base 2 using the 
-<code>gene_fraction_regularization
-</code>, and name the entities after the 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_expression_level_configuration!">
+<code>put_expression_level_configuration!
+</code>
+</a>, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -1491,6 +2007,7 @@
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = &quot;fraction&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log2Base,
 )::Nothing
 </code>
 </pre>
@@ -1504,9 +2021,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown in log base 2 using the 
-<code>gene_fraction_regularization
-</code>, and name the rows and the columns. The 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_expression_level_configuration!">
+<code>put_expression_level_configuration!
+</code>
+</a>, and name the rows and the columns. The 
 <code>genes
 </code> are the rows and the 
 <code>entries
@@ -2092,20 +2611,19 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;total UMIs&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the total UMIs of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, shown as a count, and name the entities after the 
-<code>entries
-</code>.
+<p>The total UMIs of each entry. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_total_UMIs_vector">
+<code>get_total_UMIs_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_values!">
+<code>put_size_values!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2130,24 +2648,14 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-)::AbstractVector{&lt;:Real}
+)::AbstractVector
 </code>
 </pre>
-<p>Get the total UMIs of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>. By default this is the direct property of the axis entries. However, by specifying 
-<code>via
-</code>, it is possible to access indirect counts (e.g., the total UMIs of the block of the metacell of each cell).
-</p>
-<p>An entry whose 
-<code>via
-</code> chain breaks gets the 
-<code>empty_value
-</code>, which is a count like any other, so the log scale has something to work with.
+<p>The total UMIs of each entry. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_size_vector">
+<code>get_size_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2183,20 +2691,19 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;cells&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the number of cells of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, shown as a count, and name the entities after the 
-<code>entries
-</code>.
+<p>The number of cells of each entry. Both metacells and blocks have one. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_n_cells_vector">
+<code>get_n_cells_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_values!">
+<code>put_size_values!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2221,16 +2728,14 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-)::AbstractVector{&lt;:Real}
+)::AbstractVector
 </code>
 </pre>
-<p>Get the number of cells of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>. Both metacells and blocks have one.
+<p>The number of cells of each entry. Both metacells and blocks have one. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_size_vector">
+<code>get_size_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2258,20 +2763,21 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;metacells&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the number of metacells of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
+<p>The number of metacells of each entry. Only blocks have one, so the default 
 <code>axis
-</code>, shown as a count, and name the entities after the 
-<code>entries
-</code>.
+</code> is the block. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_n_metacells_vector">
+<code>get_n_metacells_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_values!">
+<code>put_size_values!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2296,18 +2802,16 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-)::AbstractVector{&lt;:Real}
+)::AbstractVector
 </code>
 </pre>
-<p>Get the number of metacells of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
+<p>The number of metacells of each entry. Only blocks have one, so the default 
 <code>axis
-</code>. Only blocks have one, so unlike most sources the default 
-<code>axis
-</code> here is the block.
+</code> is the block. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_size_vector">
+<code>get_size_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2342,6 +2846,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean cells per metacell&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
@@ -2353,7 +2858,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown as a count, and name the entities after the 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>put_size_configuration!
+</code>
+</a>, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -2415,6 +2924,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean UMIs per metacell&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
@@ -2426,7 +2936,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown as a count, and name the entities after the 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>put_size_configuration!
+</code>
+</a>, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -2488,6 +3002,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean UMIs per cell&quot;,
     show_legend::Bool = true,
+    log_base::LogBase = Log10Base,
 )::Nothing
 </code>
 </pre>
@@ -2499,7 +3014,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown as a count, and name the entities after the 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>put_size_configuration!
+</code>
+</a>, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -2569,32 +3088,23 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::AbstractString = &quot;&quot;,
     title::Maybe{AbstractString} = &quot;block&quot;,
+    colors_axis::AbstractString = &quot;block&quot;,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     show_legend::Bool = false,
-    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the block of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, and name the entities after the 
-<code>entries
-</code>. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. Grouping by them puts a gap between the blocks. As colors, each block gets its own color from 
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_colors">
-<code>get_block_colors
+<p>The block of each entry. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. There are too many blocks for a legend to help, so 
+<code>show_legend
+</code> is off. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_vector">
+<code>get_block_vector
 </code>
-</a>, and an entry with no block gets the 
-<code>empty_block_color
-</code>. The hover says which block an entry is in.
-</p>
-<p>Aim this at a whole data source view to get the values and a hover line, or at its 
-<code>values
-</code> alone to get only the values.
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_values!">
+<code>put_category_values!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2619,20 +3129,16 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::AbstractString = &quot;&quot;,
-)::AbstractVector{&lt;:AbstractString}
+)::AbstractVector
 </code>
 </pre>
-<p>Get the block of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>. By default this is the direct property of the axis entries. However, by specifying 
-<code>via
-</code>, it is possible to access indirect blocks (e.g., the block of the metacell of each cell). An entry whose chain breaks gets the 
-<code>empty_value
-</code>, which names no block.
+<p>The block of each entry. Blocks are shown as a grouping of an axis, as colors, as a hover, or any of these. There are too many blocks for a legend to help, so 
+<code>show_legend
+</code> is off. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_vector">
+<code>get_category_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2654,33 +3160,19 @@
 <code class="language-julia hljs">get_block_colors(
     daf::DafReader;
     empty_value::AbstractString = &quot;&quot;,
-    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
 </code>
 </pre>
-<p>Get the palette mapping each entry of the 
-<code>daf
-</code> 
+<p>The palette of the 
 <code>block
-</code> axis to its own color, with an additional 
-<code>empty_block_color
-</code> for the 
-<code>empty_value
-</code> of entries with no block. The colors come from 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/common.html#SomeGraphs.Common.categorical_palette">
-<code>categorical_palette
+</code> axis, which shows the 
+<code>block
+</code>. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>get_category_colors
 </code>
-</a>, which spreads the blocks over the cyclical 
-<code>HSV
-</code> palette. The palette covers all the blocks, so each block has the same color in every graph, whichever entries the graph shows.
-</p>
-<p>A 
-<code>nothing
-</code> 
-<code>empty_block_color
-</code> leaves the 
-<code>empty_value
-</code> out of the palette, which says you expect every entry to have a block. An entry which doesn&#39;t is then rejected, because its block isn&#39;t a key of the palette.
+</a>.
 </p>
 </div>
 </section>
@@ -2794,58 +3286,28 @@
 <div>
 <pre>
 <code class="language-julia hljs">fill_type!(
-    sinks,
+    sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-    type_property::AbstractString = &quot;type&quot;,
-    type_axis::AbstractString = &quot;type&quot;,
-    via::Maybe{Union{Tuple{&lt;:AbstractString}, AbstractVector{&lt;:AbstractString}}} = nothing,
-    title::Maybe{AbstractString} = type_axis,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+    title::Maybe{AbstractString} = &quot;type&quot;,
+    colors_axis::AbstractString = &quot;type&quot;,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     show_legend::Bool = true,
-    empty_type_color::AbstractString = EMPTY_CATEGORY_COLOR,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the 
-<code>type_property
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, and name the entities after the 
-<code>entries
-</code>. By default the type is the direct property of the axis entries. However, by specifying 
-<code>via
-</code>, it is possible to access indirect types (e.g., the type of the block of the metacell of each cell). Types are shown using the 
+<p>The type of each entry, shown in the 
 <code>color
-</code> of each entry of the 
-<code>type_axis
-</code>, with an additional 
-<code>empty_type_color
-</code> for 
-<code>entries
-</code> w/ no type (empty string).
-</p>
-<p>This fetches the data with 
+</code> of each type. This fetches it with 
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_type_vector">
 <code>get_type_vector
 </code>
-</a> and 
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_colors">
-<code>get_type_colors
-</code>
-</a>, puts the types in with 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
-<code>put_vector_data!
-</code>
-</a>, and says how to show them with 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
-<code>put_category_configuration!
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_values!">
+<code>put_category_values!
 </code>
 </a>.
 </p>
@@ -2870,22 +3332,18 @@
     daf::DafReader;
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-    type_property::AbstractString = &quot;type&quot;,
-    via::Maybe{Union{Tuple{&lt;:AbstractString}, AbstractVector{&lt;:AbstractString}}} = nothing,
-)::AbstractVector{&lt;:AbstractString}
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+)::AbstractVector
 </code>
 </pre>
-<p>Get the 
-<code>type_property
-</code> for each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>. By default this is the direct property of the axis entries. However, by specifying 
-<code>via
-</code>, it is possible to access indirect types (e.g., the type of the block of the metacell of each cell).
+<p>The type of each entry, shown in the 
+<code>color
+</code> of each type. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_vector">
+<code>get_category_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2906,50 +3364,38 @@
 <pre>
 <code class="language-julia hljs">get_type_colors(
     daf::DafReader;
-    type_axis::AbstractString = &quot;type&quot;,
-    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    empty_value::AbstractString = &quot;&quot;,
+    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
 </code>
 </pre>
-<p>Get the palette mapping each entry of the 
-<code>daf
-</code> 
-<code>type_axis
-</code> to its 
-<code>color
-</code>, with an additional 
-<code>empty_type_color
-</code> for entries w/ no type (empty string). The 
-<code>type_axis
-</code> must exist and must have a 
-<code>color
-</code>; asking to color by a type is the caller&#39;s decision, so a repository which can&#39;t answer is an error rather than an empty palette. The palette is in the order of the 
-<code>type_axis
-</code>, followed by the empty type, so this is the order of the legend.
-</p>
-<p>A 
-<code>nothing
-</code> 
-<code>empty_type_color
-</code> leaves the empty type out of the palette, which says you expect every entry to have a type. An entry which doesn&#39;t is then rejected, because its type isn&#39;t a key of the palette.
+<p>The palette of the 
+<code>type
+</code> axis, which shows the 
+<code>type
+</code>. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>get_category_colors
+</code>
+</a>.
 </p>
 </div>
 </section>
 </details>
 </article>
-<h2 id="Boolean-Annotations">
-<a class="docs-heading-anchor" href="#Boolean-Annotations">Boolean Annotations
+<h2 id="Gene-Flags">
+<a class="docs-heading-anchor" href="#Gene-Flags">Gene Flags
 </a>
-<a id="Boolean-Annotations-1">
+<a id="Gene-Flags-1">
 </a>
-<a class="docs-heading-anchor-permalink" href="#Boolean-Annotations" title="Permalink">
+<a class="docs-heading-anchor-permalink" href="#Gene-Flags" title="Permalink">
 </a>
 </h2>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.fill_boolean_annotation!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_boolean_annotation!">
-<code>MetacellsGraphs.DataSources.fill_boolean_annotation!
+<summary id="MetacellsGraphs.DataSources.fill_is_lateral!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_lateral!">
+<code>MetacellsGraphs.DataSources.fill_is_lateral!
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -2958,34 +3404,27 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">fill_boolean_annotation!(
+<code class="language-julia hljs">fill_is_lateral!(
     sinks::VectorDataSinks,
     daf::DafReader;
-    axis::AbstractString,
-    property::AbstractString,
+    axis::AbstractString = &quot;gene&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-    title::Maybe{AbstractString} = property,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;lateral&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
 </pre>
-<p>Fill the 
-<code>sinks
-</code> with the Boolean mask 
-<code>property
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, shown as 
-<code>true
-</code> in black and 
-<code>false
-</code> in light grey, and name the entities after the 
-<code>entries
-</code>.
+<p>Whether each gene is lateral. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_lateral_vector">
+<code>get_is_lateral_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -2993,9 +3432,9 @@
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.get_boolean_annotation_vector">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_boolean_annotation_vector">
-<code>MetacellsGraphs.DataSources.get_boolean_annotation_vector
+<summary id="MetacellsGraphs.DataSources.get_is_lateral_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_lateral_vector">
+<code>MetacellsGraphs.DataSources.get_is_lateral_vector
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -3004,29 +3443,659 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">get_boolean_annotation_vector(
+<code class="language-julia hljs">get_is_lateral_vector(
     daf::DafReader;
-    axis::AbstractString,
-    property::AbstractString,
+    axis::AbstractString = &quot;gene&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-)::AbstractVector{&lt;:AbstractString}
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
 </code>
 </pre>
-<p>Get the Boolean mask 
-<code>property
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
-</code>, as the 
-<em>strings
-</em> 
-<code>&quot;true&quot;
-</code> and 
-<code>&quot;false&quot;
-</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings.
+<p>Whether each gene is lateral. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_marker!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_marker!">
+<code>MetacellsGraphs.DataSources.fill_is_marker!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_marker!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;marker&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is a marker gene. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_marker_vector">
+<code>get_is_marker_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_marker_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_marker_vector">
+<code>MetacellsGraphs.DataSources.get_is_marker_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_marker_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is a marker gene. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_transcription_factor!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_transcription_factor!">
+<code>MetacellsGraphs.DataSources.fill_is_transcription_factor!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_transcription_factor!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;transcription factor&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is a transcription factor (binds to DNA). This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_transcription_factor_vector">
+<code>get_is_transcription_factor_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_transcription_factor_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_transcription_factor_vector">
+<code>MetacellsGraphs.DataSources.get_is_transcription_factor_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_transcription_factor_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is a transcription factor (binds to DNA). This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_regulator!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_regulator!">
+<code>MetacellsGraphs.DataSources.fill_is_regulator!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_regulator!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;regulator&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene regulates the expression of other genes. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_regulator_vector">
+<code>get_is_regulator_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_regulator_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_regulator_vector">
+<code>MetacellsGraphs.DataSources.get_is_regulator_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_regulator_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene regulates the expression of other genes. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_forbidden!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_forbidden!">
+<code>MetacellsGraphs.DataSources.fill_is_forbidden!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_forbidden!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;forbidden&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is forbidden. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_forbidden_vector">
+<code>get_is_forbidden_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_forbidden_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_forbidden_vector">
+<code>MetacellsGraphs.DataSources.get_is_forbidden_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_forbidden_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is forbidden. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_skeleton!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_skeleton!">
+<code>MetacellsGraphs.DataSources.fill_is_skeleton!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_skeleton!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;skeleton&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is a skeleton gene. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_skeleton_vector">
+<code>get_is_skeleton_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_skeleton_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_skeleton_vector">
+<code>MetacellsGraphs.DataSources.get_is_skeleton_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_skeleton_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is a skeleton gene. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!">
+<code>MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_correlated_with_skeleton!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;correlated with skeleton&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is correlated with some skeleton gene. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector">
+<code>get_is_correlated_with_skeleton_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector">
+<code>MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_correlated_with_skeleton_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is correlated with some skeleton gene. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_mitochondrial!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_mitochondrial!">
+<code>MetacellsGraphs.DataSources.fill_is_mitochondrial!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_mitochondrial!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;mitochondrial&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is mitochondrial. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_mitochondrial_vector">
+<code>get_is_mitochondrial_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_mitochondrial_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_mitochondrial_vector">
+<code>MetacellsGraphs.DataSources.get_is_mitochondrial_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_mitochondrial_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is mitochondrial. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_ribosomal!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_ribosomal!">
+<code>MetacellsGraphs.DataSources.fill_is_ribosomal!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_ribosomal!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;ribosomal&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is ribosomal. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_ribosomal_vector">
+<code>get_is_ribosomal_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_ribosomal_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_ribosomal_vector">
+<code>MetacellsGraphs.DataSources.get_is_ribosomal_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_ribosomal_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is ribosomal. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_is_excluded!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_is_excluded!">
+<code>MetacellsGraphs.DataSources.fill_is_excluded!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_is_excluded!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+    title::Maybe{AbstractString} = &quot;excluded&quot;,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Whether each gene is excluded. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_excluded_vector">
+<code>get_is_excluded_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_excluded_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_excluded_vector">
+<code>MetacellsGraphs.DataSources.get_is_excluded_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_excluded_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Bool = false,
+)::AbstractVector
+</code>
+</pre>
+<p>Whether each gene is excluded. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>get_boolean_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -3171,8 +4240,14 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean_annotation!">
-<code>MetacellsGraphs.DataSources.fill_boolean_annotation!
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_boolean!">
+<code>MetacellsGraphs.DataSources.fill_boolean!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_category!">
+<code>MetacellsGraphs.DataSources.fill_category!
 </code>
 </a>
 </li>
@@ -3231,6 +4306,66 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!">
+<code>MetacellsGraphs.DataSources.fill_is_correlated_with_skeleton!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_excluded!">
+<code>MetacellsGraphs.DataSources.fill_is_excluded!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_forbidden!">
+<code>MetacellsGraphs.DataSources.fill_is_forbidden!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_lateral!">
+<code>MetacellsGraphs.DataSources.fill_is_lateral!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_marker!">
+<code>MetacellsGraphs.DataSources.fill_is_marker!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_mitochondrial!">
+<code>MetacellsGraphs.DataSources.fill_is_mitochondrial!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_regulator!">
+<code>MetacellsGraphs.DataSources.fill_is_regulator!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_ribosomal!">
+<code>MetacellsGraphs.DataSources.fill_is_ribosomal!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_skeleton!">
+<code>MetacellsGraphs.DataSources.fill_is_skeleton!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_transcription_factor!">
+<code>MetacellsGraphs.DataSources.fill_is_transcription_factor!
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!">
 <code>MetacellsGraphs.DataSources.fill_mean_cells_per_metacell!
 </code>
@@ -3263,6 +4398,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_n_metacells!">
 <code>MetacellsGraphs.DataSources.fill_n_metacells!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_size!">
+<code>MetacellsGraphs.DataSources.fill_size!
 </code>
 </a>
 </li>
@@ -3315,8 +4456,20 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_annotation_vector">
-<code>MetacellsGraphs.DataSources.get_boolean_annotation_vector
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_boolean_vector">
+<code>MetacellsGraphs.DataSources.get_boolean_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
+<code>MetacellsGraphs.DataSources.get_category_colors
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_vector">
+<code>MetacellsGraphs.DataSources.get_category_vector
 </code>
 </a>
 </li>
@@ -3363,6 +4516,66 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector">
+<code>MetacellsGraphs.DataSources.get_is_correlated_with_skeleton_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_excluded_vector">
+<code>MetacellsGraphs.DataSources.get_is_excluded_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_forbidden_vector">
+<code>MetacellsGraphs.DataSources.get_is_forbidden_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_lateral_vector">
+<code>MetacellsGraphs.DataSources.get_is_lateral_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_marker_vector">
+<code>MetacellsGraphs.DataSources.get_is_marker_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_mitochondrial_vector">
+<code>MetacellsGraphs.DataSources.get_is_mitochondrial_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_regulator_vector">
+<code>MetacellsGraphs.DataSources.get_is_regulator_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_ribosomal_vector">
+<code>MetacellsGraphs.DataSources.get_is_ribosomal_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_skeleton_vector">
+<code>MetacellsGraphs.DataSources.get_is_skeleton_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_transcription_factor_vector">
+<code>MetacellsGraphs.DataSources.get_is_transcription_factor_vector
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_matrix_query">
 <code>MetacellsGraphs.DataSources.get_matrix_query
 </code>
@@ -3401,6 +4614,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_n_metacells_vector">
 <code>MetacellsGraphs.DataSources.get_n_metacells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_size_vector">
+<code>MetacellsGraphs.DataSources.get_size_vector
 </code>
 </a>
 </li>
@@ -3453,8 +4672,20 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>MetacellsGraphs.DataSources.put_boolean_values!
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
 <code>MetacellsGraphs.DataSources.put_category_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_values!">
+<code>MetacellsGraphs.DataSources.put_category_values!
 </code>
 </a>
 </li>
@@ -3485,6 +4716,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
 <code>MetacellsGraphs.DataSources.put_size_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_values!">
+<code>MetacellsGraphs.DataSources.put_size_values!
 </code>
 </a>
 </li>
