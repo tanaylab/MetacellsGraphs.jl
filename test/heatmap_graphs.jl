@@ -118,7 +118,7 @@ nested_test("heatmap_graphs") do
             @test graph.data.columns.annotations[1].values.vector == ["X", "X", "Y", "Y"]
             @test graph.data.columns.annotations[1].colors.title == "type"
             @test graph.data.columns.annotations[1].colors.palette ==
-                  Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
+                  Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
             @test !graph.data.columns.annotations[1].colors.show_legend
             @test graph.data.columns.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing

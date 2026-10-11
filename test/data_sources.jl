@@ -147,6 +147,8 @@ nested_test("data_sources") do
             @test graph.data.points.colors.vector == Float32[0.0, 0.1, 0.0, 0.1]
             @test graph.configuration.points.colors.title == "C fraction"
             @test graph.configuration.points.colors.scale.log_base == Log2Base
+            @test graph.configuration.points.colors.palette == "WtYlOrRdDm"
+            @test graph.configuration.points.colors.scale.minimum == 0
             @test graph.configuration.points.colors.show_legend
             return nothing
         end
@@ -289,7 +291,7 @@ nested_test("data_sources") do
 
         # An entry with no type is given a color of its own, so that it is still drawn.
         nested_test("colors") do
-            @test get_type_colors(daf) == Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
+            @test get_type_colors(daf) == Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
             @test get_type_colors(daf; empty_type_color = nothing) == Dict("X" => "red", "Y" => "blue")
             @test collect(keys(get_type_colors(daf))) == ["Y", "X", ""]
             return nothing
@@ -339,7 +341,7 @@ nested_test("data_sources") do
             color_per_block = get_block_colors(daf)
             @test collect(keys(color_per_block)) == ["B1", "B2", ""]
             @test color_per_block["B1"] != color_per_block["B2"]
-            @test color_per_block[""] == EMPTY_BLOCK_COLOR
+            @test color_per_block[""] == EMPTY_CATEGORY_COLOR
             @test collect(keys(get_block_colors(daf; empty_block_color = nothing))) == ["B1", "B2"]
             @test collect(keys(get_block_colors(daf; empty_value = "none"))) == ["B1", "B2", "none"]
             return nothing
@@ -421,8 +423,9 @@ nested_test("data_sources") do
             @test graph.configuration.points.colors.title == "total UMIs"
             @test graph.configuration.points.colors.palette == "YlOrRd"
             @test graph.configuration.points.colors.show_legend
-            @test graph.configuration.points.colors.scale.log_base == Log2Base
-            @test graph.configuration.points.colors.scale.log_regularization == 0
+            @test graph.configuration.points.colors.scale.log_base == Log10Base
+            @test graph.configuration.points.colors.scale.log_regularization == 1
+            @test graph.configuration.points.colors.scale.minimum === nothing
             return nothing
         end
 
@@ -433,6 +436,7 @@ nested_test("data_sources") do
             @test graph.configuration.points.sizes.title == "total UMIs"
             @test graph.configuration.points.sizes.show_legend
             @test graph.configuration.points.sizes.scale.log_base == Log10Base
+            @test graph.configuration.points.sizes.scale.log_regularization == 1
             return nothing
         end
 
@@ -618,20 +622,19 @@ nested_test("data_sources") do
             axis = x_axis_vector_fields(points)
             before = string(points.configuration)
 
-            put_block_configuration!(axis, Dict("B1" => "red"))
-            put_boolean_annotation_configuration!(axis)
+            put_boolean_configuration!(axis)
+            put_category_configuration!(axis, Dict("X" => "red"))
+            put_coordinates_configuration!(colors)
+            put_expression_level_configuration!(sizes)
+            put_fold_configuration!(axis)
             put_gene_correlation_change_configuration!(sizes)
-            put_genes_expression_configuration!(sizes)
-            put_genes_fold_configuration!(axis)
-            put_type_configuration!(axis, Dict("X" => "red"))
-            put_umap_configuration!(colors)
 
             @test string(points.configuration) == before
             return nothing
         end
 
         nested_test("other") do
-            put_count_configuration!(points.data.x)
+            put_size_configuration!(points.data.x)
             put_umap_data!(points.configuration.x_axis, Float32[1.0, 2.0])
             @test points.data.x.vector === nothing
             return nothing

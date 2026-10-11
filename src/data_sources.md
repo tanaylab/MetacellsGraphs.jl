@@ -56,12 +56,24 @@ MetacellsGraphs.DataSources.fill_axes_matrix_data!
 MetacellsGraphs.DataSources.get_axes_matrix
 ```
 
-## Gene Expression
+## Display Buckets
+
+Properties fall into a few buckets by how they are shown. Each bucket has one configuration function, and the data
+source of each property uses the function of its bucket.
 
 ```@docs
-MetacellsGraphs.DataSources.put_genes_expression_configuration!
+MetacellsGraphs.DataSources.put_size_configuration!
+MetacellsGraphs.DataSources.put_expression_level_configuration!
 MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
+MetacellsGraphs.DataSources.put_fold_configuration!
+MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
+MetacellsGraphs.DataSources.put_boolean_configuration!
+MetacellsGraphs.DataSources.put_category_configuration!
+MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR
+MetacellsGraphs.DataSources.put_coordinates_configuration!
 ```
+
+## Gene Expression
 
 ### Gene Expression Vectors
 
@@ -81,9 +93,7 @@ MetacellsGraphs.DataSources.get_genes_expression_matrix
 
 ```@docs
 MetacellsGraphs.DataSources.fill_genes_fold_matrix!
-MetacellsGraphs.DataSources.put_genes_fold_configuration!
 MetacellsGraphs.DataSources.get_genes_fold_matrix
-MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
 ```
 
 ## Gene Correlations
@@ -106,7 +116,6 @@ MetacellsGraphs.DataSources.get_gene_correlation_change_vector
 ```@docs
 MetacellsGraphs.DataSources.fill_umap!
 MetacellsGraphs.DataSources.put_umap_data!
-MetacellsGraphs.DataSources.put_umap_configuration!
 MetacellsGraphs.DataSources.get_umap_vector
 ```
 
@@ -120,12 +129,6 @@ MetacellsGraphs.DataSources.get_skeleton_gene_indices
 ```
 
 ## Counts
-
-Every count-like quantity is shown the same way, so they share one configuration.
-
-```@docs
-MetacellsGraphs.DataSources.put_count_configuration!
-```
 
 ### Total UMIs
 
@@ -158,10 +161,8 @@ MetacellsGraphs.DataSources.get_mean_total_UMIs_per_cell_vector
 
 ```@docs
 MetacellsGraphs.DataSources.fill_block!
-MetacellsGraphs.DataSources.put_block_configuration!
 MetacellsGraphs.DataSources.get_block_vector
 MetacellsGraphs.DataSources.get_block_colors
-MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
 ```
 
 ## Global Flow Order
@@ -175,17 +176,14 @@ MetacellsGraphs.DataSources.get_global_flow_order_vector
 
 ```@docs
 MetacellsGraphs.DataSources.fill_type!
-MetacellsGraphs.DataSources.put_type_configuration!
 MetacellsGraphs.DataSources.get_type_vector
 MetacellsGraphs.DataSources.get_type_colors
-MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
 ```
 
 ## Boolean Annotations
 
 ```@docs
 MetacellsGraphs.DataSources.fill_boolean_annotation!
-MetacellsGraphs.DataSources.put_boolean_annotation_configuration!
 MetacellsGraphs.DataSources.get_boolean_annotation_vector
 ```
 

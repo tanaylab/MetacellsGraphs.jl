@@ -56,8 +56,7 @@ is used for computing hover values (data) and as an axis/legend title (configura
 """
 module DataSources
 
-export EMPTY_BLOCK_COLOR
-export EMPTY_TYPE_COLOR
+export EMPTY_CATEGORY_COLOR
 export fill_axes_matrix_data!
 export fill_axes_names_data!
 export fill_axis_names_data!
@@ -111,14 +110,13 @@ export get_type_vector
 export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
-export put_block_configuration!
-export put_boolean_annotation_configuration!
-export put_count_configuration!
+export put_boolean_configuration!
+export put_category_configuration!
+export put_coordinates_configuration!
+export put_expression_level_configuration!
+export put_fold_configuration!
 export put_gene_correlation_change_configuration!
-export put_genes_expression_configuration!
-export put_genes_fold_configuration!
-export put_type_configuration!
-export put_umap_configuration!
+export put_size_configuration!
 export put_umap_data!
 
 using DataAxesFormats
@@ -139,16 +137,11 @@ The extreme of the color scale of the log-base-2 fold factors between gene expre
 MAX_FOLD_FOR_GRAPHS::Float64 = 3
 
 """
-The color to give to entities without any type annotation (empty string type). This should be different from the color
-given to any explicit type. The `"magenta"` color was chosen as it isn't often used and visibly stands out.
+The color to give to entities without any value of a category (an empty string), e.g. with no type or no block. A
+computed palette takes its colors from the `HSV` palette, which holds only fully saturated colors. The `"grey"` color
+isn't one of them.
 """
-EMPTY_TYPE_COLOR::AbstractString = "magenta"
-
-"""
-The color to give to entities without any block (empty string block). The blocks get their colors from the `HSV`
-palette, which holds only fully saturated colors. The `"grey"` color isn't one of them.
-"""
-EMPTY_BLOCK_COLOR::AbstractString = "grey"
+EMPTY_CATEGORY_COLOR::AbstractString = "grey"
 
 """
     get_total_UMIs_vector(
@@ -177,80 +170,77 @@ function get_total_UMIs_vector(
 end
 
 """
-    put_count_configuration!(
+    put_size_configuration!(
         sinks::Sinks;
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
     )::Nothing
 
-Show a count on a log-base-2 scale, in the `YlOrRd` color scale, named by the `title`. This is how every count-like
-quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of
-magnitude, which is what the log scale is for.
+Show a size (a count) on a log-base-10 scale, regularized by 1, in the `YlOrRd` color scale, named by the `title`. This
+is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these.
+They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is
+rare, a place on the scale.
 
-The color scale runs from yellow through orange to red, so the low end is still visible; one which starts at white
-would lose it against the background.
-
-A count shown as sizes uses a log-base-10 scale instead. The base does not change the sizes, but it gives the legend of
-sizes round values such as 100, 200 and 500.
-
-There is no regularization, because anything real has at least one of whatever is being counted.
+The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is
+visible. A scale which starts at white would lose it against the background.
 """
-function put_count_configuration!(
+function put_size_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_count_configuration!(sink; title, show_legend)
+        return put_size_configuration!(sink; title, show_legend)
     end
     return nothing
 end
 
-function put_count_configuration!(
+function put_size_configuration!(
     sizes::SizesConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     sizes.show_legend = show_legend
-    sizes.scale.log_base = Log10Base
+    put_size_configuration!(sizes.scale)
     if title !== nothing
         sizes.title = title
     end
     return nothing
 end
 
-function put_count_configuration!(
+function put_size_configuration!(
     axis::AxisConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,  # NOLINT
 )::Nothing
-    put_count_configuration!(axis.scale)
+    put_size_configuration!(axis.scale)
     if title !== nothing
         axis.title = title
     end
     return nothing
 end
 
-function put_count_configuration!(
+function put_size_configuration!(
     colors::ColorsConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     colors.palette = "YlOrRd"
     colors.show_legend = show_legend
-    put_count_configuration!(colors.scale)
+    put_size_configuration!(colors.scale)
     if title !== nothing
         colors.title = title
     end
     return nothing
 end
 
-function put_count_configuration!(
+function put_size_configuration!(
     scale::ScaleConfiguration;
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
 )::Nothing
-    scale.log_base = Log2Base
+    scale.log_base = Log10Base
+    scale.log_regularization = 1
     return nothing
 end
 
@@ -266,8 +256,8 @@ end
         show_legend::Bool = true,
     )::Nothing
 
-Fill the `sinks` with the total UMIs of each of the `entries` of the `daf` `axis`, shown in log base 2 in the `YlOrRd`
-color scale, and name the entities after the `entries`.
+Fill the `sinks` with the total UMIs of each of the `entries` of the `daf` `axis`, shown as a count, and name the
+entities after the `entries`.
 """
 function fill_total_UMIs!(
     sinks::VectorDataSinks,
@@ -281,7 +271,7 @@ function fill_total_UMIs!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_total_UMIs_vector(daf; axis, entries, via, empty_value); title)  # NOJET
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -334,7 +324,7 @@ function fill_n_cells!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_n_cells_vector(daf; axis, entries, via, empty_value); title)
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -388,7 +378,7 @@ function fill_n_metacells!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_n_metacells_vector(daf; axis, entries, via, empty_value); title)
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -438,7 +428,7 @@ function fill_mean_cells_per_metacell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_cells_per_metacell_vector(daf; axis, entries, via); title)
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -488,7 +478,7 @@ function fill_mean_total_UMIs_per_metacell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via); title)
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -538,7 +528,7 @@ function fill_mean_total_UMIs_per_cell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via); title)
-    put_count_configuration!(sinks; title, show_legend)
+    put_size_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -603,7 +593,7 @@ end
         empty_value::AbstractString = "",
         title::Maybe{AbstractString} = "block",
         show_legend::Bool = false,
-        empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+        empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     )::Nothing
 
 Fill the `sinks` with the block of each of the `entries` of the `daf` `axis`, and name the entities after the
@@ -623,61 +613,12 @@ function fill_block!(
     empty_value::AbstractString = "",
     title::Maybe{AbstractString} = "block",
     show_legend::Bool = false,
-    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_block_vector(daf; axis, entries, via, empty_value); title)
-    put_block_configuration!(sinks, get_block_colors(daf; empty_value, empty_block_color); title, show_legend)
+    put_category_configuration!(sinks, get_block_colors(daf; empty_value, empty_block_color); title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
-    return nothing
-end
-
-"""
-    put_block_configuration!(
-        sinks::Sinks,
-        color_per_block::CategoricalColors;
-        title::Maybe{AbstractString} = nothing,
-        show_legend::Bool = false,
-    )::Nothing
-
-Show the blocks of the `sinks` using the `color_per_block` palette, named by the `title`. The blocks themselves are put
-in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
-
-There are too many blocks for a legend to help, so `show_legend` is off.
-"""
-function put_block_configuration!(
-    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector},
-    color_per_block::CategoricalColors;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = false,
-)::Nothing
-    visit_configuration_sinks(sinks) do sink
-        return put_block_configuration!(sink, color_per_block; title, show_legend)
-    end
-    return nothing
-end
-
-# A block is only ever colors.
-function put_block_configuration!(
-    ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration},
-    ::CategoricalColors;
-    title::Maybe{AbstractString} = nothing,  # NOLINT
-    show_legend::Bool = false,  # NOLINT
-)::Nothing
-    return nothing
-end
-
-function put_block_configuration!(
-    colors::ColorsConfiguration,
-    color_per_block::CategoricalColors;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = false,
-)::Nothing
-    colors.palette = color_per_block
-    colors.show_legend = show_legend
-    if title !== nothing
-        colors.title = title
-    end
     return nothing
 end
 
@@ -685,7 +626,7 @@ end
     get_block_colors(
         daf::DafReader;
         empty_value::AbstractString = "",
-        empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+        empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     )::OrderedDict{AbstractString, AbstractString}
 
 Get the palette mapping each entry of the `daf` `block` axis to its own color, with an additional `empty_block_color`
@@ -700,7 +641,7 @@ a block. An entry which doesn't is then rejected, because its block isn't a key 
 function get_block_colors(
     daf::DafReader;
     empty_value::AbstractString = "",
-    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
     color_palette = OrderedDict{AbstractString, AbstractString}(categorical_palette(axis_vector(daf, "block")))  # NOJET
     if empty_block_color !== nothing
@@ -792,30 +733,30 @@ function get_boolean_annotation_vector(
 end
 
 """
-    put_boolean_annotation_configuration!(
+    put_boolean_configuration!(
         sinks::Sinks;
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = false,
     )::Nothing
 
-Show Boolean *string* annotations: `true` in black and `false` in light grey, named by the `title`. The values
-themselves are put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
+Show Boolean *string* values: `true` in black and `false` in light grey, named by the `title`. The values themselves
+are put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
 Black against light grey has only two values and is named by its title, so `show_legend` is off.
 """
-function put_boolean_annotation_configuration!(
+function put_boolean_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_boolean_annotation_configuration!(sink; title, show_legend)
+        return put_boolean_configuration!(sink; title, show_legend)
     end
     return nothing
 end
 
-# An annotation is only ever colors.
-function put_boolean_annotation_configuration!(
+# Booleans are shown only as colors. This method ignores an axis, a scale and sizes.
+function put_boolean_configuration!(
     ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration};
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = false,  # NOLINT
@@ -823,7 +764,7 @@ function put_boolean_annotation_configuration!(
     return nothing
 end
 
-function put_boolean_annotation_configuration!(
+function put_boolean_configuration!(
     colors::ColorsConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
@@ -861,7 +802,7 @@ function fill_boolean_annotation!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_boolean_annotation_vector(daf; axis, property, entries); title)
-    put_boolean_annotation_configuration!(sinks; title, show_legend)
+    put_boolean_configuration!(sinks; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -893,7 +834,7 @@ function fill_gene_expression!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title)
-    put_genes_expression_configuration!(sinks; gene_fraction_regularization, title, show_legend)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1116,7 +1057,7 @@ function fill_genes_expression_matrix!(
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title)
-    put_genes_expression_configuration!(sinks; gene_fraction_regularization, title, show_legend)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend)
     fill_axes_names_data!(
         sinks,
         daf;
@@ -1156,21 +1097,24 @@ function get_genes_expression_matrix(
 end
 
 """
-    put_genes_expression_configuration!(
+    put_expression_level_configuration!(
         sinks::Sinks;
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
     )::Nothing
 
-Show gene expression (linear fraction) on a log-base-2 scale, regularized by `gene_fraction_regularization`, named by
-the `title`. The fractions themselves are put in by
+Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log-base-2 scale, regularized by
+`gene_fraction_regularization`, named by the `title`. The expression levels themselves are put in by
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
-The `show_legend` applies where the fractions are the colors. An axis is read off its own ticks and ignores it.
+As colors, the expression levels are shown in the `WtYlOrRdDm` color scale, which starts at zero. Zero expression is
+common, and is white, so any expression above it shows a color.
+
+The `show_legend` applies where the expression levels are the colors. An axis is read off its own ticks and ignores it.
 """
-function put_genes_expression_configuration!(
+function put_expression_level_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
@@ -1178,13 +1122,13 @@ function put_genes_expression_configuration!(
 )::Nothing
     @assert gene_fraction_regularization >= 0
     visit_configuration_sinks(sinks) do sink
-        return put_genes_expression_configuration!(sink; gene_fraction_regularization, title, show_legend)
+        return put_expression_level_configuration!(sink; gene_fraction_regularization, title, show_legend)
     end
     return nothing
 end
 
 # Gene expression is not shown as a size.
-function put_genes_expression_configuration!(
+function put_expression_level_configuration!(
     ::SizesConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
     title::Maybe{AbstractString} = "fraction",  # NOLINT
@@ -1193,26 +1137,28 @@ function put_genes_expression_configuration!(
     return nothing
 end
 
-function put_genes_expression_configuration!(
+function put_expression_level_configuration!(
     axis::AxisConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,  # NOLINT
 )::Nothing
-    put_genes_expression_configuration!(axis.scale; gene_fraction_regularization)
+    put_expression_level_configuration!(axis.scale; gene_fraction_regularization)
     if title !== nothing
         axis.title = title
     end
     return nothing
 end
 
-function put_genes_expression_configuration!(
+function put_expression_level_configuration!(
     colors::ColorsConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
 )::Nothing
-    put_genes_expression_configuration!(colors.scale; gene_fraction_regularization)
+    put_expression_level_configuration!(colors.scale; gene_fraction_regularization)
+    colors.palette = "WtYlOrRdDm"
+    colors.scale.minimum = 0
     colors.show_legend = show_legend
     if title !== nothing
         colors.title = title
@@ -1220,7 +1166,7 @@ function put_genes_expression_configuration!(
     return nothing
 end
 
-function put_genes_expression_configuration!(
+function put_expression_level_configuration!(
     scale::ScaleConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = nothing,  # NOLINT
@@ -1301,7 +1247,7 @@ function fill_umap!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_umap_data!(sinks, get_umap_vector(daf; coordinate, axis, entries); title)
-    put_umap_configuration!(sinks; title)
+    put_coordinates_configuration!(sinks; title)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1326,30 +1272,30 @@ function get_umap_vector(
 end
 
 """
-    put_umap_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+    put_coordinates_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
 
-Show UMAP coordinates without ticks or a grid, named by the `title`. Only which points are near which other points
-means anything, so the values themselves are not worth labelling.
+Show the coordinates of an embedding (e.g. a UMAP) without ticks or a grid, named by the `title`. Only which points are
+near which other points means anything, so the values themselves are not worth labelling.
 """
-function put_umap_configuration!(
+function put_coordinates_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_umap_configuration!(sink; title)
+        return put_coordinates_configuration!(sink; title)
     end
     return nothing
 end
 
-# UMAP coordinates are only ever an axis.
-function put_umap_configuration!(
+# Coordinates are shown only along an axis. This method ignores a scale, colors and sizes.
+function put_coordinates_configuration!(
     ::Union{ScaleConfiguration, ColorsConfiguration, SizesConfiguration};
     title::Maybe{AbstractString} = nothing,  # NOLINT
 )::Nothing
     return nothing
 end
 
-function put_umap_configuration!(axis::AxisConfiguration; title::Maybe{AbstractString} = nothing)::Nothing
+function put_coordinates_configuration!(axis::AxisConfiguration; title::Maybe{AbstractString} = nothing)::Nothing
     if title !== nothing
         axis.title = title
     end
@@ -1387,7 +1333,7 @@ function fill_genes_fold_matrix!(
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_fold_matrix(daf; genes, axis, entries); title)  # NOJET
-    put_genes_fold_configuration!(sinks; max_fold, title, show_legend)
+    put_fold_configuration!(sinks; max_fold, title, show_legend)
     fill_axes_names_data!(
         sinks,
         daf;
@@ -1429,18 +1375,19 @@ function get_genes_fold_matrix(
 end
 
 """
-    put_genes_fold_configuration!(
+    put_fold_configuration!(
         sinks::Sinks;
         max_fold::Real = MAX_FOLD_FOR_GRAPHS,
         title::Maybe{AbstractString} = "fold from median",
         show_legend::Bool = true,
     )::Nothing
 
-Show the genes fold (log base-2 minus the median) in the range -`max_fold` (blue) to 0 (white) to +`max_fold` (red),
-named by the `title`, and include it in the legend if `show_legend`. The folds themselves are put in by
+Show a fold (the log base 2 of a ratio, e.g. of a gene's expression to its median) in the range -`max_fold` (blue) to
+0 (white) to +`max_fold` (red), named by the `title`, and include it in the legend if `show_legend`. The folds
+themselves are put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 """
-function put_genes_fold_configuration!(
+function put_fold_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fold from median",
@@ -1448,13 +1395,13 @@ function put_genes_fold_configuration!(
 )::Nothing
     @assert max_fold > 0
     visit_configuration_sinks(sinks) do sink
-        return put_genes_fold_configuration!(sink; max_fold, title, show_legend)
+        return put_fold_configuration!(sink; max_fold, title, show_legend)
     end
     return nothing
 end
 
-# A fold is only ever colors.
-function put_genes_fold_configuration!(
+# Folds are shown only as colors. This method ignores an axis, a scale and sizes.
+function put_fold_configuration!(
     ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration};
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,  # NOLINT
     title::Maybe{AbstractString} = "fold from median",  # NOLINT
@@ -1463,7 +1410,7 @@ function put_genes_fold_configuration!(
     return nothing
 end
 
-function put_genes_fold_configuration!(
+function put_fold_configuration!(
     colors::ColorsConfiguration;
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fold from median",
@@ -1753,7 +1700,7 @@ function fill_column_boolean_annotation!(
     show_legend::Bool = false,
 )::Nothing
     put_vector_data!(sinks, string.(get_column_vector(frame; column)); title)
-    put_boolean_annotation_configuration!(sinks; title, show_legend)
+    put_boolean_configuration!(sinks; title, show_legend)
     return nothing
 end
 
@@ -1843,7 +1790,7 @@ end
         via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = type_axis,
         show_legend::Bool = true,
-        empty_type_color::AbstractString = EMPTY_TYPE_COLOR,
+        empty_type_color::AbstractString = EMPTY_CATEGORY_COLOR,
     )::Nothing
 
 Fill the `sinks` with the `type_property` of each of the `entries` of the `daf` `axis`, and name the entities after the
@@ -1853,7 +1800,7 @@ of each entry of the `type_axis`, with an additional `empty_type_color` for `ent
 
 This fetches the data with [`get_type_vector`](@ref) and [`get_type_colors`](@ref), puts the types in with
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!), and says how to show them with
-[`put_type_configuration!`](@ref).
+[`put_category_configuration!`](@ref).
 """
 function fill_type!(
     sinks::VectorDataSinks,
@@ -1865,43 +1812,48 @@ function fill_type!(
     via::Maybe{Union{Tuple{<:AbstractString}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = type_axis,
     show_legend::Bool = true,
-    empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
+    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_type_vector(daf; axis, entries, type_property, via); title)
-    put_type_configuration!(sinks, get_type_colors(daf; type_axis, empty_type_color); title, show_legend)
+    put_category_configuration!(sinks, get_type_colors(daf; type_axis, empty_type_color); title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
 
 """
-    put_type_configuration!(
+    put_category_configuration!(
         sinks::Sinks,
-        color_per_type::CategoricalColors;
+        color_per_value::CategoricalColors;
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
     )::Nothing
 
-Show the types of the `sinks` using the `color_per_type` palette, named by the `title`. The types themselves are put in
-by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
+Show the values of a category (e.g. types or blocks) of the `sinks` using the `color_per_value` palette, named by the
+`title`. The values themselves are put in by
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
-A color says nothing without a legend to read it by, so `show_legend` is on. Turn it off for an annotation of a graph
-whose colors already name the same types.
+The palette is required, and covers every value, including the empty one of entries with no value. Where it comes from
+is up to the data source. For example, [`get_type_colors`](@ref) reads the colors given by the repository, and
+[`get_block_colors`](@ref) computes them.
+
+A color says nothing without a legend to read it by, so `show_legend` is on. Turn it off for a category with too many
+values to list, or for an annotation of a graph whose colors already name the same values.
 """
-function put_type_configuration!(
+function put_category_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector},
-    color_per_type::CategoricalColors;
+    color_per_value::CategoricalColors;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_type_configuration!(sink, color_per_type; title, show_legend)
+        return put_category_configuration!(sink, color_per_value; title, show_legend)
     end
     return nothing
 end
 
-# A type is only ever colors.
-function put_type_configuration!(
+# Categories are shown only as colors. This method ignores an axis, a scale and sizes.
+function put_category_configuration!(
     ::Union{AxisConfiguration, ScaleConfiguration, SizesConfiguration},
     ::CategoricalColors;
     title::Maybe{AbstractString} = nothing,  # NOLINT
@@ -1910,13 +1862,13 @@ function put_type_configuration!(
     return nothing
 end
 
-function put_type_configuration!(
+function put_category_configuration!(
     colors::ColorsConfiguration,
-    color_per_type::CategoricalColors;
+    color_per_value::CategoricalColors;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
-    colors.palette = color_per_type
+    colors.palette = color_per_value
     colors.show_legend = show_legend
     if title !== nothing
         colors.title = title
@@ -1951,7 +1903,7 @@ end
     get_type_colors(
         daf::DafReader;
         type_axis::AbstractString = "type",
-        empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
+        empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     )::OrderedDict{AbstractString, AbstractString}
 
 Get the palette mapping each entry of the `daf` `type_axis` to its `color`, with an additional `empty_type_color` for
@@ -1965,7 +1917,7 @@ type. An entry which doesn't is then rejected, because its type isn't a key of t
 function get_type_colors(
     daf::DafReader;
     type_axis::AbstractString = "type",
-    empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
+    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
     color_per_type = get_vector(daf, type_axis, "color")
     color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_type)[1], color_per_type))

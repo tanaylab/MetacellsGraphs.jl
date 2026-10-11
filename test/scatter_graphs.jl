@@ -112,7 +112,8 @@ nested_test("scatter_graphs") do
             fill_type!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
             @test graph.configuration.points.colors.title == "type"
-            @test graph.configuration.points.colors.palette == Dict("X" => "red", "Y" => "blue", "" => EMPTY_TYPE_COLOR)
+            @test graph.configuration.points.colors.palette ==
+                  Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
             @test graph.configuration.points.colors.show_legend
             @test graph.data.points.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
@@ -123,7 +124,7 @@ nested_test("scatter_graphs") do
             graph = umap_graph(daf)
             fill_total_UMIs!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == UInt32[100, 200, 300, 400]
-            @test graph.configuration.points.colors.scale.log_base == Log2Base
+            @test graph.configuration.points.colors.scale.log_base == Log10Base
             return nothing
         end
     end

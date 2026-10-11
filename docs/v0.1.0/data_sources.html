@@ -73,6 +73,12 @@
 </a>
 </li>
 <li>
+<a class="tocitem" href="#Display-Buckets">
+<span>Display Buckets
+</span>
+</a>
+</li>
+<li>
 <a class="tocitem" href="#Gene-Expression">
 <span>Gene Expression
 </span>
@@ -1052,19 +1058,21 @@
 </section>
 </details>
 </article>
-<h2 id="Gene-Expression">
-<a class="docs-heading-anchor" href="#Gene-Expression">Gene Expression
+<h2 id="Display-Buckets">
+<a class="docs-heading-anchor" href="#Display-Buckets">Display Buckets
 </a>
-<a id="Gene-Expression-1">
+<a id="Display-Buckets-1">
 </a>
-<a class="docs-heading-anchor-permalink" href="#Gene-Expression" title="Permalink">
+<a class="docs-heading-anchor-permalink" href="#Display-Buckets" title="Permalink">
 </a>
 </h2>
+<p>Properties fall into a few buckets by how they are shown. Each bucket has one configuration function, and the data source of each property uses the function of its bucket.
+</p>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_genes_expression_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_genes_expression_configuration!">
-<code>MetacellsGraphs.DataSources.put_genes_expression_configuration!
+<summary id="MetacellsGraphs.DataSources.put_size_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>MetacellsGraphs.DataSources.put_size_configuration!
 </code>
 </a> — 
 <span class="docstring-category">Function
@@ -1073,7 +1081,39 @@
 <section>
 <div>
 <pre>
-<code class="language-julia hljs">put_genes_expression_configuration!(
+<code class="language-julia hljs">put_size_configuration!(
+    sinks::Sinks;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show a size (a count) on a log-base-10 scale, regularized by 1, in the 
+<code>YlOrRd
+</code> color scale, named by the 
+<code>title
+</code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is rare, a place on the scale.
+</p>
+<p>The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is visible. A scale which starts at white would lose it against the background.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_expression_level_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_expression_level_configuration!">
+<code>MetacellsGraphs.DataSources.put_expression_level_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_expression_level_configuration!(
     sinks::Sinks;
     gene_fraction_regularization::Real = 1.0e-5,
     title::Maybe{AbstractString} = &quot;fraction&quot;,
@@ -1081,11 +1121,11 @@
 )::Nothing
 </code>
 </pre>
-<p>Show gene expression (linear fraction) on a log-base-2 scale, regularized by 
+<p>Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log-base-2 scale, regularized by 
 <code>gene_fraction_regularization
 </code>, named by the 
 <code>title
-</code>. The fractions themselves are put in by 
+</code>. The expression levels themselves are put in by 
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
@@ -1095,9 +1135,13 @@
 </code>
 </a>.
 </p>
+<p>As colors, the expression levels are shown in the 
+<code>WtYlOrRdDm
+</code> color scale, which starts at zero. Zero expression is common, and is white, so any expression above it shows a color.
+</p>
 <p>The 
 <code>show_legend
-</code> applies where the fractions are the colors. An axis is read off its own ticks and ignores it.
+</code> applies where the expression levels are the colors. An axis is read off its own ticks and ignores it.
 </p>
 </div>
 </section>
@@ -1121,6 +1165,214 @@
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_fold_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_fold_configuration!">
+<code>MetacellsGraphs.DataSources.put_fold_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_fold_configuration!(
+    sinks::Sinks;
+    max_fold::Real = MAX_FOLD_FOR_GRAPHS,
+    title::Maybe{AbstractString} = &quot;fold from median&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show a fold (the log base 2 of a ratio, e.g. of a gene&#39;s expression to its median) in the range -
+<code>max_fold
+</code> (blue) to 0 (white) to +
+<code>max_fold
+</code> (red), named by the 
+<code>title
+</code>, and include it in the legend if 
+<code>show_legend
+</code>. The folds themselves are put in by 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a> or 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_data%21">
+<code>put_matrix_data!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_boolean_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_configuration!">
+<code>MetacellsGraphs.DataSources.put_boolean_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_boolean_configuration!(
+    sinks::Sinks;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = false,
+)::Nothing
+</code>
+</pre>
+<p>Show Boolean 
+<em>string
+</em> values: 
+<code>true
+</code> in black and 
+<code>false
+</code> in light grey, named by the 
+<code>title
+</code>. The values themselves are put in by 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>Black against light grey has only two values and is named by its title, so 
+<code>show_legend
+</code> is off.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_category_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_category_configuration!">
+<code>MetacellsGraphs.DataSources.put_category_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_category_configuration!(
+    sinks::Sinks,
+    color_per_value::CategoricalColors;
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show the values of a category (e.g. types or blocks) of the 
+<code>sinks
+</code> using the 
+<code>color_per_value
+</code> palette, named by the 
+<code>title
+</code>. The values themselves are put in by 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a>.
+</p>
+<p>The palette is required, and covers every value, including the empty one of entries with no value. Where it comes from is up to the data source. For example, 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_type_colors">
+<code>get_type_colors
+</code>
+</a> reads the colors given by the repository, and 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_colors">
+<code>get_block_colors
+</code>
+</a> computes them.
+</p>
+<p>A color says nothing without a legend to read it by, so 
+<code>show_legend
+</code> is on. Turn it off for a category with too many values to list, or for an annotation of a graph whose colors already name the same values.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The color to give to entities without any value of a category (an empty string), e.g. with no type or no block. A computed palette takes its colors from the 
+<code>HSV
+</code> palette, which holds only fully saturated colors. The 
+<code>&quot;grey&quot;
+</code> color isn&#39;t one of them.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_coordinates_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_coordinates_configuration!">
+<code>MetacellsGraphs.DataSources.put_coordinates_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_coordinates_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
+</code>
+</pre>
+<p>Show the coordinates of an embedding (e.g. a UMAP) without ticks or a grid, named by the 
+<code>title
+</code>. Only which points are near which other points means anything, so the values themselves are not worth labelling.
+</p>
+</div>
+</section>
+</details>
+</article>
+<h2 id="Gene-Expression">
+<a class="docs-heading-anchor" href="#Gene-Expression">Gene Expression
+</a>
+<a id="Gene-Expression-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Gene-Expression" title="Permalink">
+</a>
+</h2>
 <h3 id="Gene-Expression-Vectors">
 <a class="docs-heading-anchor" href="#Gene-Expression-Vectors">Gene Expression Vectors
 </a>
@@ -1366,45 +1618,6 @@
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_genes_fold_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_genes_fold_configuration!">
-<code>MetacellsGraphs.DataSources.put_genes_fold_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_genes_fold_configuration!(
-    sinks::Sinks;
-    max_fold::Real = MAX_FOLD_FOR_GRAPHS,
-    title::Maybe{AbstractString} = &quot;fold from median&quot;,
-    show_legend::Bool = true,
-)::Nothing
-</code>
-</pre>
-<p>Show the genes fold (log base-2 minus the median) in the range -
-<code>max_fold
-</code> (blue) to 0 (white) to +
-<code>max_fold
-</code> (red), named by the 
-<code>title
-</code>, and include it in the legend if 
-<code>show_legend
-</code>. The folds themselves are put in by 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_data%21">
-<code>put_matrix_data!
-</code>
-</a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.get_genes_fold_matrix">
 <a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_genes_fold_matrix">
 <code>MetacellsGraphs.DataSources.get_genes_fold_matrix
@@ -1443,24 +1656,6 @@
 </code>. The median of each gene is taken across the 
 <code>entries
 </code>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS">
-<code>MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.
 </p>
 </div>
 </section>
@@ -1756,30 +1951,6 @@
 </article>
 <article>
 <details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_umap_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_umap_configuration!">
-<code>MetacellsGraphs.DataSources.put_umap_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_umap_configuration!(sinks::Sinks; title::Maybe{AbstractString} = nothing)::Nothing
-</code>
-</pre>
-<p>Show UMAP coordinates without ticks or a grid, named by the 
-<code>title
-</code>. Only which points are near which other points means anything, so the values themselves are not worth labelling.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.get_umap_vector">
 <a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_umap_vector">
 <code>MetacellsGraphs.DataSources.get_umap_vector
@@ -1891,44 +2062,6 @@
 <a class="docs-heading-anchor-permalink" href="#Counts" title="Permalink">
 </a>
 </h2>
-<p>Every count-like quantity is shown the same way, so they share one configuration.
-</p>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_count_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_count_configuration!">
-<code>MetacellsGraphs.DataSources.put_count_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_count_configuration!(
-    sinks::Sinks;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = true,
-)::Nothing
-</code>
-</pre>
-<p>Show a count on a log-base-2 scale, in the 
-<code>YlOrRd
-</code> color scale, named by the 
-<code>title
-</code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for.
-</p>
-<p>The color scale runs from yellow through orange to red, so the low end is still visible; one which starts at white would lose it against the background.
-</p>
-<p>A count shown as sizes uses a log-base-10 scale instead. The base does not change the sizes, but it gives the legend of sizes round values such as 100, 200 and 500.
-</p>
-<p>There is no regularization, because anything real has at least one of whatever is being counted.
-</p>
-</div>
-</section>
-</details>
-</article>
 <h3 id="Total-UMIs">
 <a class="docs-heading-anchor" href="#Total-UMIs">Total UMIs
 </a>
@@ -1970,9 +2103,7 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown in log base 2 in the 
-<code>YlOrRd
-</code> color scale, and name the entities after the 
+</code>, shown as a count, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -2439,7 +2570,7 @@
     empty_value::AbstractString = &quot;&quot;,
     title::Maybe{AbstractString} = &quot;block&quot;,
     show_legend::Bool = false,
-    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::Nothing
 </code>
 </pre>
@@ -2464,47 +2595,6 @@
 <p>Aim this at a whole data source view to get the values and a hover line, or at its 
 <code>values
 </code> alone to get only the values.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_block_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_block_configuration!">
-<code>MetacellsGraphs.DataSources.put_block_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_block_configuration!(
-    sinks::Sinks,
-    color_per_block::CategoricalColors;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = false,
-)::Nothing
-</code>
-</pre>
-<p>Show the blocks of the 
-<code>sinks
-</code> using the 
-<code>color_per_block
-</code> palette, named by the 
-<code>title
-</code>. The blocks themselves are put in by 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
-<code>put_vector_data!
-</code>
-</a>.
-</p>
-<p>There are too many blocks for a legend to help, so 
-<code>show_legend
-</code> is off.
 </p>
 </div>
 </section>
@@ -2564,7 +2654,7 @@
 <code class="language-julia hljs">get_block_colors(
     daf::DafReader;
     empty_value::AbstractString = &quot;&quot;,
-    empty_block_color::Maybe{AbstractString} = EMPTY_BLOCK_COLOR,
+    empty_block_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
 </code>
 </pre>
@@ -2591,28 +2681,6 @@
 </code> leaves the 
 <code>empty_value
 </code> out of the palette, which says you expect every entry to have a block. An entry which doesn&#39;t is then rejected, because its block isn&#39;t a key of the palette.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
-<code>MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The color to give to entities without any block (empty string block). The blocks get their colors from the 
-<code>HSV
-</code> palette, which holds only fully saturated colors. The 
-<code>&quot;grey&quot;
-</code> color isn&#39;t one of them.
 </p>
 </div>
 </section>
@@ -2735,7 +2803,7 @@
     via::Maybe{Union{Tuple{&lt;:AbstractString}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = type_axis,
     show_legend::Bool = true,
-    empty_type_color::AbstractString = EMPTY_TYPE_COLOR,
+    empty_type_color::AbstractString = EMPTY_CATEGORY_COLOR,
 )::Nothing
 </code>
 </pre>
@@ -2776,51 +2844,10 @@
 <code>put_vector_data!
 </code>
 </a>, and says how to show them with 
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_type_configuration!">
-<code>put_type_configuration!
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
+<code>put_category_configuration!
 </code>
 </a>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_type_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_type_configuration!">
-<code>MetacellsGraphs.DataSources.put_type_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_type_configuration!(
-    sinks::Sinks,
-    color_per_type::CategoricalColors;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = true,
-)::Nothing
-</code>
-</pre>
-<p>Show the types of the 
-<code>sinks
-</code> using the 
-<code>color_per_type
-</code> palette, named by the 
-<code>title
-</code>. The types themselves are put in by 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
-<code>put_vector_data!
-</code>
-</a>.
-</p>
-<p>A color says nothing without a legend to read it by, so 
-<code>show_legend
-</code> is on. Turn it off for an annotation of a graph whose colors already name the same types.
 </p>
 </div>
 </section>
@@ -2880,7 +2907,7 @@
 <code class="language-julia hljs">get_type_colors(
     daf::DafReader;
     type_axis::AbstractString = &quot;type&quot;,
-    empty_type_color::Maybe{AbstractString} = EMPTY_TYPE_COLOR,
+    empty_type_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
 )::OrderedDict{AbstractString, AbstractString}
 </code>
 </pre>
@@ -2905,26 +2932,6 @@
 </code> 
 <code>empty_type_color
 </code> leaves the empty type out of the palette, which says you expect every entry to have a type. An entry which doesn&#39;t is then rejected, because its type isn&#39;t a key of the palette.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
-<code>MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
-</code>
-</a> — 
-<span class="docstring-category">Constant
-</span>
-</summary>
-<section>
-<div>
-<p>The color to give to entities without any type annotation (empty string type). This should be different from the color given to any explicit type. The 
-<code>&quot;magenta&quot;
-</code> color was chosen as it isn&#39;t often used and visibly stands out.
 </p>
 </div>
 </section>
@@ -2979,48 +2986,6 @@
 </code> in light grey, and name the entities after the 
 <code>entries
 </code>.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
-<code>MetacellsGraphs.DataSources.put_boolean_annotation_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_boolean_annotation_configuration!(
-    sinks::Sinks;
-    title::Maybe{AbstractString} = nothing,
-    show_legend::Bool = false,
-)::Nothing
-</code>
-</pre>
-<p>Show Boolean 
-<em>string
-</em> annotations: 
-<code>true
-</code> in black and 
-<code>false
-</code> in light grey, named by the 
-<code>title
-</code>. The values themselves are put in by 
-<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
-<code>put_vector_data!
-</code>
-</a>.
-</p>
-<p>Black against light grey has only two values and is named by its title, so 
-<code>show_legend
-</code> is off.
 </p>
 </div>
 </section>
@@ -3158,14 +3123,8 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR">
-<code>MetacellsGraphs.DataSources.EMPTY_BLOCK_COLOR
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR">
-<code>MetacellsGraphs.DataSources.EMPTY_TYPE_COLOR
+<a href="data_sources.html#MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR">
+<code>MetacellsGraphs.DataSources.EMPTY_CATEGORY_COLOR
 </code>
 </a>
 </li>
@@ -3488,20 +3447,32 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_block_configuration!">
-<code>MetacellsGraphs.DataSources.put_block_configuration!
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_configuration!">
+<code>MetacellsGraphs.DataSources.put_boolean_configuration!
 </code>
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_annotation_configuration!">
-<code>MetacellsGraphs.DataSources.put_boolean_annotation_configuration!
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
+<code>MetacellsGraphs.DataSources.put_category_configuration!
 </code>
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_count_configuration!">
-<code>MetacellsGraphs.DataSources.put_count_configuration!
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_coordinates_configuration!">
+<code>MetacellsGraphs.DataSources.put_coordinates_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_expression_level_configuration!">
+<code>MetacellsGraphs.DataSources.put_expression_level_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_fold_configuration!">
+<code>MetacellsGraphs.DataSources.put_fold_configuration!
 </code>
 </a>
 </li>
@@ -3512,26 +3483,8 @@
 </a>
 </li>
 <li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_genes_expression_configuration!">
-<code>MetacellsGraphs.DataSources.put_genes_expression_configuration!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_genes_fold_configuration!">
-<code>MetacellsGraphs.DataSources.put_genes_fold_configuration!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_type_configuration!">
-<code>MetacellsGraphs.DataSources.put_type_configuration!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_umap_configuration!">
-<code>MetacellsGraphs.DataSources.put_umap_configuration!
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_size_configuration!">
+<code>MetacellsGraphs.DataSources.put_size_configuration!
 </code>
 </a>
 </li>
