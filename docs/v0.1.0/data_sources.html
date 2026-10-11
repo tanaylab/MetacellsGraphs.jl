@@ -1222,10 +1222,8 @@
 <pre>
 <code class="language-julia hljs">put_size_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{&lt;:Real};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    value_per_entry::AbstractVector{&lt;:Real},
+    name_per_entry::AbstractVector{&lt;:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
@@ -1234,12 +1232,6 @@
 </pre>
 <p>Put the size (count) 
 <code>value_per_entry
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
 </code> into the 
 <code>sinks
 </code>, shown by 
@@ -1247,7 +1239,7 @@
 <code>put_size_configuration!
 </code>
 </a>, and name the entities after the 
-<code>entries
+<code>name_per_entry
 </code>. Every size data source ends with this.
 </p>
 </div>
@@ -1534,10 +1526,8 @@
 <pre>
 <code class="language-julia hljs">put_correlation_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{&lt;:Real};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    value_per_entry::AbstractVector{&lt;:Real},
+    name_per_entry::AbstractVector{&lt;:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
@@ -1545,12 +1535,6 @@
 </pre>
 <p>Put the correlation 
 <code>value_per_entry
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
 </code> into the 
 <code>sinks
 </code>, shown by 
@@ -1558,7 +1542,7 @@
 <code>put_correlation_configuration!
 </code>
 </a>, and name the entities after the 
-<code>entries
+<code>name_per_entry
 </code>. Every correlation data source ends with this.
 </p>
 </div>
@@ -1723,10 +1707,8 @@
 <pre>
 <code class="language-julia hljs">put_boolean_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{&lt;:AbstractString};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    value_per_entry::AbstractVector{&lt;:AbstractString},
+    name_per_entry::AbstractVector{&lt;:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
@@ -1736,12 +1718,6 @@
 <em>string
 </em> 
 <code>value_per_entry
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
 </code> into the 
 <code>sinks
 </code>, shown by 
@@ -1749,7 +1725,7 @@
 <code>put_boolean_configuration!
 </code>
 </a>, and name the entities after the 
-<code>entries
+<code>name_per_entry
 </code>. Every Boolean data source ends with this.
 </p>
 </div>
@@ -1921,40 +1897,26 @@
 <pre>
 <code class="language-julia hljs">put_category_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{&lt;:AbstractString};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    value_per_entry::AbstractVector{&lt;:AbstractString},
+    name_per_entry::AbstractVector{&lt;:AbstractString},
+    color_per_value::CategoricalColors;
     title::Maybe{AbstractString} = nothing,
-    empty_value::AbstractString = &quot;&quot;,
-    colors_axis::AbstractString,
-    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     show_legend::Bool = true,
 )::Nothing
 </code>
 </pre>
 <p>Put the category 
 <code>value_per_entry
-</code> of each of the 
-<code>entries
-</code> of the 
-<code>daf
-</code> 
-<code>axis
 </code> into the 
 <code>sinks
 </code>, shown by 
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_category_configuration!">
 <code>put_category_configuration!
 </code>
-</a> using the palette of the 
-<code>colors_axis
-</code> (see 
-<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_colors">
-<code>get_category_colors
-</code>
-</a>), and name the entities after the 
-<code>entries
+</a> using the 
+<code>color_per_value
+</code> palette, and name the entities after the 
+<code>name_per_entry
 </code>. Every category data source ends with this.
 </p>
 </div>
@@ -3459,9 +3421,9 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::AbstractString = &quot;&quot;,
-    title::Maybe{AbstractString} = &quot;block&quot;,
     colors_axis::AbstractString = &quot;block&quot;,
     empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    title::Maybe{AbstractString} = &quot;block&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -3664,9 +3626,9 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::AbstractString = &quot;&quot;,
-    title::Maybe{AbstractString} = &quot;type&quot;,
     colors_axis::AbstractString = &quot;type&quot;,
     empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
+    title::Maybe{AbstractString} = &quot;type&quot;,
     show_legend::Bool = true,
 )::Nothing
 </code>

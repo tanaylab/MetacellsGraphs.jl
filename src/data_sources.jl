@@ -151,15 +151,18 @@ const ENTRIES_KEYWORDS = (
 )
 
 # Define the `get_<property>_vector` and `fill_<property>!` of each property in the `table` of a display bucket. The get
-# calls the bucket's `get_function` with its `property`. The fill calls the get, and passes the values to the bucket's
+# calls the bucket's `get_function` with its `property`. The fill gets the values with the get and the names of the
+# entries, and (for a bucket with a `palette_expression`) the palette. It then passes all of them to the bucket's
 # `put_values_function`. The get takes the `axis`, the `ENTRIES_KEYWORDS` and the bucket's `get_keywords`. The fill also
-# takes the `title` and the bucket's `put_keywords`. A table line gives the `property`, its default `axis` and `title`,
-# and its `doc`. It may also give its own defaults for any of the bucket's keywords.
+# takes the `title`, the bucket's `palette_keywords` and its `put_keywords`. A table line gives the `property`, its
+# default `axis` and `title`, and its `doc`. It may also give its own defaults for any of the bucket's keywords.
 function define_bucket_data_sources(;
     get_function::Symbol,
     put_values_function::Symbol,
     get_keywords::Tuple,
     put_keywords::Tuple,
+    palette_keywords::Tuple = (),
+    palette_expression::Maybe{Expr} = nothing,
     table::Tuple,
 )::Nothing
     for line in table
@@ -184,8 +187,20 @@ function define_bucket_data_sources(;
             keyword in (:(title::Maybe{AbstractString} = $(line.title)), put_keywords...)
         ]
         put_names = keyword_names(put_arguments)
-        fill_arguments =  # NOJET
-            vcat(get_arguments, [argument for argument in put_arguments if !(argument.args[1].args[1] in get_names)])
+        palette_arguments = [line_keyword(line, keyword) for keyword in palette_keywords]
+        fill_arguments = copy(get_arguments)
+        for argument in vcat(palette_arguments, put_arguments)
+            if !(argument.args[1].args[1] in keyword_names(fill_arguments))
+                push!(fill_arguments, argument)
+            end
+        end
+        if palette_expression === nothing
+            palette_statement = :(nothing)
+            palette_values = ()
+        else
+            palette_statement = :(color_per_value = $palette_expression)
+            palette_values = (:color_per_value,)
+        end
         define_property_data_source(;
             line,
             function_name = Symbol("fill_$(line.property)!"),
@@ -197,7 +212,15 @@ function define_bucket_data_sources(;
             body = quote
                 entries = sinks_entries(sinks, entries)
                 value_per_entry = $get_name(daf; $(get_names...))
-                return $put_values_function(sinks, daf, value_per_entry; axis, entries, $(put_names...))
+                name_per_entry = get_axis_entries_vector(daf; axis, entries)
+                $palette_statement
+                return $put_values_function(
+                    sinks,
+                    value_per_entry,
+                    name_per_entry,
+                    $(palette_values...);
+                    $(put_names...),
+                )
             end,
         )
     end
@@ -237,7 +260,7 @@ end
 
 # The names of keyword arguments.
 function keyword_names(keyword_arguments::AbstractVector{Expr})::Vector{Symbol}  # ONLY SEEMS UNTESTED
-    return [keyword.args[1].args[1] for keyword in keyword_arguments]
+    return [keyword.args[1].args[1] for keyword in keyword_arguments]  # NOJET
 end
 
 # A keyword declaration as a keyword argument, with its default given by the table `line` if it gives one.
@@ -404,38 +427,35 @@ function fill_size!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_size_vector(daf; axis, property, entries, via, empty_value)
-    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
     return nothing
 end
 
 """
     put_size_values!(
         sinks::VectorDataSinks,
-        daf::DafReader,
-        value_per_entry::AbstractVector{<:Real};
-        axis::AbstractString,
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        value_per_entry::AbstractVector{<:Real},
+        name_per_entry::AbstractVector{<:AbstractString};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
     )::Nothing
 
-Put the size (count) `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
-[`put_size_configuration!`](@ref), and name the entities after the `entries`. Every size data source ends with this.
+Put the size (count) `value_per_entry` into the `sinks`, shown by [`put_size_configuration!`](@ref), and name the
+entities after the `name_per_entry`. Every size data source ends with this.
 """
 function put_size_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{<:Real};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    value_per_entry::AbstractVector{<:Real},
+    name_per_entry::AbstractVector{<:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
 )::Nothing
     put_vector_data!(sinks, value_per_entry; title)
     put_size_configuration!(sinks; title, show_legend, log_base)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    put_vector_names_data!(sinks, name_per_entry)
     return nothing
 end
 
@@ -508,7 +528,8 @@ function fill_mean_cells_per_metacell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_cells_per_metacell_vector(daf; axis, entries, via)
-    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
     return nothing
 end
 
@@ -559,7 +580,8 @@ function fill_mean_total_UMIs_per_metacell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via)
-    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
     return nothing
 end
 
@@ -610,7 +632,8 @@ function fill_mean_total_UMIs_per_cell!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via)
-    put_size_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend, log_base)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
     return nothing
 end
 
@@ -809,37 +832,33 @@ function fill_boolean!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_boolean_vector(daf; axis, property, entries, via, empty_value)
-    put_boolean_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_boolean_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
     return nothing
 end
 
 """
     put_boolean_values!(
         sinks::VectorDataSinks,
-        daf::DafReader,
-        value_per_entry::AbstractVector{<:AbstractString};
-        axis::AbstractString,
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        value_per_entry::AbstractVector{<:AbstractString},
+        name_per_entry::AbstractVector{<:AbstractString};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = false,
     )::Nothing
 
-Put the Boolean *string* `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
-[`put_boolean_configuration!`](@ref), and name the entities after the `entries`. Every Boolean data source ends with
-this.
+Put the Boolean *string* `value_per_entry` into the `sinks`, shown by [`put_boolean_configuration!`](@ref), and name the
+entities after the `name_per_entry`. Every Boolean data source ends with this.
 """
 function put_boolean_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{<:AbstractString};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    value_per_entry::AbstractVector{<:AbstractString},
+    name_per_entry::AbstractVector{<:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
     put_vector_data!(sinks, value_per_entry; title)
     put_boolean_configuration!(sinks; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    put_vector_names_data!(sinks, name_per_entry)
     return nothing
 end
 
@@ -987,7 +1006,8 @@ function fill_gene_correlation!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_gene_correlation_vector(daf; gene, axis, entries)
-    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
     return nothing
 end
 
@@ -1164,37 +1184,33 @@ function fill_correlation!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_correlation_vector(daf; axis, property, entries, via, empty_value)
-    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
     return nothing
 end
 
 """
     put_correlation_values!(
         sinks::VectorDataSinks,
-        daf::DafReader,
-        value_per_entry::AbstractVector{<:Real};
-        axis::AbstractString,
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        value_per_entry::AbstractVector{<:Real},
+        name_per_entry::AbstractVector{<:AbstractString};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
     )::Nothing
 
-Put the correlation `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
-[`put_correlation_configuration!`](@ref), and name the entities after the `entries`. Every correlation data source ends
-with this.
+Put the correlation `value_per_entry` into the `sinks`, shown by [`put_correlation_configuration!`](@ref), and name the
+entities after the `name_per_entry`. Every correlation data source ends with this.
 """
 function put_correlation_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{<:Real};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    value_per_entry::AbstractVector{<:Real},
+    name_per_entry::AbstractVector{<:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
 )::Nothing
     put_vector_data!(sinks, value_per_entry; title)
     put_correlation_configuration!(sinks, value_per_entry; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    put_vector_names_data!(sinks, name_per_entry)
     return nothing
 end
 
@@ -1254,7 +1270,8 @@ function fill_gene_correlation_change!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries)
-    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
     return nothing
 end
 
@@ -2136,16 +2153,13 @@ function define_category_colors(table::Tuple)::Nothing
     return nothing
 end
 
-# The keywords of the category bucket's get and of its `put_category_values!`, other than the ones every generated data
-# source takes. Each line of the table gives its own `colors_axis`, since its default (the property) isn't known to the
-# generated function.
+# The keywords of the category bucket's get, of the get of its palette, and of its `put_category_values!`, other than
+# the ones every generated data source takes. Each line of the table gives its own `colors_axis`, since its default (the
+# property) isn't known to the generated function.
 const CATEGORY_GET_KEYWORDS = (:(empty_value::AbstractString = ""),)
-const CATEGORY_PUT_KEYWORDS = (
-    :(empty_value::AbstractString = ""),
-    :(colors_axis::AbstractString = ""),
-    :(empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR),
-    :(show_legend::Bool = true),
-)
+const CATEGORY_PALETTE_KEYWORDS =
+    (:(colors_axis::AbstractString = ""), :(empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR))
+const CATEGORY_PUT_KEYWORDS = (:(show_legend::Bool = true),)
 
 """
     get_category_vector(
@@ -2206,55 +2220,36 @@ function fill_category!(
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_category_vector(daf; axis, property, entries, via, empty_value)
-    put_category_values!(
-        sinks,
-        daf,
-        value_per_entry;
-        axis,
-        entries,
-        title,
-        empty_value,
-        colors_axis,
-        empty_color,
-        show_legend,
-    )
+    name_per_entry = get_axis_entries_vector(daf; axis, entries)
+    color_per_value = get_category_colors(daf; axis = colors_axis, empty_value, empty_color)
+    put_category_values!(sinks, value_per_entry, name_per_entry, color_per_value; title, show_legend)
     return nothing
 end
 
 """
     put_category_values!(
         sinks::VectorDataSinks,
-        daf::DafReader,
-        value_per_entry::AbstractVector{<:AbstractString};
-        axis::AbstractString,
-        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        value_per_entry::AbstractVector{<:AbstractString},
+        name_per_entry::AbstractVector{<:AbstractString},
+        color_per_value::CategoricalColors;
         title::Maybe{AbstractString} = nothing,
-        empty_value::AbstractString = "",
-        colors_axis::AbstractString,
-        empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
         show_legend::Bool = true,
     )::Nothing
 
-Put the category `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
-[`put_category_configuration!`](@ref) using the palette of the `colors_axis` (see [`get_category_colors`](@ref)), and
-name the entities after the `entries`. Every category data source ends with this.
+Put the category `value_per_entry` into the `sinks`, shown by [`put_category_configuration!`](@ref) using the
+`color_per_value` palette, and name the entities after the `name_per_entry`. Every category data source ends with this.
 """
 function put_category_values!(
     sinks::VectorDataSinks,
-    daf::DafReader,
-    value_per_entry::AbstractVector{<:AbstractString};
-    axis::AbstractString,
-    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    value_per_entry::AbstractVector{<:AbstractString},
+    name_per_entry::AbstractVector{<:AbstractString},
+    color_per_value::CategoricalColors;
     title::Maybe{AbstractString} = nothing,
-    empty_value::AbstractString = "",
-    colors_axis::AbstractString,
-    empty_color::Maybe{AbstractString} = EMPTY_CATEGORY_COLOR,
     show_legend::Bool = true,
 )::Nothing
     put_vector_data!(sinks, value_per_entry; title)
-    color_palette = get_category_colors(daf; axis = colors_axis, empty_value, empty_color)
-    put_category_configuration!(sinks, color_palette; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    put_category_configuration!(sinks, color_per_value; title, show_legend)
+    put_vector_names_data!(sinks, name_per_entry)
     return nothing
 end
 
@@ -2285,6 +2280,8 @@ define_bucket_data_sources(;
     put_values_function = :put_category_values!,
     get_keywords = CATEGORY_GET_KEYWORDS,
     put_keywords = CATEGORY_PUT_KEYWORDS,
+    palette_keywords = CATEGORY_PALETTE_KEYWORDS,
+    palette_expression = :(get_category_colors(daf; axis = colors_axis, empty_value, empty_color)),
     table = CATEGORY_PROPERTIES,
 )
 

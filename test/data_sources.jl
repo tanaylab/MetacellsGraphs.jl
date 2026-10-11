@@ -770,6 +770,35 @@ nested_test("data_sources") do
         end
     end
 
+    # The put of each display bucket takes only data already in hand: the values, the names and (for a category) the
+    # palette, wherever they came from.
+    nested_test("put_values") do
+        graph = heatmap_graph()
+        put_size_values!(rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)), [1, 2], ["a", "b"])
+        put_boolean_values!(
+            rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)),
+            ["true", "false"],
+            ["a", "b"],
+        )
+        put_correlation_values!(
+            rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)),
+            [0.5, -0.5],
+            ["a", "b"],
+        )
+        put_category_values!(
+            rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)),
+            ["X", ""],
+            ["a", "b"],
+            Dict("X" => "red", "" => EMPTY_CATEGORY_COLOR),
+        )
+        @test graph.data.rows.entities.names == ["a", "b"]
+        @test graph.data.rows.annotations[1].values.vector == [1, 2]
+        @test graph.data.rows.annotations[2].values.vector == ["true", "false"]
+        @test graph.data.rows.annotations[3].colors.scale.minimum == -0.5
+        @test graph.data.rows.annotations[4].colors.palette == Dict("X" => "red", "" => EMPTY_CATEGORY_COLOR)
+        return nothing
+    end
+
     # A put has a method per leaf it writes and a no-op for the leaves of its kind it ignores. A view whose
     # configuration it ignores is left alone, a leaf of the other kind is walked and nothing is found, and a leaf it
     # says nothing about (the other shape) is an error.
