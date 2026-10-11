@@ -700,6 +700,35 @@ nested_test("data_sources") do
         end
     end
 
+    # The colors of correlations follow the range of the values, which always includes zero, and zero is white.
+    nested_test("correlation_colors") do
+        nested_test("mixed") do
+            graph = points_graph()
+            put_correlation_configuration!(points_colors_vector_fields(graph), [-0.2, 0.5, 0.8])
+            @test graph.configuration.points.colors.palette ==
+                  [(-0.2, "rgb(5,10,172)"), (0, "rgb(255,255,255)"), (0.8, "rgb(178,10,28)")]
+            @test graph.configuration.points.colors.scale.minimum == -0.2
+            @test graph.configuration.points.colors.scale.maximum == 0.8
+            return nothing
+        end
+
+        nested_test("positive") do
+            graph = points_graph()
+            put_correlation_configuration!(points_colors_vector_fields(graph), [0.3, 0.6, NaN])
+            @test graph.configuration.points.colors.palette == [(0, "rgb(255,255,255)"), (0.6, "rgb(178,10,28)")]
+            @test graph.configuration.points.colors.scale.minimum == 0
+            return nothing
+        end
+
+        nested_test("zero") do
+            graph = points_graph()
+            put_correlation_configuration!(points_colors_vector_fields(graph), [0.0, 0.0])
+            @test graph.configuration.points.colors.scale.minimum == -1
+            @test graph.configuration.points.colors.scale.maximum == 1
+            return nothing
+        end
+    end
+
     # A put has a method per leaf it writes and a no-op for the leaves of its kind it ignores. A view whose
     # configuration it ignores is left alone, a leaf of the other kind is walked and nothing is found, and a leaf it
     # says nothing about (the other shape) is an error.
@@ -718,8 +747,8 @@ nested_test("data_sources") do
             put_category_configuration!(axis, Dict("X" => "red"))
             put_coordinates_configuration!(colors)
             put_expression_level_configuration!(sizes)
+            put_correlation_configuration!(sizes, [0.5, -0.5])
             put_fold_configuration!(axis)
-            put_gene_correlation_change_configuration!(sizes)
 
             @test string(points.configuration) == before
             return nothing

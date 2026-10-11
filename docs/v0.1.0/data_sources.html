@@ -1385,6 +1385,47 @@
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_correlation_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_correlation_configuration!">
+<code>MetacellsGraphs.DataSources.put_correlation_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_correlation_configuration!(
+    sinks::Sinks,
+    values::AbstractArray{&lt;:Real};
+    title::Maybe{AbstractString} = &quot;correlation&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Show a correlation (or a difference of correlations) on a linear scale, named by the 
+<code>title
+</code>. The 
+<code>values
+</code> are the ones put in by 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a> or 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_matrix_data%21">
+<code>put_matrix_data!
+</code>
+</a>, and the colors follow their range.
+</p>
+<p>As colors, zero is white, negative values go towards blue and positive values towards red, each side as far as the values go. The range always includes zero, even when all the values are positive (or all negative), so white always means no correlation. Unlike a fold, the range need not be symmetric, since most correlations are positive. If all the values are zero, the range is -1 to 1.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.put_boolean_configuration!">
 <a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_configuration!">
 <code>MetacellsGraphs.DataSources.put_boolean_configuration!
@@ -2208,6 +2249,7 @@
     axis::AbstractString = &quot;base_block&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     title::Maybe{AbstractString} = &quot;correlation&quot;,
+    show_legend::Bool = true,
 )::Nothing
 </code>
 </pre>
@@ -2221,7 +2263,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, and name the entities after the 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_configuration!">
+<code>put_correlation_configuration!
+</code>
+</a>, and name the entities after the 
 <code>entries
 </code>.
 </p>
@@ -2309,34 +2355,6 @@
 </code>, per each of the 
 <code>entries
 </code>, and name the entities after them.
-</p>
-</div>
-</section>
-</details>
-</article>
-<article>
-<details class="docstring" open="true">
-<summary id="MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
-<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
-<code>MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!
-</code>
-</a> — 
-<span class="docstring-category">Function
-</span>
-</summary>
-<section>
-<div>
-<pre>
-<code class="language-julia hljs">put_gene_correlation_change_configuration!(
-    sinks::Sinks;
-    title::Maybe{AbstractString} = &quot;correlation change&quot;,
-    show_legend::Bool = true,
-)::Nothing
-</code>
-</pre>
-<p>Name the correlation change in the configuration, and include it in the legend if 
-<code>show_legend
-</code> where it is the colors. There is nothing else to say about how to show it: it is a difference of two correlations, so it is already on the scale it is read in.
 </p>
 </div>
 </section>
@@ -4696,6 +4714,12 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_configuration!">
+<code>MetacellsGraphs.DataSources.put_correlation_configuration!
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_expression_level_configuration!">
 <code>MetacellsGraphs.DataSources.put_expression_level_configuration!
 </code>
@@ -4704,12 +4728,6 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_fold_configuration!">
 <code>MetacellsGraphs.DataSources.put_fold_configuration!
-</code>
-</a>
-</li>
-<li>
-<a href="data_sources.html#MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!">
-<code>MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!
 </code>
 </a>
 </li>

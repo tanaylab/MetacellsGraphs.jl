@@ -75,6 +75,7 @@ MetacellsGraphs.DataSources.put_expression_level_configuration!
 MetacellsGraphs.DataSources.GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
 MetacellsGraphs.DataSources.put_fold_configuration!
 MetacellsGraphs.DataSources.MAX_FOLD_FOR_GRAPHS
+MetacellsGraphs.DataSources.put_correlation_configuration!
 MetacellsGraphs.DataSources.put_boolean_configuration!
 MetacellsGraphs.DataSources.get_boolean_vector
 MetacellsGraphs.DataSources.fill_boolean!
@@ -122,7 +123,6 @@ MetacellsGraphs.DataSources.get_gene_correlation_vector
 
 ```@docs
 MetacellsGraphs.DataSources.fill_gene_correlation_change!
-MetacellsGraphs.DataSources.put_gene_correlation_change_configuration!
 MetacellsGraphs.DataSources.get_gene_correlation_change_vector
 ```
 

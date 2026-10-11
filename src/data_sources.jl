@@ -110,9 +110,9 @@ export put_boolean_values!
 export put_category_configuration!
 export put_category_values!
 export put_coordinates_configuration!
+export put_correlation_configuration!
 export put_expression_level_configuration!
 export put_fold_configuration!
-export put_gene_correlation_change_configuration!
 export put_size_configuration!
 export put_size_values!
 export put_umap_data!
@@ -967,10 +967,11 @@ end
         axis::AbstractString = "base_block",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         title::Maybe{AbstractString} = "correlation",
+        show_legend::Bool = true,
     )::Nothing
 
-Fill the `sinks` with the correlation of the `gene` per each of the `entries` of some `daf` `axis`, and name the
-entities after the `entries`.
+Fill the `sinks` with the correlation of the `gene` per each of the `entries` of some `daf` `axis`, shown by
+[`put_correlation_configuration!`](@ref), and name the entities after the `entries`.
 """
 function fill_gene_correlation!(
     sinks::VectorDataSinks,
@@ -979,9 +980,12 @@ function fill_gene_correlation!(
     axis::AbstractString = "base_block",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = "correlation",
+    show_legend::Bool = true,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_gene_correlation_vector(daf; gene, axis, entries); title)
+    correlation_per_entry = get_gene_correlation_vector(daf; gene, axis, entries)
+    put_vector_data!(sinks, correlation_per_entry; title)
+    put_correlation_configuration!(sinks, correlation_per_entry; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1016,39 +1020,49 @@ function get_gene_correlation_change_vector(
 end
 
 """
-    put_gene_correlation_change_configuration!(
-        sinks::Sinks;
-        title::Maybe{AbstractString} = "correlation change",
+    put_correlation_configuration!(
+        sinks::Sinks,
+        values::AbstractArray{<:Real};
+        title::Maybe{AbstractString} = "correlation",
         show_legend::Bool = true,
     )::Nothing
 
-Name the correlation change in the configuration, and include it in the legend if `show_legend` where it is the colors.
-There is nothing else to say about how to show it: it is a difference of two correlations, so it is already on the
-scale it is read in.
+Show a correlation (or a difference of correlations) on a linear scale, named by the `title`. The `values` are the ones
+put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
+[`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!), and the colors follow their range.
+
+As colors, zero is white, negative values go towards blue and positive values towards red, each side as far as the
+values go. The range always includes zero, even when all the values are positive (or all negative), so white always
+means no correlation. Unlike a fold, the range need not be symmetric, since most correlations are positive. If all
+the values are zero, the range is -1 to 1.
 """
-function put_gene_correlation_change_configuration!(
-    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
-    title::Maybe{AbstractString} = "correlation change",
+function put_correlation_configuration!(
+    sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector},
+    values::AbstractArray{<:Real};
+    title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
-        return put_gene_correlation_change_configuration!(sink; title, show_legend)
+        return put_correlation_configuration!(sink, values; title, show_legend)
     end
     return nothing
 end
 
-# A correlation change is already on the scale it is read in, and is not shown as a size.
-function put_gene_correlation_change_configuration!(
-    ::Union{ScaleConfiguration, SizesConfiguration};
-    title::Maybe{AbstractString} = "correlation change",  # NOLINT
+# Correlations are never shown as sizes, and an axis scale of correlations is linear. This method ignores sizes and a
+# scale.
+function put_correlation_configuration!(
+    ::Union{ScaleConfiguration, SizesConfiguration},
+    ::AbstractArray{<:Real};
+    title::Maybe{AbstractString} = "correlation",  # NOLINT
     show_legend::Bool = true,  # NOLINT
 )::Nothing
     return nothing
 end
 
-function put_gene_correlation_change_configuration!(
-    axis::AxisConfiguration;
-    title::Maybe{AbstractString} = "correlation change",
+function put_correlation_configuration!(
+    axis::AxisConfiguration,
+    ::AbstractArray{<:Real};
+    title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,  # NOLINT
 )::Nothing
     if title !== nothing
@@ -1057,11 +1071,31 @@ function put_gene_correlation_change_configuration!(
     return nothing
 end
 
-function put_gene_correlation_change_configuration!(
-    colors::ColorsConfiguration;
-    title::Maybe{AbstractString} = "correlation change",
+function put_correlation_configuration!(
+    colors::ColorsConfiguration,
+    values::AbstractArray{<:Real};
+    title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,
 )::Nothing
+    minimum_value = min(0, minimum(value for value in values if isfinite(value); init = 0))
+    maximum_value = max(0, maximum(value for value in values if isfinite(value); init = 0))
+    if minimum_value == maximum_value
+        minimum_value = -1
+        maximum_value = 1
+    end
+
+    color_scale = Tuple{Real, AbstractString}[]
+    if minimum_value < 0
+        push!(color_scale, (minimum_value, "rgb(5,10,172)"))
+    end
+    push!(color_scale, (0, "rgb(255,255,255)"))
+    if maximum_value > 0
+        push!(color_scale, (maximum_value, "rgb(178,10,28)"))
+    end
+
+    colors.palette = color_scale
+    colors.scale.minimum = minimum_value
+    colors.scale.maximum = maximum_value
     colors.show_legend = show_legend
     if title !== nothing
         colors.title = title
@@ -1097,8 +1131,9 @@ function fill_gene_correlation_change!(
     show_legend::Bool = true,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries); title)
-    put_gene_correlation_change_configuration!(sinks; title, show_legend)
+    change_per_entry = get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries)
+    put_vector_data!(sinks, change_per_entry; title)
+    put_correlation_configuration!(sinks, change_per_entry; title, show_legend)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
