@@ -68,6 +68,7 @@ export fill_category!
 export fill_column_boolean_annotation!
 export fill_column_names_data!
 export fill_column_vector_data!
+export fill_correlation!
 export fill_gene_correlation!
 export fill_gene_correlation_change!
 export fill_gene_expression!
@@ -88,6 +89,7 @@ export get_boolean_vector
 export get_category_colors
 export get_category_vector
 export get_column_vector
+export get_correlation_vector
 export get_gene_correlation_change_vector
 export get_gene_correlation_vector
 export get_gene_expression_vector
@@ -111,6 +113,7 @@ export put_category_configuration!
 export put_category_values!
 export put_coordinates_configuration!
 export put_correlation_configuration!
+export put_correlation_values!
 export put_expression_level_configuration!
 export put_fold_configuration!
 export put_size_configuration!
@@ -983,10 +986,8 @@ function fill_gene_correlation!(
     show_legend::Bool = true,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    correlation_per_entry = get_gene_correlation_vector(daf; gene, axis, entries)
-    put_vector_data!(sinks, correlation_per_entry; title)
-    put_correlation_configuration!(sinks, correlation_per_entry; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_gene_correlation_vector(daf; gene, axis, entries)
+    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
     return nothing
 end
 
@@ -1103,6 +1104,127 @@ function put_correlation_configuration!(
     return nothing
 end
 
+# The keywords of the correlation bucket's get and of its `put_correlation_values!`, other than the ones every
+# generated data source takes.
+const CORRELATION_GET_KEYWORDS = (:(empty_value::Real = 0),)
+const CORRELATION_PUT_KEYWORDS = (:(show_legend::Bool = true),)
+
+"""
+    get_correlation_vector(
+        daf::DafReader;
+        axis::AbstractString,
+        property::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        empty_value::Real = 0,
+    )::AbstractVector{<:Real}
+
+Get the correlation `property` of each of the `entries` of the `daf` `axis`. By specifying `via`, it is possible to
+access an indirect correlation. An entry whose `via` chain breaks gets the `empty_value`, which by default means no
+correlation.
+"""
+function get_correlation_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+)::AbstractVector{<:Real}
+    return get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries)
+end
+
+"""
+    fill_correlation!(
+        sinks::VectorDataSinks,
+        daf::DafReader;
+        axis::AbstractString,
+        property::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        title::Maybe{AbstractString} = property,
+        empty_value::Real = 0,
+        show_legend::Bool = true,
+    )::Nothing
+
+Fill the `sinks` with the correlation `property` of each of the `entries` of the `daf` `axis` (see
+[`get_correlation_vector`](@ref)), shown by [`put_correlation_configuration!`](@ref), and name the entities after the
+`entries`.
+"""
+function fill_correlation!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::Real = 0,
+    show_legend::Bool = true,
+)::Nothing
+    entries = sinks_entries(sinks, entries)
+    value_per_entry = get_correlation_vector(daf; axis, property, entries, via, empty_value)
+    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
+    return nothing
+end
+
+"""
+    put_correlation_values!(
+        sinks::VectorDataSinks,
+        daf::DafReader,
+        value_per_entry::AbstractVector{<:Real};
+        axis::AbstractString,
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+        title::Maybe{AbstractString} = nothing,
+        show_legend::Bool = true,
+    )::Nothing
+
+Put the correlation `value_per_entry` of each of the `entries` of the `daf` `axis` into the `sinks`, shown by
+[`put_correlation_configuration!`](@ref), and name the entities after the `entries`. Every correlation data source ends
+with this.
+"""
+function put_correlation_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{<:Real};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
+    put_vector_data!(sinks, value_per_entry; title)
+    put_correlation_configuration!(sinks, value_per_entry; title, show_legend)
+    fill_axis_names_data!(sinks, daf; axis, entries)
+    return nothing
+end
+
+define_bucket_data_sources(;
+    get_function = :get_correlation_vector,
+    put_values_function = :put_correlation_values!,
+    get_keywords = CORRELATION_GET_KEYWORDS,
+    put_keywords = CORRELATION_PUT_KEYWORDS,
+    table = (
+        (;
+            property = "correlation_between_cells_and_punctuated_metacells",
+            axis = "gene",
+            title = "cells correlation",
+            doc = "The correlation of each gene between the cells and their punctuated metacells.",
+        ),
+        (;
+            property = "correlation_between_cells_and_projected_punctuated_metacells",
+            axis = "gene",
+            title = "projected cells correlation",
+            doc = "The correlation of each gene between the cells and their projected punctuated metacells.",
+        ),
+        (;
+            property = "correlation_between_cells_and_projected_metacells",
+            axis = "gene",
+            title = "projection correlation",
+            doc = "The correlation of each gene between the query cells and their projected atlas metacells.",
+        ),
+    ),
+)
+
 """
     fill_gene_correlation_change!(
         sinks::VectorDataSinks,
@@ -1131,10 +1253,8 @@ function fill_gene_correlation_change!(
     show_legend::Bool = true,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    change_per_entry = get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries)
-    put_vector_data!(sinks, change_per_entry; title)
-    put_correlation_configuration!(sinks, change_per_entry; title, show_legend)
-    fill_axis_names_data!(sinks, daf; axis, entries)
+    value_per_entry = get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries)
+    put_correlation_values!(sinks, daf, value_per_entry; axis, entries, title, show_legend)
     return nothing
 end
 

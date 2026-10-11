@@ -1426,6 +1426,147 @@
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_correlation_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_correlation_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+)::AbstractVector{&lt;:Real}
+</code>
+</pre>
+<p>Get the correlation 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code>. By specifying 
+<code>via
+</code>, it is possible to access an indirect correlation. An entry whose 
+<code>via
+</code> chain breaks gets the 
+<code>empty_value
+</code>, which by default means no correlation.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_correlation!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_correlation!">
+<code>MetacellsGraphs.DataSources.fill_correlation!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_correlation!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    title::Maybe{AbstractString} = property,
+    empty_value::Real = 0,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Fill the 
+<code>sinks
+</code> with the correlation 
+<code>property
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>get_correlation_vector
+</code>
+</a>), shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_configuration!">
+<code>put_correlation_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.put_correlation_values!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_correlation_values!">
+<code>MetacellsGraphs.DataSources.put_correlation_values!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_correlation_values!(
+    sinks::VectorDataSinks,
+    daf::DafReader,
+    value_per_entry::AbstractVector{&lt;:Real};
+    axis::AbstractString,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    title::Maybe{AbstractString} = nothing,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>Put the correlation 
+<code>value_per_entry
+</code> of each of the 
+<code>entries
+</code> of the 
+<code>daf
+</code> 
+<code>axis
+</code> into the 
+<code>sinks
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_configuration!">
+<code>put_correlation_configuration!
+</code>
+</a>, and name the entities after the 
+<code>entries
+</code>. Every correlation data source ends with this.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.DataSources.put_boolean_configuration!">
 <a class="docstring-binding" href="#MetacellsGraphs.DataSources.put_boolean_configuration!">
 <code>MetacellsGraphs.DataSources.put_boolean_configuration!
@@ -2305,6 +2446,219 @@
 </code> 
 <code>axis
 </code> and their punctuated metacells. A zero is the gene saying nothing about that entry, rather than a correlation which happens to be zero.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_correlation_between_cells_and_punctuated_metacells!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_punctuated_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_punctuated_metacells!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_correlation_between_cells_and_punctuated_metacells!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+    title::Maybe{AbstractString} = &quot;cells correlation&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>The correlation of each gene between the cells and their punctuated metacells. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector">
+<code>get_correlation_between_cells_and_punctuated_metacells_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_values!">
+<code>put_correlation_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_correlation_between_cells_and_punctuated_metacells_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+)::AbstractVector
+</code>
+</pre>
+<p>The correlation of each gene between the cells and their punctuated metacells. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>get_correlation_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_punctuated_metacells!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_punctuated_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_punctuated_metacells!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_correlation_between_cells_and_projected_punctuated_metacells!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+    title::Maybe{AbstractString} = &quot;projected cells correlation&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>The correlation of each gene between the cells and their projected punctuated metacells. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector">
+<code>get_correlation_between_cells_and_projected_punctuated_metacells_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_values!">
+<code>put_correlation_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_correlation_between_cells_and_projected_punctuated_metacells_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+)::AbstractVector
+</code>
+</pre>
+<p>The correlation of each gene between the cells and their projected punctuated metacells. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>get_correlation_vector
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_metacells!">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_metacells!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">fill_correlation_between_cells_and_projected_metacells!(
+    sinks::VectorDataSinks,
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+    title::Maybe{AbstractString} = &quot;projection correlation&quot;,
+    show_legend::Bool = true,
+)::Nothing
+</code>
+</pre>
+<p>The correlation of each gene between the query cells and their projected atlas metacells. This fetches it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector">
+<code>get_correlation_between_cells_and_projected_metacells_vector
+</code>
+</a>, and shows it with 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_values!">
+<code>put_correlation_values!
+</code>
+</a>.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_correlation_between_cells_and_projected_metacells_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;gene&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::Real = 0,
+)::AbstractVector
+</code>
+</pre>
+<p>The correlation of each gene between the query cells and their projected atlas metacells. This is directed at 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>get_correlation_vector
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -4288,6 +4642,30 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_correlation!">
+<code>MetacellsGraphs.DataSources.fill_correlation!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_metacells!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_punctuated_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_projected_punctuated_metacells!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_correlation_between_cells_and_punctuated_metacells!">
+<code>MetacellsGraphs.DataSources.fill_correlation_between_cells_and_punctuated_metacells!
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_gene_correlation!">
 <code>MetacellsGraphs.DataSources.fill_gene_correlation!
 </code>
@@ -4494,6 +4872,30 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_column_vector">
 <code>MetacellsGraphs.DataSources.get_column_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_metacells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_projected_punctuated_metacells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_between_cells_and_punctuated_metacells_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_correlation_vector
 </code>
 </a>
 </li>
@@ -4716,6 +5118,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_configuration!">
 <code>MetacellsGraphs.DataSources.put_correlation_configuration!
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_correlation_values!">
+<code>MetacellsGraphs.DataSources.put_correlation_values!
 </code>
 </a>
 </li>

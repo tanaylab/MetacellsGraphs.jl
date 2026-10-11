@@ -729,6 +729,47 @@ nested_test("data_sources") do
         end
     end
 
+    nested_test("correlation") do
+        set_vector!(daf, "gene", "correlation_between_cells_and_punctuated_metacells", Float32[0.5, -0.1, 0.2])
+
+        nested_test("generic") do
+            graph = heatmap_graph()
+            index = add_rows_annotation!(graph)
+            fill_correlation!(
+                rows_annotations_colors_vector_fields(graph, index),
+                daf;
+                axis = "gene",
+                property = "correlation_between_cells_and_punctuated_metacells",
+            )
+            @test graph.data.rows.annotations[1].values.vector == Float32[0.5, -0.1, 0.2]
+            @test graph.data.rows.annotations[1].colors.scale.minimum ≈ -0.1
+            @test graph.data.rows.annotations[1].colors.scale.maximum ≈ 0.5
+            return nothing
+        end
+
+        # Every keyword of the correlation bucket passes through a generated data source.
+        nested_test("keywords") do
+            graph = heatmap_graph()
+            index = add_rows_annotation!(graph)
+            fill_correlation_between_cells_and_punctuated_metacells!(
+                rows_annotations_colors_vector_fields(graph, index),
+                daf;
+                axis = "gene",
+                entries = ["A", "C"],
+                via = nothing,
+                title = "correlation!",
+                empty_value = 0,
+                show_legend = false,
+            )
+            @test graph.data.rows.annotations[1].values.vector == Float32[0.5, 0.2]
+            @test graph.data.rows.annotations[1].colors.title == "correlation!"
+            @test !graph.data.rows.annotations[1].colors.show_legend
+            @test graph.data.rows.annotations[1].colors.scale.minimum == 0
+            @test get_correlation_between_cells_and_punctuated_metacells_vector(daf) == Float32[0.5, -0.1, 0.2]
+            return nothing
+        end
+    end
+
     # A put has a method per leaf it writes and a no-op for the leaves of its kind it ignores. A view whose
     # configuration it ignores is left alone, a leaf of the other kind is walked and nothing is found, and a leaf it
     # says nothing about (the other shape) is an error.
