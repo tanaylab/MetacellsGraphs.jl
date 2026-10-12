@@ -199,7 +199,7 @@ nested_test("scatter_graphs") do
         end
 
         nested_test("!correlated") do
-            message = "no base block correlates the gene: B\nof the base daf data: base!"
+            message = "no base_block correlates the gene: B\nof the daf data: base!"
             @test_throws message gene_base_delta_correlations_graph(; daf, base_daf, gene = "B")
             return nothing
         end

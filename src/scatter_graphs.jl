@@ -14,6 +14,7 @@ module ScatterGraphs
 
 export gene_base_delta_correlations_graph
 export gene_gene_graph
+export put_hidden_entries_configuration!
 export umap_graph
 
 using DataAxesFormats
@@ -120,12 +121,10 @@ function gene_base_delta_correlations_graph(;
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
 )::PointsGraph
-    @assert axis_vector(base_daf, "gene") == axis_vector(daf, "gene")
-    @assert axis_vector(base_daf, base_axis) == axis_vector(daf, axis)
+    assert_same_entries(daf, base_daf; axis, base_axis)
 
     graph = points_graph()
-    graph.configuration.x_axis.scale.include_hidden = false
-    graph.configuration.y_axis.scale.include_hidden = false
+    put_hidden_entries_configuration!(graph.configuration)
 
     entities = points_entities(graph)
     fill_gene_correlation!(entities, base_daf; gene, axis, entries, title = "base correlation")
@@ -140,14 +139,33 @@ function gene_base_delta_correlations_graph(;
         gene_fraction_regularization,
     )
 
-    # A zero base correlation is the gene saying nothing about the entry, so such entries are hidden.
-    is_shown_per_entry = get_gene_correlation_vector(base_daf; gene, axis, entries) .!= 0
-    if !any(is_shown_per_entry)
-        error("no base block correlates the gene: $(gene)\nof the base daf data: $(base_daf.name)")
-    end
-    put_vector_mask_data!(entities, is_shown_per_entry)
+    put_vector_mask_data!(entities, get_gene_is_correlated_vector(base_daf; gene, axis, entries))
 
     return graph
+end
+
+"""
+    put_hidden_entries_configuration!(configuration::PointsGraphConfiguration)::Nothing
+
+Exclude the hidden (masked) entries from the ranges of the axes, as
+[`gene_base_delta_correlations_graph`](@ref) does.
+"""
+function put_hidden_entries_configuration!(configuration::PointsGraphConfiguration)::Nothing
+    configuration.x_axis.scale.include_hidden = false
+    configuration.y_axis.scale.include_hidden = false
+    return nothing
+end
+
+# The `base_daf` must hold the same genes as the `daf`, and its `base_axis` the same entries as the `daf` `axis`.
+function assert_same_entries(
+    daf::DafReader,
+    base_daf::DafReader;
+    axis::AbstractString,
+    base_axis::AbstractString,
+)::Nothing
+    @assert axis_vector(base_daf, "gene") == axis_vector(daf, "gene")
+    @assert axis_vector(base_daf, base_axis) == axis_vector(daf, axis)
+    return nothing
 end
 
 end  # module
