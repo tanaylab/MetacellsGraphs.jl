@@ -46,6 +46,9 @@ these aren't given, it uses the entries the `sinks` are already named after (see
 names does it use the whole axis. So when the first data source of a graph picks some entries, the rest follow it
 without being told which they are. Sinks named after different entries are an error.
 
+The `entries` (and `genes` and `row_entries`) can be given by their names, by their 1-based indices, or by a Boolean
+mask over the axis. In particular, any Boolean get can serve as the mask (e.g., `entries = get_is_marker_vector(daf)`).
+
 A `put_` has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a
 colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a
 `MethodError`; in particular a matrix leaf handed to a vector `put_`, or the other way around.
@@ -93,6 +96,7 @@ export get_correlation_vector
 export get_gene_correlation_change_vector
 export get_gene_correlation_vector
 export get_gene_expression_vector
+export get_gene_is_correlated_vector
 export get_genes_expression_matrix
 export get_genes_fold_matrix
 export get_global_flow_order_vector
@@ -661,7 +665,7 @@ Unlike the markers these are not ranked, and there are few enough of them to sho
 blocks were computed from, so they show what the blocks were told apart by.
 """
 function get_skeleton_gene_indices(daf::DafReader)::Vector{Int}
-    return findall(get_axis_vector(daf; axis = "gene", query_suffix = ": is_skeleton"))
+    return findall(get_is_skeleton_vector(daf))  # NOLINT
 end
 
 """
@@ -739,12 +743,12 @@ const BOOLEAN_PUT_KEYWORDS = (:(show_legend::Bool = false),)
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         empty_value::Bool = false,
-    )::AbstractVector{<:AbstractString}
+    )::Union{AbstractVector{Bool}, BitVector}
 
-Get the Boolean `property` of each of the `entries` of the `daf` `axis`, as the *strings* `"true"` and `"false"`.
-Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings. By specifying `via`,
-it is possible to access an indirect property (e.g., whether the anchor gene of each module is a marker). An entry whose
-`via` chain breaks gets the `empty_value`.
+Get the Boolean `property` of each of the `entries` of the `daf` `axis`. This can be shown as colors (see
+[`put_boolean_values!`](@ref)) or used as a mask, as it is. By specifying `via`, it is possible to access an indirect
+property (e.g., whether the anchor gene of each module is a marker). An entry whose `via` chain breaks gets the
+`empty_value`.
 """
 function get_boolean_vector(
     daf::DafReader;
@@ -753,8 +757,8 @@ function get_boolean_vector(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     empty_value::Bool = false,
-)::AbstractVector{<:AbstractString}
-    return string.(get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries))
+)::Union{AbstractVector{Bool}, BitVector}
+    return get_axis_vector(daf; axis, query_suffix = ": $(escape_value(property))", via, empty_value, entries)
 end
 
 """
@@ -840,25 +844,30 @@ end
 """
     put_boolean_values!(
         sinks::VectorDataSinks,
-        value_per_entry::AbstractVector{<:AbstractString},
-        name_per_entry::AbstractVector{<:AbstractString};
+        value_per_entry::Union{AbstractVector{Bool}, BitVector},
+        name_per_entry::Maybe{AbstractVector{<:AbstractString}};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = false,
     )::Nothing
 
-Put the Boolean *string* `value_per_entry` into the `sinks`, shown by [`put_boolean_configuration!`](@ref), and name the
-entities after the `name_per_entry`. Every Boolean data source ends with this.
+Put the Boolean `value_per_entry` into the `sinks`, shown by [`put_boolean_configuration!`](@ref), and name the entities
+after the `name_per_entry` (unless it is `nothing`). Every Boolean data source ends with this.
+
+The values are put as the *strings* `"true"` and `"false"`. Coloring by a Boolean is coloring by two categories, and a
+categorical palette is keyed by strings.
 """
 function put_boolean_values!(
     sinks::VectorDataSinks,
-    value_per_entry::AbstractVector{<:AbstractString},
-    name_per_entry::AbstractVector{<:AbstractString};
+    value_per_entry::Union{AbstractVector{Bool}, BitVector},
+    name_per_entry::Maybe{AbstractVector{<:AbstractString}};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
-    put_vector_data!(sinks, value_per_entry; title)
+    put_vector_data!(sinks, string.(value_per_entry); title)
     put_boolean_configuration!(sinks; title, show_legend)
-    put_vector_names_data!(sinks, name_per_entry)
+    if name_per_entry !== nothing
+        put_vector_names_data!(sinks, name_per_entry)
+    end
     return nothing
 end
 
@@ -979,6 +988,31 @@ function get_gene_correlation_vector(
                        "@ gene = $(escape_value(gene))",
         entries,
     )
+end
+
+"""
+    get_gene_is_correlated_vector(
+        daf::DafReader;
+        gene::AbstractString,
+        axis::AbstractString = "base_block",
+        entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+    )::Union{AbstractVector{Bool}, BitVector}
+
+Get whether the `gene` correlates (see [`get_gene_correlation_vector`](@ref)) in each of the `entries` of some `daf`
+`axis`. A zero correlation is the gene saying nothing about the entry, so such an entry is not correlated. A gene which
+correlates in no entry has nothing to show, which is an error.
+"""
+function get_gene_is_correlated_vector(
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = "base_block",
+    entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+    is_correlated_per_entry = get_gene_correlation_vector(daf; gene, axis, entries) .!= 0
+    if !any(is_correlated_per_entry)
+        error("no $(axis) correlates the gene: $(gene)\nof the daf data: $(daf.name)")
+    end
+    return is_correlated_per_entry
 end
 
 """
@@ -1953,8 +1987,7 @@ function fill_column_boolean_annotation!(
     title::Maybe{AbstractString} = column,
     show_legend::Bool = false,
 )::Nothing
-    put_vector_data!(sinks, string.(get_column_vector(frame; column)); title)
-    put_boolean_configuration!(sinks; title, show_legend)
+    put_boolean_values!(sinks, get_column_vector(frame; column), nothing; title, show_legend)
     return nothing
 end
 
@@ -2371,7 +2404,7 @@ function get_matrix_query(
     return data
 end
 
-# The names of the `entries` of an `axis`, given either their names or their indices. A `nothing` means all of them,
+# The names of the `entries` of an `axis`, given by their names, their indices or a mask. A `nothing` means all of them,
 # which is left to the caller to resolve.
 function entries_names(::DafReader, ::AbstractString, ::Nothing)::Nothing
     return nothing
@@ -2393,8 +2426,8 @@ function entries_names(
     return entries
 end
 
-# The indices of the `entries` of an `axis`, given either their names or their indices. A `nothing` means all of them,
-# which is left to the caller to resolve.
+# The indices of the `entries` of an `axis`, given by their names, their indices or a mask. A mask is returned as is,
+# since Julia indexes with it directly. A `nothing` means all of them, which is left to the caller to resolve.
 function entries_indices(::DafReader, ::AbstractString, ::Nothing)::Nothing
     return nothing
 end

@@ -93,6 +93,21 @@ nested_test("data_sources") do
             return nothing
         end
 
+        nested_test("mask") do
+            graph = points_graph()
+            fill_axis_vector_data!(
+                x_axis_vector_fields(graph),
+                daf;
+                axis = "metacell",
+                query_suffix = ": umap_x",
+                entries = [true, false, true, false],
+                title = "X",
+            )
+            @test graph.data.x.vector == Float32[0.0, 2.0]
+            @test graph.data.points.entities.names == ["M1", "M3"]
+            return nothing
+        end
+
         # A property of what an entry belongs to is reached by naming the way there.
         nested_test("via") do
             set_vector!(daf, "block", "region", ["north", "south"])
@@ -181,6 +196,20 @@ nested_test("data_sources") do
                 fill_genes_expression_matrix!(entries_matrix_fields(graph), daf; entries = ["M1", "M3"])
                 @test graph.data.entries.matrix == Float32[0.1 0.3; 0.4 0.2; 0.0 0.0]
                 @test graph.data.rows.entities.names == ["A", "B", "C"]
+                @test graph.data.columns.entities.names == ["M1", "M3"]
+                return nothing
+            end
+
+            nested_test("mask") do
+                graph = heatmap_graph()
+                fill_genes_expression_matrix!(
+                    entries_matrix_fields(graph),
+                    daf;
+                    genes = [true, true, false],
+                    entries = BitVector([true, false, true, false]),
+                )
+                @test graph.data.entries.matrix == Float32[0.1 0.3; 0.4 0.2]
+                @test graph.data.rows.entities.names == ["A", "B"]
                 @test graph.data.columns.entities.names == ["M1", "M3"]
                 return nothing
             end
@@ -465,7 +494,15 @@ nested_test("data_sources") do
             @test graph.data.rows.annotations[1].values.vector == ["true", "false"]
             @test graph.data.rows.annotations[1].colors.title == "skeleton!"
             @test graph.data.rows.annotations[1].colors.show_legend
-            @test get_is_skeleton_vector(daf) == ["true", "false", "true"]
+            @test get_is_skeleton_vector(daf) == [true, false, true]
+            return nothing
+        end
+
+        # A Boolean is fetched as it is, so it serves as a mask as well as colors.
+        nested_test("mask") do
+            graph = points_graph()
+            put_vector_mask_data!(points_entities(graph), get_is_skeleton_vector(daf))
+            @test graph.data.points.entities.mask == [true, false, true]
             return nothing
         end
     end
@@ -614,6 +651,12 @@ nested_test("data_sources") do
             fill_gene_correlation!(points_entities(graph), daf; gene = "A")
             @test graph.data.points.entities.names == ["B1", "B2"]
             @test graph.data.points.entities.hovers[1] == "base correlation: 0.3<br>correlation: 0.4"
+            return nothing
+        end
+
+        nested_test("is_correlated") do
+            @test get_gene_is_correlated_vector(base_daf; gene = "C") == [true, false]
+            @test_throws "no base_block correlates the gene: B" get_gene_is_correlated_vector(base_daf; gene = "B")
             return nothing
         end
 
@@ -777,7 +820,7 @@ nested_test("data_sources") do
         put_size_values!(rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)), [1, 2], ["a", "b"])
         put_boolean_values!(
             rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)),
-            ["true", "false"],
+            [true, false],
             ["a", "b"],
         )
         put_correlation_values!(

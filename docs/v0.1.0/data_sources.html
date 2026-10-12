@@ -430,6 +430,16 @@
 <code>sinks
 </code> have no names does it use the whole axis. So when the first data source of a graph picks some entries, the rest follow it without being told which they are. Sinks named after different entries are an error.
 </p>
+<p>The 
+<code>entries
+</code> (and 
+<code>genes
+</code> and 
+<code>row_entries
+</code>) can be given by their names, by their 1-based indices, or by a Boolean mask over the axis. In particular, any Boolean get can serve as the mask (e.g., 
+<code>entries = get_is_marker_vector(daf)
+</code>).
+</p>
 <p>A 
 <code>put_
 </code> has a method per leaf it writes and one explicit no-op method for the leaves of its kind it ignores (e.g., a colors-only configuration ignores an axis). Its walking method takes everything else. A leaf covered by neither is a 
@@ -1611,7 +1621,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-)::AbstractVector{&lt;:AbstractString}
+)::Union{AbstractVector{Bool}, BitVector}
 </code>
 </pre>
 <p>Get the Boolean 
@@ -1622,13 +1632,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, as the 
-<em>strings
-</em> 
-<code>&quot;true&quot;
-</code> and 
-<code>&quot;false&quot;
-</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings. By specifying 
+</code>. This can be shown as colors (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_boolean_values!">
+<code>put_boolean_values!
+</code>
+</a>) or used as a mask, as it is. By specifying 
 <code>via
 </code>, it is possible to access an indirect property (e.g., whether the anchor gene of each module is a marker). An entry whose 
 <code>via
@@ -1707,16 +1715,14 @@
 <pre>
 <code class="language-julia hljs">put_boolean_values!(
     sinks::VectorDataSinks,
-    value_per_entry::AbstractVector{&lt;:AbstractString},
-    name_per_entry::AbstractVector{&lt;:AbstractString};
+    value_per_entry::Union{AbstractVector{Bool}, BitVector},
+    name_per_entry::Maybe{AbstractVector{&lt;:AbstractString}};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
 </code>
 </pre>
 <p>Put the Boolean 
-<em>string
-</em> 
 <code>value_per_entry
 </code> into the 
 <code>sinks
@@ -1726,7 +1732,17 @@
 </code>
 </a>, and name the entities after the 
 <code>name_per_entry
-</code>. Every Boolean data source ends with this.
+</code> (unless it is 
+<code>nothing
+</code>). Every Boolean data source ends with this.
+</p>
+<p>The values are put as the 
+<em>strings
+</em> 
+<code>&quot;true&quot;
+</code> and 
+<code>&quot;false&quot;
+</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings.
 </p>
 </div>
 </section>
@@ -2408,6 +2424,45 @@
 </code> 
 <code>axis
 </code> and their punctuated metacells. A zero is the gene saying nothing about that entry, rather than a correlation which happens to be zero.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_gene_is_correlated_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_gene_is_correlated_vector">
+<code>MetacellsGraphs.DataSources.get_gene_is_correlated_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_gene_is_correlated_vector(
+    daf::DafReader;
+    gene::AbstractString,
+    axis::AbstractString = &quot;base_block&quot;,
+    entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+</code>
+</pre>
+<p>Get whether the 
+<code>gene
+</code> correlates (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_correlation_vector">
+<code>get_gene_correlation_vector
+</code>
+</a>) in each of the 
+<code>entries
+</code> of some 
+<code>daf
+</code> 
+<code>axis
+</code>. A zero correlation is the gene saying nothing about the entry, so such an entry is not correlated. A gene which correlates in no entry has nothing to show, which is an error.
 </p>
 </div>
 </section>
@@ -4876,6 +4931,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_expression_vector">
 <code>MetacellsGraphs.DataSources.get_gene_expression_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_is_correlated_vector">
+<code>MetacellsGraphs.DataSources.get_gene_is_correlated_vector
 </code>
 </a>
 </li>
