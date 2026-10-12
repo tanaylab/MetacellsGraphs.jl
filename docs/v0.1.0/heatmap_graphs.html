@@ -221,6 +221,46 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.put_genes_heatmap_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.put_genes_heatmap_configuration!">
+<code>MetacellsGraphs.HeatmapGraphs.put_genes_heatmap_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_genes_heatmap_configuration!(
+    configuration::HeatmapGraphConfiguration;
+    n_genes::Integer,
+    n_entries::Integer,
+    rows_axis_title::Maybe{AbstractString} = &quot;Genes&quot;,
+    columns_axis_title::Maybe{AbstractString} = &quot;Metacells&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Lay out a heatmap of 
+<code>n_genes
+</code> genes (the rows) by 
+<code>n_entries
+</code> entries (the columns), as 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<code>genes_heatmap_graph
+</code>
+</a> shows it. The rows are labelled and named by the 
+<code>rows_axis_title
+</code>. There are too many columns to label, so they are named only by the 
+<code>columns_axis_title
+</code> and in the hover of each cell. Both sides are clustered, except a side with a single entry, which has nothing to be ordered against.
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Index">
 <a class="docs-heading-anchor" href="#Index">Index
 </a>
@@ -239,6 +279,12 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 <li>
 <a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
 <code>MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.put_genes_heatmap_configuration!">
+<code>MetacellsGraphs.HeatmapGraphs.put_genes_heatmap_configuration!
 </code>
 </a>
 </li>
