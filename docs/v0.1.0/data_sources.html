@@ -103,6 +103,12 @@
 </a>
 </li>
 <li>
+<a class="tocitem" href="#Entry-Masks">
+<span>Entry Masks
+</span>
+</a>
+</li>
+<li>
 <a class="tocitem" href="#Counts">
 <span>Counts
 </span>
@@ -2979,6 +2985,175 @@
 </section>
 </details>
 </article>
+<h2 id="Entry-Masks">
+<a class="docs-heading-anchor" href="#Entry-Masks">Entry Masks
+</a>
+<a id="Entry-Masks-1">
+</a>
+<a class="docs-heading-anchor-permalink" href="#Entry-Masks" title="Permalink">
+</a>
+</h2>
+<p>These pick which entries of an axis a graph shows, and return a Boolean mask over the whole axis, to pass as the 
+<code>entries
+</code> of another data source. Masks combine by 
+<code>.&amp;
+</code>.
+</p>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_in_categories_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_in_categories_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_categories_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_in_categories_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    categories::AbstractVector{&lt;:AbstractString},
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+    empty_value::AbstractString = &quot;&quot;,
+)::Union{AbstractVector{Bool}, BitVector}
+</code>
+</pre>
+<p>Get whether the category 
+<code>property
+</code> of each entry of the 
+<code>daf
+</code> 
+<code>axis
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_category_vector">
+<code>get_category_vector
+</code>
+</a>) is one of the 
+<code>categories
+</code> (e.g., which metacells are of some types). Each of the 
+<code>categories
+</code> must be an entry of the axis named 
+<code>property
+</code> (e.g., the 
+<code>type
+</code> axis).
+</p>
+<p>This covers the whole axis, so it can be passed as the 
+<code>entries
+</code> of another data source, or combined with other such masks (e.g., by 
+<code>.&amp;
+</code>).
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_in_neighborhood_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_in_neighborhood_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_neighborhood_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_in_neighborhood_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    block::AbstractString,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+</code>
+</pre>
+<p>Get whether each entry of the 
+<code>daf
+</code> 
+<code>axis
+</code> is in the neighborhood of the 
+<code>block
+</code>. On the 
+<code>block
+</code> axis, this is whether each block is in it. On any other axis, this is whether the block of each entry is in it (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_block_vector">
+<code>get_block_vector
+</code>
+</a>, which takes the 
+<code>via
+</code>).
+</p>
+<p>This covers the whole axis, so it can be passed as the 
+<code>entries
+</code> of another data source, or combined with other such masks (e.g., by 
+<code>.&amp;
+</code>).
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_is_in_environment_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_is_in_environment_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_environment_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_is_in_environment_vector(
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+    block::AbstractString,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+</code>
+</pre>
+<p>Get whether each entry of the 
+<code>daf
+</code> 
+<code>axis
+</code> is in the environment of the 
+<code>block
+</code>. An environment is a set of metacells, so on the 
+<code>metacell
+</code> axis this is whether each metacell is in it. On an axis below the metacells (e.g., 
+<code>cell
+</code>), this is whether the 
+<code>metacell
+</code> of each entry is in it. The 
+<code>via
+</code> is the chain to walk before reading the 
+<code>metacell
+</code>, as in 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_axis_vector">
+<code>get_axis_vector
+</code>
+</a> (none for a cell, which has it directly). It is an error on the 
+<code>block
+</code> axis, whose blocks may be only partly in the environment.
+</p>
+<p>This covers the whole axis, so it can be passed as the 
+<code>entries
+</code> of another data source, or combined with other such masks (e.g., by 
+<code>.&amp;
+</code>).
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Counts">
 <a class="docs-heading-anchor" href="#Counts">Counts
 </a>
@@ -4990,6 +5165,24 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_is_forbidden_vector">
 <code>MetacellsGraphs.DataSources.get_is_forbidden_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_in_categories_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_categories_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_in_environment_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_environment_vector
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_in_neighborhood_vector">
+<code>MetacellsGraphs.DataSources.get_is_in_neighborhood_vector
 </code>
 </a>
 </li>

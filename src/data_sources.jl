@@ -100,6 +100,9 @@ export get_gene_is_correlated_vector
 export get_genes_expression_matrix
 export get_genes_fold_matrix
 export get_global_flow_order_vector
+export get_is_in_categories_vector
+export get_is_in_environment_vector
+export get_is_in_neighborhood_vector
 export get_matrix_query
 export get_mean_cells_per_metacell_vector
 export get_mean_total_UMIs_per_cell_vector
@@ -666,6 +669,126 @@ blocks were computed from, so they show what the blocks were told apart by.
 """
 function get_skeleton_gene_indices(daf::DafReader)::Vector{Int}
     return findall(get_is_skeleton_vector(daf))  # NOLINT
+end
+
+"""
+    get_is_in_categories_vector(
+        daf::DafReader;
+        axis::AbstractString,
+        property::AbstractString,
+        categories::AbstractVector{<:AbstractString},
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+        empty_value::AbstractString = "",
+    )::Union{AbstractVector{Bool}, BitVector}
+
+Get whether the category `property` of each entry of the `daf` `axis` (see [`get_category_vector`](@ref)) is one of
+the `categories` (e.g., which metacells are of some types). Each of the `categories` must be an entry of the axis named
+`property` (e.g., the `type` axis).
+
+This covers the whole axis, so it can be passed as the `entries` of another data source, or combined with other such
+masks (e.g., by `.&`).
+"""
+function get_is_in_categories_vector(
+    daf::DafReader;
+    axis::AbstractString,
+    property::AbstractString,
+    categories::AbstractVector{<:AbstractString},
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    empty_value::AbstractString = "",
+)::Union{AbstractVector{Bool}, BitVector}
+    known_categories = Set(axis_vector(daf, property))
+    for category in categories
+        if !(category in known_categories)
+            error("unknown $(property): $(category)\nof the daf data: $(daf.name)")
+        end
+    end
+    return in.(get_category_vector(daf; axis, property, via, empty_value), Ref(Set(categories)))
+end
+
+"""
+    get_is_in_neighborhood_vector(
+        daf::DafReader;
+        axis::AbstractString = "metacell",
+        block::AbstractString,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    )::Union{AbstractVector{Bool}, BitVector}
+
+Get whether each entry of the `daf` `axis` is in the neighborhood of the `block`. On the `block` axis, this is whether
+each block is in it. On any other axis, this is whether the block of each entry is in it (see
+[`get_block_vector`](@ref), which takes the `via`).
+
+This covers the whole axis, so it can be passed as the `entries` of another data source, or combined with other such
+masks (e.g., by `.&`).
+"""
+function get_is_in_neighborhood_vector(
+    daf::DafReader;
+    axis::AbstractString = "metacell",
+    block::AbstractString,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+    is_in_neighborhood_per_block = vec(
+        get_axes_matrix(
+            daf;
+            rows_axis = "block",
+            columns_axis = "block",
+            query_suffix = ":: is_in_neighborhood",
+            column_entries = [block],
+        ),
+    )
+    if axis == "block"
+        return is_in_neighborhood_per_block
+    else
+        neighborhood_blocks = Set(axis_vector(daf, "block")[is_in_neighborhood_per_block])
+        return in.(get_block_vector(daf; axis, via), Ref(neighborhood_blocks))  # NOLINT
+    end
+end
+
+"""
+    get_is_in_environment_vector(
+        daf::DafReader;
+        axis::AbstractString = "metacell",
+        block::AbstractString,
+        via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+    )::Union{AbstractVector{Bool}, BitVector}
+
+Get whether each entry of the `daf` `axis` is in the environment of the `block`. An environment is a set of metacells,
+so on the `metacell` axis this is whether each metacell is in it. On an axis below the metacells (e.g., `cell`), this is
+whether the `metacell` of each entry is in it. The `via` is the chain to walk before reading the `metacell`, as in
+[`get_axis_vector`](@ref) (none for a cell, which has it directly). It is an error on the `block` axis, whose blocks
+may be only partly in the environment.
+
+This covers the whole axis, so it can be passed as the `entries` of another data source, or combined with other such
+masks (e.g., by `.&`).
+"""
+function get_is_in_environment_vector(
+    daf::DafReader;
+    axis::AbstractString = "metacell",
+    block::AbstractString,
+    via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
+)::Union{AbstractVector{Bool}, BitVector}
+    if axis == "block"
+        error(
+            "an environment is a set of metacells, not of blocks\n" *
+            "for the block: $(block)\n" *
+            "of the daf data: $(daf.name)",
+        )
+    end
+    is_in_environment_per_metacell = vec(
+        get_axes_matrix(
+            daf;
+            rows_axis = "metacell",
+            columns_axis = "block",
+            query_suffix = ":: is_in_environment",
+            column_entries = [block],
+        ),
+    )
+    if axis == "metacell"
+        return is_in_environment_per_metacell
+    else
+        environment_metacells = Set(axis_vector(daf, "metacell")[is_in_environment_per_metacell])
+        metacell_per_entry = get_axis_vector(daf; axis, query_suffix = ": metacell", via)
+        return in.(metacell_per_entry, Ref(environment_metacells))
+    end
 end
 
 """

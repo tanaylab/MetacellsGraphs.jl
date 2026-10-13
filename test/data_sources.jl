@@ -640,6 +640,61 @@ nested_test("data_sources") do
         return nothing
     end
 
+    nested_test("entry_masks") do
+        add_axis!(daf, "type", ["X", "Y"])
+        set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
+        set_vector!(daf, "block", "type", ["X", "Y"])
+        # The neighborhood of `B1` is itself, and that of `B2` is both blocks.
+        set_matrix!(daf, "block", "block", "is_in_neighborhood", [true true; false true])
+        # The environment of `B1` is `M1` to `M3`, and that of `B2` is `M3` and `M4`.
+        set_matrix!(daf, "metacell", "block", "is_in_environment", [true false; true false; true true; false true])
+
+        nested_test("categories") do
+            @test get_is_in_categories_vector(daf; axis = "metacell", property = "type", categories = ["X"]) ==
+                  [true, true, false, false]
+            @test get_is_in_categories_vector(daf; axis = "block", property = "type", categories = ["X", "Y"]) ==
+                  [true, true]
+            @test_throws "unknown type: Z" get_is_in_categories_vector(
+                daf;
+                axis = "metacell",
+                property = "type",
+                categories = ["Z"],
+            )
+            return nothing
+        end
+
+        nested_test("neighborhood") do
+            @test get_is_in_neighborhood_vector(daf; axis = "block", block = "B1") == [true, false]
+            @test get_is_in_neighborhood_vector(daf; block = "B1") == [true, true, false, false]
+            @test get_is_in_neighborhood_vector(daf; block = "B2") == [true, true, true, true]
+            return nothing
+        end
+
+        nested_test("environment") do
+            @test get_is_in_environment_vector(daf; block = "B1") == [true, true, true, false]
+            add_axis!(daf, "cell", ["C1", "C2"])
+            set_vector!(daf, "cell", "metacell", ["M1", "M4"])
+            @test get_is_in_environment_vector(daf; axis = "cell", block = "B1") == [true, false]
+            @test_throws "an environment is a set of metacells" get_is_in_environment_vector(
+                daf;
+                axis = "block",
+                block = "B1",
+            )
+            return nothing
+        end
+
+        # Masks combine, and pick the entries of another data source.
+        nested_test("entries") do
+            is_shown_per_metacell =
+                get_is_in_categories_vector(daf; axis = "metacell", property = "type", categories = ["Y"]) .&
+                get_is_in_environment_vector(daf; block = "B1")
+            @test get_axis_entries_vector(daf; axis = "metacell", entries = is_shown_per_metacell) == ["M3"]
+            return nothing
+        end
+
+        return nothing
+    end
+
     nested_test("gene_correlation") do
         # The base is the repository the blocks come from, and the other repository holds the same genes correlated
         # over the same base blocks. Gene `A` improves in `B1` and degrades in `B2`.

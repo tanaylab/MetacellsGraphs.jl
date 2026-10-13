@@ -153,6 +153,17 @@ MetacellsGraphs.DataSources.get_top_marker_gene_indices
 MetacellsGraphs.DataSources.get_skeleton_gene_indices
 ```
 
+## Entry Masks
+
+These pick which entries of an axis a graph shows, and return a Boolean mask over the whole axis, to pass as the
+`entries` of another data source. Masks combine by `.&`.
+
+```@docs
+MetacellsGraphs.DataSources.get_is_in_categories_vector
+MetacellsGraphs.DataSources.get_is_in_neighborhood_vector
+MetacellsGraphs.DataSources.get_is_in_environment_vector
+```
+
 ## Counts
 
 ### Total UMIs
