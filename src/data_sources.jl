@@ -1868,10 +1868,11 @@ end
         row_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         column_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         title::Maybe{AbstractString} = nothing,
+        hover_format::Maybe{Function} = nothing,
     )::Nothing
 
 Fill the `sinks` with the result of the query `@ rows_axis @ columns_axis query_suffix`, and name the rows and the
-columns. The matrix twin of [`fill_axis_vector_data!`](@ref).
+columns. The matrix twin of [`fill_axis_vector_data!`](@ref), including the `hover_format`.
 """
 function fill_axes_matrix_data!(
     sinks::MatrixDataSinks,
@@ -1882,12 +1883,14 @@ function fill_axes_matrix_data!(
     row_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     column_entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
     row_entries, column_entries = sinks_matrix_entries(sinks, row_entries, column_entries)
     put_matrix_data!(
         sinks,
         get_axes_matrix(daf; rows_axis, columns_axis, query_suffix, row_entries, column_entries);
         title,
+        hover_format,
     )
     fill_axes_names_data!(sinks, daf; rows_axis, columns_axis, row_entries, column_entries)
     return nothing
@@ -1901,13 +1904,14 @@ end
         query_suffix::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         title::Maybe{AbstractString} = nothing,
+        hover_format::Maybe{Function} = nothing,
     )::Nothing
 
 Fill the `sinks` with the result of the query `@ axis query_suffix` for each of the `entries` of the `daf` `axis`, and
 name the entities after the `entries`.
 
 This fetches the data with [`get_axis_vector`](@ref), then hands it to
-[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!), with the `title` and the `hover_format`.
 """
 function fill_axis_vector_data!(
     sinks::VectorDataSinks,
@@ -1918,9 +1922,10 @@ function fill_axis_vector_data!(
     empty_value::Maybe{StorageScalarBase} = nothing,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_axis_vector(daf; axis, query_suffix, via, empty_value, entries); title)
+    put_vector_data!(sinks, get_axis_vector(daf; axis, query_suffix, via, empty_value, entries); title, hover_format)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1941,9 +1946,11 @@ end
         frame::DataFrame;
         column::AbstractString,
         title::Maybe{AbstractString} = nothing,
+        hover_format::Maybe{Function} = nothing,
     )::Nothing
 
-Fill the `sinks` with the `column` of a `frame`, one value per row.
+Fill the `sinks` with the `column` of a `frame`, one value per row, with the `title` and the `hover_format` of
+[`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!).
 
 The entities are not named here, unlike [`fill_axis_vector_data!`](@ref); a frame has no one column which identifies
 its rows, so say which one does with [`fill_column_names_data!`](@ref).
@@ -1953,8 +1960,9 @@ function fill_column_vector_data!(
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
-    put_vector_data!(sinks, get_column_vector(frame; column); title)
+    put_vector_data!(sinks, get_column_vector(frame; column); title, hover_format)
     return nothing
 end
 

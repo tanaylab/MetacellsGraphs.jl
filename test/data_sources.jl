@@ -108,6 +108,21 @@ nested_test("data_sources") do
             return nothing
         end
 
+        nested_test("hover_format") do
+            graph = points_graph()
+            fill_axis_vector_data!(
+                x_axis_vector_fields(graph),
+                daf;
+                axis = "metacell",
+                query_suffix = ": umap_x",
+                title = "X",
+                hover_format = fixed_format(; digits = 2),
+            )
+            @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
+            @test graph.data.points.entities.hovers[2] == "X: 1.00"
+            return nothing
+        end
+
         # A property of what an entry belongs to is reached by naming the way there.
         nested_test("via") do
             set_vector!(daf, "block", "region", ["north", "south"])
@@ -242,6 +257,17 @@ nested_test("data_sources") do
 
         # Nothing is configured, because how to show a value depends on which property it is.
         @test graph.configuration.entries.colors.palette === nothing
+
+        graph = heatmap_graph()
+        fill_axes_matrix_data!(
+            entries_matrix_fields(graph),
+            daf;
+            rows_axis = "gene",
+            columns_axis = "metacell",
+            query_suffix = ":: linear_fraction",
+            hover_format = percent_format(; digits = 0),
+        )
+        @test graph.data.cells.hovers[1, 1] == "10%"
         return nothing
     end
 
@@ -693,6 +719,20 @@ nested_test("data_sources") do
             @test graph.data.bars.names === nothing
             fill_column_names_data!(bars_entities(graph), frame; column = "gene")
             @test graph.data.bars.names == ["A", "B"]
+            return nothing
+        end
+
+        nested_test("hover_format") do
+            graph = bars_graph()
+            fill_column_vector_data!(
+                values_axis_vector_fields(graph),
+                frame;
+                column = "imp_f",
+                title = "improved",
+                hover_format = percent_format(; digits = 1),
+            )
+            @test graph.data.values.vector == [0.75, 0.25]
+            @test graph.data.bars.hovers == ["improved: 75.0%", "improved: 25.0%"]
             return nothing
         end
 
