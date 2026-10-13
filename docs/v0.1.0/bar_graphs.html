@@ -187,7 +187,7 @@
 </code>
 </a>, which is what says when a gene is improved or degraded in a base block and which regulators it moves with; the graph picks the genes worth showing and draws them. A gene which is not a marker is not in the report and is therefore not shown.
 </p>
-<p>The hover of each bar says how often the gene is in no module at all in that side&#39;s base blocks, and which 
+<p>The hover of each bar gives the percentage of base neighborhoods it shows. It then says how often the gene is in no module at all in that side&#39;s base blocks, and which 
 <code>regulators_count
 </code> regulators it is most often in a module with there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene name different regulators.
 </p>
@@ -232,6 +232,36 @@
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.BarGraphs.put_changed_genes_configuration!">
+<a class="docstring-binding" href="#MetacellsGraphs.BarGraphs.put_changed_genes_configuration!">
+<code>MetacellsGraphs.BarGraphs.put_changed_genes_configuration!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">put_changed_genes_configuration!(configuration::SeriesBarsGraphConfiguration)::Nothing
+</code>
+</pre>
+<p>Lay out a butterfly of genes, as 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.improved_genes_graph">
+<code>improved_genes_graph
+</code>
+</a> and 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.degraded_genes_graph">
+<code>degraded_genes_graph
+</code>
+</a> show it. The genes are horizontal bars, and the two series are mirrored around them. The values are percentages of the base neighborhoods.
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Index">
 <a class="docs-heading-anchor" href="#Index">Index
 </a>
@@ -256,6 +286,12 @@
 <li>
 <a href="bar_graphs.html#MetacellsGraphs.BarGraphs.improved_genes_graph">
 <code>MetacellsGraphs.BarGraphs.improved_genes_graph
+</code>
+</a>
+</li>
+<li>
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.put_changed_genes_configuration!">
+<code>MetacellsGraphs.BarGraphs.put_changed_genes_configuration!
 </code>
 </a>
 </li>

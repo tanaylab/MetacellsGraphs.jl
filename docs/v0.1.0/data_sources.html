@@ -587,6 +587,7 @@
     query_suffix::AbstractString,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
 </code>
 </pre>
@@ -612,7 +613,11 @@
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
-</a>.
+</a>, with the 
+<code>title
+</code> and the 
+<code>hover_format
+</code>.
 </p>
 </div>
 </section>
@@ -707,6 +712,7 @@
     frame::DataFrame;
     column::AbstractString,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
 </code>
 </pre>
@@ -716,7 +722,15 @@
 <code>column
 </code> of a 
 <code>frame
-</code>, one value per row.
+</code>, one value per row, with the 
+<code>title
+</code> and the 
+<code>hover_format
+</code> of 
+<a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
+<code>put_vector_data!
+</code>
+</a>.
 </p>
 <p>The entities are not named here, unlike 
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
@@ -1010,6 +1024,7 @@
     row_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     column_entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     title::Maybe{AbstractString} = nothing,
+    hover_format::Maybe{Function} = nothing,
 )::Nothing
 </code>
 </pre>
@@ -1021,7 +1036,9 @@
 <a href="data_sources.html#MetacellsGraphs.DataSources.fill_axis_vector_data!">
 <code>fill_axis_vector_data!
 </code>
-</a>.
+</a>, including the 
+<code>hover_format
+</code>.
 </p>
 </div>
 </section>

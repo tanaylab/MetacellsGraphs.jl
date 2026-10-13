@@ -8,6 +8,7 @@ module BarGraphs
 
 export degraded_genes_graph
 export improved_genes_graph
+export put_changed_genes_configuration!
 
 using DataAxesFormats
 using DataFrames
@@ -34,10 +35,10 @@ Everything drawn here is a column of
 is improved or degraded in a base block and which regulators it moves with; the graph picks the genes worth showing
 and draws them. A gene which is not a marker is not in the report and is therefore not shown.
 
-The hover of each bar says how often the gene is in no module at all in that side's base blocks, and which
-`regulators_count` regulators it is most often in a module with there - that is, what the sharpening moved the gene
-with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a
-gene name different regulators.
+The hover of each bar gives the percentage of base neighborhoods it shows. It then says how often the gene is in no
+module at all in that side's base blocks, and which `regulators_count` regulators it is most often in a module with
+there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks
+about its own base blocks, so the two hovers of a gene name different regulators.
 
 Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides.
 A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the
@@ -88,34 +89,25 @@ function changed_genes_graph(;
     @assert regulators_count >= 0
 
     report = compute_gene_report(; daf, base_daf, regulators_count)  # NOJET
+    shown_report = get_top_changed_genes_report(report; genes_count, by_improved)
 
-    # Ascending, because the bars of a horizontal graph run from the bottom up, and the gene the graph is named for
-    # belongs at its top. A stable sort of a report which arrives in marker rank order means genes which moved in
-    # equally many base blocks are ranked by how good a marker they are, rather than by whatever the sort happens to do.
-    sort!(report, by_improved ? "imp_f" : "deg_f"; alg = MergeSort)
-    shown_report = last(report, genes_count)
-
-    graph = series_bars_graph(;
-        configuration = SeriesBarsGraphConfiguration(;
-            values_orientation = HorizontalValues,
-            value_axis = AxisConfiguration(;
-                title = "Base neighborhoods",
-                scale = ScaleConfiguration(; percent = true),
-            ),
-            bar_axis = AxisConfiguration(; title = "Genes"),
-            mirrored = true,
-        ),
-    )
+    graph = series_bars_graph()
+    put_changed_genes_configuration!(graph.configuration)
 
     fill_column_names_data!(bars_entities(graph), shown_report; column = "gene")
 
-    # The series are the two sides of the butterfly, so their colors say which side a bar is on. The bar shows the
-    # value, so its hover says only what the sharpening moved the gene with.
+    # The series are the two sides of the butterfly, so their colors say which side a bar is on. The hover of a bar
+    # gives its value as a percent, as the axis does, then what the sharpening moved the gene with.
     for (prefix, side_name, color) in (("deg", "degraded", "darkred"), ("imp", "improved", "darkblue"))
-        series = SeriesData(; name = side_name, color)
-        add_series!(graph, series)
-        fill_column_vector_data!(series.values, shown_report; column = "$(prefix)_f")
-        fill_module_regulators_hovers!(series.bars, shown_report; prefix, side_name, regulators_count)
+        series = add_series!(graph, SeriesData(; name = side_name, color))
+        fill_column_vector_data!(  # NOJET
+            series.values,
+            shown_report;
+            column = "$(prefix)_f",
+            title = "Base neighborhoods",
+            hover_format = percent_format(; digits = 1),
+        )
+        fill_module_regulators_hovers!(series.entities, shown_report; prefix, side_name, regulators_count)
     end
 
     for (title, column) in (("is lateral", "lat?"), ("is regulator", "reg?"))
@@ -124,6 +116,31 @@ function changed_genes_graph(;
     end
 
     return graph
+end
+
+"""
+    put_changed_genes_configuration!(configuration::SeriesBarsGraphConfiguration)::Nothing
+
+Lay out a butterfly of genes, as [`improved_genes_graph`](@ref) and [`degraded_genes_graph`](@ref) show it. The genes
+are horizontal bars, and the two series are mirrored around them. The values are percentages of the base
+neighborhoods.
+"""
+function put_changed_genes_configuration!(configuration::SeriesBarsGraphConfiguration)::Nothing
+    configuration.values_orientation = HorizontalValues
+    configuration.mirrored = true
+    configuration.value_axis.title = "Base neighborhoods"
+    configuration.value_axis.scale.percent = true
+    configuration.bar_axis.title = "Genes"
+    return nothing
+end
+
+# The `genes_count` genes of the `report` which changed in the most base blocks, on the improved or the degraded side.
+# They are in ascending order, because the bars of a horizontal graph run from the bottom up, and the gene the graph is
+# named for belongs at its top. A stable sort of a report which arrives in marker rank order means genes which moved in
+# equally many base blocks are ranked by how good a marker they are, rather than by whatever the sort happens to do.
+function get_top_changed_genes_report(report::DataFrame; genes_count::Integer, by_improved::Bool)::DataFrame
+    sorted_report = sort(report, by_improved ? "imp_f" : "deg_f"; alg = MergeSort)
+    return last(sorted_report, genes_count)
 end
 
 end  # module
