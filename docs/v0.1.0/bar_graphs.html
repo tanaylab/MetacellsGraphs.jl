@@ -148,9 +148,13 @@
 <div>
 <p>Bar graphs of a metacells repository.
 </p>
-<p>Unlike the other graphs, a graph here picks its own bars, so there is nothing for a caller to fill in afterwards. It reads a report computed by 
+<p>Unlike the other graphs, a graph here picks its own bars. It reads a report computed by 
 <code>Metacells
-</code>, keeps the genes worth showing, and draws everything about them.
+</code>, keeps the genes worth showing, and draws the report&#39;s values about them. As with the other graphs, annotations are a second call, e.g. 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!">
+<code>add_changed_genes_default_annotations!
+</code>
+</a>.
 </p>
 </div>
 </section>
@@ -191,7 +195,11 @@
 <code>regulators_count
 </code> regulators it is most often in a module with there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks about its own base blocks, so the two hovers of a gene name different regulators.
 </p>
-<p>Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides. A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the metacells nevertheless describe better than the base does.
+<p>Lateral and regulator genes are shown like any other. The graph doesn&#39;t annotate them; that is a second call (see 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!">
+<code>add_changed_genes_default_annotations!
+</code>
+</a>). A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the metacells nevertheless describe better than the base does.
 </p>
 </div>
 </section>
@@ -262,6 +270,52 @@
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!">
+<a class="docstring-binding" href="#MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!">
+<code>MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">add_changed_genes_default_annotations!(
+    graph::SeriesBarsGraph;
+    daf::DafReader,
+    base_daf::DafReader,
+)::Nothing
+</code>
+</pre>
+<p>Add the default annotations of the bars (the genes) of an 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.improved_genes_graph">
+<code>improved_genes_graph
+</code>
+</a> or a 
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.degraded_genes_graph">
+<code>degraded_genes_graph
+</code>
+</a> of the 
+<code>daf
+</code> and the 
+<code>base_daf
+</code>: whether each gene is lateral, a regulator, and a marker (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_lateral!">
+<code>fill_is_lateral!
+</code>
+</a> and its siblings). The graph measures the metacells against the base, so the annotations are of the 
+<code>base_daf
+</code>. An annotation whose data the 
+<code>base_daf
+</code> doesn&#39;t have is left out.
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Index">
 <a class="docs-heading-anchor" href="#Index">Index
 </a>
@@ -274,6 +328,12 @@
 <li>
 <a href="bar_graphs.html#MetacellsGraphs.BarGraphs">
 <code>MetacellsGraphs.BarGraphs
+</code>
+</a>
+</li>
+<li>
+<a href="bar_graphs.html#MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!">
+<code>MetacellsGraphs.BarGraphs.add_changed_genes_default_annotations!
 </code>
 </a>
 </li>

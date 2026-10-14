@@ -1,11 +1,13 @@
 """
 Bar graphs of a metacells repository.
 
-Unlike the other graphs, a graph here picks its own bars, so there is nothing for a caller to fill in afterwards. It
-reads a report computed by `Metacells`, keeps the genes worth showing, and draws everything about them.
+Unlike the other graphs, a graph here picks its own bars. It reads a report computed by `Metacells`, keeps the genes
+worth showing, and draws the report's values about them. As with the other graphs, annotations are a second call, e.g.
+[`add_changed_genes_default_annotations!`](@ref).
 """
 module BarGraphs
 
+export add_changed_genes_default_annotations!
 export degraded_genes_graph
 export improved_genes_graph
 export put_changed_genes_configuration!
@@ -40,9 +42,9 @@ module at all in that side's base blocks, and which `regulators_count` regulator
 there - that is, what the sharpening moved the gene with, where the bars say only how often it moved it. Each wing asks
 about its own base blocks, so the two hovers of a gene name different regulators.
 
-Lateral and regulator genes are shown like any other, and are marked as such in the annotations between the two sides.
-A lateral gene high in this graph is worth looking at: it is a gene the analysis was told to ignore, which the
-metacells nevertheless describe better than the base does.
+Lateral and regulator genes are shown like any other. The graph doesn't annotate them; that is a second call (see
+[`add_changed_genes_default_annotations!`](@ref)). A lateral gene high in this graph is worth looking at: it is a gene
+the analysis was told to ignore, which the metacells nevertheless describe better than the base does.
 """
 function improved_genes_graph(;
     daf::DafReader,
@@ -110,11 +112,6 @@ function changed_genes_graph(;
         fill_module_regulators_hovers!(series.entities, shown_report; prefix, side_name, regulators_count)
     end
 
-    for (title, column) in (("is lateral", "lat?"), ("is regulator", "reg?"))
-        index = add_annotation!(graph)
-        fill_column_boolean_annotation!(annotations_colors_vector_fields(graph, index), shown_report; column, title)
-    end
-
     return graph
 end
 
@@ -131,6 +128,36 @@ function put_changed_genes_configuration!(configuration::SeriesBarsGraphConfigur
     configuration.value_axis.title = "Base neighborhoods"
     configuration.value_axis.scale.percent = true
     configuration.bar_axis.title = "Genes"
+    return nothing
+end
+
+"""
+    add_changed_genes_default_annotations!(
+        graph::SeriesBarsGraph;
+        daf::DafReader,
+        base_daf::DafReader,
+    )::Nothing
+
+Add the default annotations of the bars (the genes) of an [`improved_genes_graph`](@ref) or a
+[`degraded_genes_graph`](@ref) of the `daf` and the `base_daf`: whether each gene is lateral, a regulator, and a marker
+(see [`fill_is_lateral!`](@ref MetacellsGraphs.DataSources.fill_is_lateral!) and its siblings). The graph measures the
+metacells against the base, so the annotations are of the `base_daf`. An annotation whose data the `base_daf` doesn't
+have is left out.
+"""
+function add_changed_genes_default_annotations!(
+    graph::SeriesBarsGraph;
+    daf::DafReader,  # NOLINT
+    base_daf::DafReader,
+)::Nothing
+    for (property, fill_property!) in (
+        ("is_lateral", fill_is_lateral!),  # NOLINT
+        ("is_regulator", fill_is_regulator!),  # NOLINT
+        ("is_marker", fill_is_marker!),  # NOLINT
+    )
+        if has_vector(base_daf, "gene", property)
+            fill_property!(annotations_colors_vector_fields(graph, add_annotation!(graph)), base_daf)
+        end
+    end
     return nothing
 end
 

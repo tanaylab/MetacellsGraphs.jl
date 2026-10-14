@@ -162,20 +162,22 @@ nested_test("bar_graphs") do
         return nothing
     end
 
+    # The graph annotates nothing; the default annotations are a second call, which reads the flags of the base, and
+    # leaves out those the base doesn't have. The base's markers differ from the other repository's on purpose.
     nested_test("annotations") do
         graph = improved_genes_graph(; daf, base_daf)
-        @test length(graph.data.annotations) == 2
-        @test graph.data.annotations[1].colors.title == "is lateral"
+        @test isempty(graph.data.annotations)
+        add_changed_genes_default_annotations!(graph; daf, base_daf)
+        @test isempty(graph.data.annotations)
+
+        set_vector!(base_daf, "gene", "is_lateral", [false, false, false, true, false])
+        set_vector!(base_daf, "gene", "is_regulator", [false, true, false, false, false])
+        set_vector!(base_daf, "gene", "is_marker", [true, false, true, true, false])
+        add_changed_genes_default_annotations!(graph; daf, base_daf)
+        @test [annotation.colors.title for annotation in graph.data.annotations] == ["lateral", "regulator", "marker"]
         @test graph.data.annotations[1].values.vector == ["false", "true", "false", "false"]
-        @test graph.data.annotations[2].colors.title == "is regulator"
         @test graph.data.annotations[2].values.vector == ["false", "false", "true", "false"]
-        @test !graph.data.annotations[1].colors.show_legend
-        @test graph.data.bars.hovers == [
-            "is lateral: false<br>is regulator: false",
-            "is lateral: true<br>is regulator: false",
-            "is lateral: false<br>is regulator: true",
-            "is lateral: false<br>is regulator: false",
-        ]
+        @test graph.data.annotations[3].values.vector == ["true", "true", "false", "true"]
         return nothing
     end
 end
