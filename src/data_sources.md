@@ -150,6 +150,7 @@ These pick which genes a graph shows, and return indices to pass as the `genes` 
 
 ```@docs
 MetacellsGraphs.DataSources.get_top_marker_gene_indices
+MetacellsGraphs.DataSources.TOP_MARKERS_COUNT_FOR_GRAPHS
 MetacellsGraphs.DataSources.get_skeleton_gene_indices
 ```
 

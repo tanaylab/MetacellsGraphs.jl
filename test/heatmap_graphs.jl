@@ -78,6 +78,13 @@ nested_test("heatmap_graphs") do
             return nothing
         end
 
+        # By default, the genes are the strongest markers, so `E`, which is no marker, is left out.
+        nested_test("default") do
+            graph = genes_heatmap_graph(daf)
+            @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
+            return nothing
+        end
+
         nested_test("markers_count") do
             genes = get_top_marker_gene_indices(daf; markers_count = 2)
             graph = genes_heatmap_graph(daf; genes)
@@ -135,6 +142,25 @@ nested_test("heatmap_graphs") do
                   Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
             @test !graph.data.columns.annotations[1].colors.show_legend
             @test graph.data.columns.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
+            return nothing
+        end
+
+        # The default annotations are those the data has: the types of the metacells, but the genes have no lateral flag
+        # until it is set, and the blocks have no types.
+        nested_test("default_annotations") do
+            graph = genes_heatmap_graph(daf; genes)
+            add_genes_heatmap_default_rows_annotations!(graph, daf)
+            add_genes_heatmap_default_columns_annotations!(graph, daf)
+            @test isempty(graph.data.rows.annotations)
+            @test graph.data.columns.annotations[1].values.vector == ["X", "X", "Y", "Y"]
+
+            set_vector!(daf, "gene", "is_lateral", [false, true, false, false, false])
+            add_genes_heatmap_default_rows_annotations!(graph, daf)
+            @test graph.data.rows.annotations[1].values.vector == ["false", "true"]
+
+            graph = genes_heatmap_graph(daf; axis = "block", genes)
+            add_genes_heatmap_default_columns_annotations!(graph, daf; axis = "block")
+            @test isempty(graph.data.columns.annotations)
             return nothing
         end
 

@@ -165,6 +165,12 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 <code>entries
 </code>, since it fills the entries the graph was named after.
 </p>
+<p>The usual annotations of each side are added by one call, e.g. 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!">
+<code>add_genes_heatmap_default_columns_annotations!
+</code>
+</a>, so a script gets the same graph as the interactive form shows by default.
+</p>
 </div>
 </section>
 </details>
@@ -203,17 +209,27 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 <code>entries
 </code>.
 </p>
-<p>The genes are the rows and the entries are the columns; both are clustered. Pick the genes with a data source such as 
+<p>The genes are the rows and the entries are the columns; both are clustered. By default, the genes are the 
+<a href="data_sources.html#MetacellsGraphs.DataSources.TOP_MARKERS_COUNT_FOR_GRAPHS">
+<code>TOP_MARKERS_COUNT_FOR_GRAPHS
+</code>
+</a> strongest markers (see 
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_top_marker_gene_indices">
 <code>get_top_marker_gene_indices
 </code>
-</a> or 
+</a>), which requires the 
+<code>marker_rank
+</code> of the genes. Pick other genes with a data source such as 
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_skeleton_gene_indices">
 <code>get_skeleton_gene_indices
 </code>
 </a>, and name them in the 
 <code>rows_axis_title
-</code>.
+</code>. Pick the entries with an entry mask (e.g., 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_is_in_categories_vector">
+<code>get_is_in_categories_vector
+</code>
+</a>).
 </p>
 <p>There are too many columns to label, so they are named in the hover of each cell instead. The rows are labelled.
 </p>
@@ -261,6 +277,82 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_rows_annotations!">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_rows_annotations!">
+<code>MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_rows_annotations!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">add_genes_heatmap_default_rows_annotations!(graph::HeatmapGraph, daf::DafReader)::Nothing
+</code>
+</pre>
+<p>Add the default annotations of the rows (the genes) of a 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<code>genes_heatmap_graph
+</code>
+</a> of the 
+<code>daf
+</code>: whether each gene is lateral (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_is_lateral!">
+<code>fill_is_lateral!
+</code>
+</a>). An annotation whose data the 
+<code>daf
+</code> doesn&#39;t have is left out.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!">
+<a class="docstring-binding" href="#MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!">
+<code>MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">add_genes_heatmap_default_columns_annotations!(
+    graph::HeatmapGraph,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Add the default annotations of the columns (the entries of the 
+<code>axis
+</code>) of a 
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.genes_heatmap_graph">
+<code>genes_heatmap_graph
+</code>
+</a> of the 
+<code>daf
+</code>: the type of each entry (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_type!">
+<code>fill_type!
+</code>
+</a>). The 
+<code>axis
+</code> must be the one the graph was made for. An annotation whose data the 
+<code>daf
+</code> doesn&#39;t have is left out.
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Index">
 <a class="docs-heading-anchor" href="#Index">Index
 </a>
@@ -273,6 +365,18 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 <li>
 <a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs">
 <code>MetacellsGraphs.HeatmapGraphs
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!">
+<code>MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_columns_annotations!
+</code>
+</a>
+</li>
+<li>
+<a href="heatmap_graphs.html#MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_rows_annotations!">
+<code>MetacellsGraphs.HeatmapGraphs.add_genes_heatmap_default_rows_annotations!
 </code>
 </a>
 </li>

@@ -126,6 +126,7 @@ export put_fold_configuration!
 export put_size_configuration!
 export put_size_values!
 export put_umap_data!
+export TOP_MARKERS_COUNT_FOR_GRAPHS
 
 using DataAxesFormats
 using DataFrames
@@ -143,6 +144,12 @@ GENE_FRACTION_REGULARIZATION_FOR_GRAPHS::Float64 = 1e-5
 The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.
 """
 MAX_FOLD_FOR_GRAPHS::Float64 = 3
+
+"""
+The number of the strongest marker genes a graph shows when it isn't told which genes to show (see
+[`get_top_marker_gene_indices`](@ref)).
+"""
+TOP_MARKERS_COUNT_FOR_GRAPHS::Int = 100
 
 """
 The color to give to entities without any value of a category (an empty string), e.g. with no type or no block. A
