@@ -278,6 +278,7 @@ nested_test("data_sources") do
             fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes = [1, 2])
             @test graph.data.entries.matrix[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
             @test graph.data.entries.matrix[2, :] == Float32[1.0, 0.0, 0.0, -1.0]
+            @test graph.data.cells.hovers[1, 1] == "fold from median: -1.00"
             @test graph.data.rows.entities.names == ["A", "B"]
             @test graph.configuration.entries.colors.palette == "BuWtRd"
             @test graph.configuration.entries.colors.show_legend
@@ -584,8 +585,10 @@ nested_test("data_sources") do
                 empty_value = 1,
                 show_legend = false,
                 log_base = Log2Base,
+                hover_format = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
             )
             @test graph.data.points.colors.vector == UInt32[70]
+            @test graph.data.points.entities.hovers[1] == "cells!: 70.0"
             @test graph.configuration.points.colors.title == "cells!"
             @test !graph.configuration.points.colors.show_legend
             @test graph.configuration.points.colors.scale.log_base == Log2Base
@@ -597,6 +600,7 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_size!(points_colors_vector_fields(graph), daf; axis = "metacell", property = "n_cells")
             @test graph.data.points.colors.vector == UInt32[10, 20, 30, 40]
+            @test graph.data.points.entities.hovers[1] == "n_cells: 10"
             @test graph.configuration.points.colors.title == "n_cells"
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             return nothing
@@ -616,6 +620,8 @@ nested_test("data_sources") do
                 fill_mean_total_UMIs_per_metacell!(y_axis_vector_fields(graph), daf; axis = "block")
                 @test graph.data.x.vector == Float32[15.0, 35.0]
                 @test graph.data.y.vector == Float32[150.0, 350.0]
+                @test graph.data.points.entities.hovers[1] ==
+                      "mean cells per metacell: 15.0<br>mean UMIs per metacell: 150.0"
                 @test graph.configuration.x_axis.title == "mean cells per metacell"
                 @test graph.configuration.y_axis.title == "mean UMIs per metacell"
                 return nothing
@@ -731,7 +737,7 @@ nested_test("data_sources") do
             fill_gene_correlation!(points_entities(graph), base_daf; gene = "A", title = "base correlation")
             fill_gene_correlation!(points_entities(graph), daf; gene = "A")
             @test graph.data.points.entities.names == ["B1", "B2"]
-            @test graph.data.points.entities.hovers[1] == "base correlation: 0.3<br>correlation: 0.4"
+            @test graph.data.points.entities.hovers[1] == "base correlation: 0.300<br>correlation: 0.400"
             return nothing
         end
 

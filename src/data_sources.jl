@@ -61,7 +61,9 @@ module DataSources
 
 # The data sources generated from the table of each display bucket (e.g. `fill_n_cells!`) are exported where they are
 # defined, by `define_bucket_data_sources`.
+export CORRELATION_HOVER_FORMAT_FOR_GRAPHS
 export EMPTY_CATEGORY_COLOR
+export EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS
 export fill_axes_matrix_data!
 export fill_axes_names_data!
 export fill_axis_names_data!
@@ -84,6 +86,7 @@ export fill_mean_total_UMIs_per_metacell!
 export fill_module_regulators_hovers!
 export fill_size!
 export fill_umap!
+export FOLD_HOVER_FORMAT_FOR_GRAPHS
 export GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
 export get_axes_matrix
 export get_axis_entries_vector
@@ -114,6 +117,7 @@ export get_top_marker_gene_indices
 export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
+export MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS
 export put_boolean_configuration!
 export put_boolean_values!
 export put_category_configuration!
@@ -126,6 +130,7 @@ export put_fold_configuration!
 export put_size_configuration!
 export put_size_values!
 export put_umap_data!
+export SIZE_HOVER_FORMAT_FOR_GRAPHS
 export TOP_MARKERS_COUNT_FOR_GRAPHS
 
 using DataAxesFormats
@@ -150,6 +155,31 @@ The number of the strongest marker genes a graph shows when it isn't told which 
 [`get_top_marker_gene_indices`](@ref)).
 """
 TOP_MARKERS_COUNT_FOR_GRAPHS::Int = 100
+
+"""
+The `hover_format` of a size (a count): a whole number.
+"""
+SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 0)
+
+"""
+The `hover_format` of a mean of sizes (e.g., the mean cells per metacell): one digit after the decimal point.
+"""
+MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 1)
+
+"""
+The `hover_format` of an expression level: 3 significant digits.
+"""
+EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS::Function = significant_format(; sigdigits = 3)
+
+"""
+The `hover_format` of a fold factor: two digits after the decimal point.
+"""
+FOLD_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 2)
+
+"""
+The `hover_format` of a correlation: three digits after the decimal point, since small correlations are common.
+"""
+CORRELATION_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 3)
 
 """
 The color to give to entities without any value of a category (an empty string), e.g. with no type or no block. A
@@ -380,7 +410,11 @@ end
 # The keywords of the size bucket's get and of its `put_size_values!`, other than the ones every generated data source
 # takes.
 const SIZE_GET_KEYWORDS = (:(empty_value::Real = 1),)
-const SIZE_PUT_KEYWORDS = (:(show_legend::Bool = true), :(log_base::LogBase = Log10Base))
+const SIZE_PUT_KEYWORDS = (
+    :(show_legend::Bool = true),
+    :(log_base::LogBase = Log10Base),
+    :(hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS),
+)
 
 """
     get_size_vector(
@@ -422,6 +456,7 @@ end
         empty_value::Real = 1,
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
+        hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the size (count) `property` of each of the `entries` of the `daf` `axis` (see
@@ -438,11 +473,12 @@ function fill_size!(
     empty_value::Real = 1,
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
+    hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_size_vector(daf; axis, property, entries, via, empty_value)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base, hover_format)
     return nothing
 end
 
@@ -454,10 +490,12 @@ end
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
+        hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Put the size (count) `value_per_entry` into the `sinks`, shown by [`put_size_configuration!`](@ref), and name the
-entities after the `name_per_entry`. Every size data source ends with this.
+entities after the `name_per_entry`. Every size data source ends with this. The hovers show each value by the
+`hover_format`.
 """
 function put_size_values!(
     sinks::VectorDataSinks,
@@ -466,8 +504,9 @@ function put_size_values!(
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
+    hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
-    put_vector_data!(sinks, value_per_entry; title)
+    put_vector_data!(sinks, value_per_entry; title, hover_format)
     put_size_configuration!(sinks; title, show_legend, log_base)
     put_vector_names_data!(sinks, name_per_entry)
     return nothing
@@ -525,6 +564,7 @@ end
         title::Maybe{AbstractString} = "mean cells per metacell",
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
+        hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the mean number of cells per metacell of each of the `entries` of the `daf` `axis`, shown by
@@ -539,11 +579,12 @@ function fill_mean_cells_per_metacell!(
     title::Maybe{AbstractString} = "mean cells per metacell",
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
+    hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_cells_per_metacell_vector(daf; axis, entries, via)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base, hover_format)
     return nothing
 end
 
@@ -577,6 +618,7 @@ end
         title::Maybe{AbstractString} = "mean UMIs per metacell",
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
+        hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` of the `daf` `axis`, shown by
@@ -591,11 +633,12 @@ function fill_mean_total_UMIs_per_metacell!(
     title::Maybe{AbstractString} = "mean UMIs per metacell",
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
+    hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_total_UMIs_per_metacell_vector(daf; axis, entries, via)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base, hover_format)
     return nothing
 end
 
@@ -629,6 +672,7 @@ end
         title::Maybe{AbstractString} = "mean UMIs per cell",
         show_legend::Bool = true,
         log_base::LogBase = Log10Base,
+        hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of the `daf` `axis`, shown by
@@ -643,11 +687,12 @@ function fill_mean_total_UMIs_per_cell!(
     title::Maybe{AbstractString} = "mean UMIs per cell",
     show_legend::Bool = true,
     log_base::LogBase = Log10Base,
+    hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_mean_total_UMIs_per_cell_vector(daf; axis, entries, via)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base)
+    put_size_values!(sinks, value_per_entry, name_per_entry; title, show_legend, log_base, hover_format)
     return nothing
 end
 
@@ -1051,10 +1096,12 @@ define_bucket_data_sources(;
         title::Maybe{AbstractString} = "\$(gene) fraction",
         show_legend::Bool = true,
         log_base::LogBase = Log2Base,
+        hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the `gene` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
-shown by [`put_expression_level_configuration!`](@ref), and name the entities after the `entries`.
+shown by [`put_expression_level_configuration!`](@ref), and name the entities after the `entries`. The hovers show each
+value by the `hover_format`.
 """
 function fill_gene_expression!(
     sinks::VectorDataSinks,
@@ -1066,9 +1113,10 @@ function fill_gene_expression!(
     title::Maybe{AbstractString} = "$(gene) fraction",
     show_legend::Bool = true,
     log_base::LogBase = Log2Base,
+    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title)
+    put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title, hover_format)
     put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
@@ -1154,6 +1202,7 @@ end
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         title::Maybe{AbstractString} = "correlation",
         show_legend::Bool = true,
+        hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the correlation of the `gene` per each of the `entries` of some `daf` `axis`, shown by
@@ -1167,11 +1216,12 @@ function fill_gene_correlation!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,
+    hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_gene_correlation_vector(daf; gene, axis, entries)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend, hover_format)
     return nothing
 end
 
@@ -1291,7 +1341,8 @@ end
 # The keywords of the correlation bucket's get and of its `put_correlation_values!`, other than the ones every
 # generated data source takes.
 const CORRELATION_GET_KEYWORDS = (:(empty_value::Real = 0),)
-const CORRELATION_PUT_KEYWORDS = (:(show_legend::Bool = true),)
+const CORRELATION_PUT_KEYWORDS =
+    (:(show_legend::Bool = true), :(hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS))
 
 """
     get_correlation_vector(
@@ -1329,6 +1380,7 @@ end
         title::Maybe{AbstractString} = property,
         empty_value::Real = 0,
         show_legend::Bool = true,
+        hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the correlation `property` of each of the `entries` of the `daf` `axis` (see
@@ -1345,11 +1397,12 @@ function fill_correlation!(
     title::Maybe{AbstractString} = property,
     empty_value::Real = 0,
     show_legend::Bool = true,
+    hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_correlation_vector(daf; axis, property, entries, via, empty_value)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend, hover_format)
     return nothing
 end
 
@@ -1360,10 +1413,12 @@ end
         name_per_entry::AbstractVector{<:AbstractString};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
+        hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Put the correlation `value_per_entry` into the `sinks`, shown by [`put_correlation_configuration!`](@ref), and name the
-entities after the `name_per_entry`. Every correlation data source ends with this.
+entities after the `name_per_entry`. Every correlation data source ends with this. The hovers show each value by the
+`hover_format`.
 """
 function put_correlation_values!(
     sinks::VectorDataSinks,
@@ -1371,8 +1426,9 @@ function put_correlation_values!(
     name_per_entry::AbstractVector{<:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
+    hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
-    put_vector_data!(sinks, value_per_entry; title)
+    put_vector_data!(sinks, value_per_entry; title, hover_format)
     put_correlation_configuration!(sinks, value_per_entry; title, show_legend)
     put_vector_names_data!(sinks, name_per_entry)
     return nothing
@@ -1416,6 +1472,7 @@ define_bucket_data_sources(;
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         title::Maybe{AbstractString} = "correlation change",
         show_legend::Bool = true,
+        hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with how much the correlation of the `gene` changed between the `base_daf` and the `daf`, per each of
@@ -1431,11 +1488,12 @@ function fill_gene_correlation_change!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     title::Maybe{AbstractString} = "correlation change",
     show_legend::Bool = true,
+    hover_format::Maybe{Function} = CORRELATION_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     value_per_entry = get_gene_correlation_change_vector(daf, base_daf; gene, axis, base_axis, entries)
     name_per_entry = get_axis_entries_vector(daf; axis, entries)
-    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend)
+    put_correlation_values!(sinks, value_per_entry, name_per_entry; title, show_legend, hover_format)
     return nothing
 end
 
@@ -1450,11 +1508,12 @@ end
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
         log_base::LogBase = Log2Base,
+        hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the `genes` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
 shown by [`put_expression_level_configuration!`](@ref), and name the rows and the columns. The `genes` are the rows
-and the `entries` are the columns.
+and the `entries` are the columns. The hovers show each value by the `hover_format`.
 """
 function fill_genes_expression_matrix!(
     sinks::MatrixDataSinks,
@@ -1466,9 +1525,10 @@ function fill_genes_expression_matrix!(
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
     log_base::LogBase = Log2Base,
+    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
-    put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title)
+    put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title, hover_format)
     put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
     fill_axes_names_data!(
         sinks,
@@ -1732,12 +1792,13 @@ end
         max_fold::Real = MAX_FOLD_FOR_GRAPHS,
         title::Maybe{AbstractString} = "fold from median",
         show_legend::Bool = true,
+        hover_format::Maybe{Function} = FOLD_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the `genes` fold (log base-2 minus the median) per each of the `entries` of some `daf` `axis`,
 shown in the range -`max_fold` (blue) to 0 (white) to +`max_fold` (red), and name the rows and the columns. The `genes`
 are the rows and the `entries` are the columns. This is based on the `log_linear_fraction` per gene per `axis`, which is
-already a log, so there's no regularization to apply here.
+already a log, so there's no regularization to apply here. The hovers show each value by the `hover_format`.
 """
 function fill_genes_fold_matrix!(
     sinks::MatrixDataSinks,
@@ -1748,9 +1809,10 @@ function fill_genes_fold_matrix!(
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fold from median",
     show_legend::Bool = true,
+    hover_format::Maybe{Function} = FOLD_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
-    put_matrix_data!(sinks, get_genes_fold_matrix(daf; genes, axis, entries); title)  # NOJET
+    put_matrix_data!(sinks, get_genes_fold_matrix(daf; genes, axis, entries); title, hover_format)
     put_fold_configuration!(sinks; max_fold, title, show_legend)
     fill_axes_names_data!(
         sinks,
