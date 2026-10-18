@@ -637,6 +637,19 @@ nested_test("data_sources") do
         end
     end
 
+    # The fills are documented, so their defaults can be read (e.g. by the widgets, to show them).
+    nested_test("defaults") do
+        function_default = MetacellsGraphs.DataSources.TanayLabUtilities.function_default
+        @test function_default(fill_n_cells!, :show_legend) == true
+        @test function_default(fill_n_cells!, :log_base) == Log10Base
+        @test function_default(fill_is_lateral!, :show_legend) == false
+        @test function_default(fill_type!, :show_legend) == true
+        @test function_default(fill_gene_expression!, :log_base) == Log2Base
+        @test function_default(fill_mean_cells_per_metacell!, :log_base) == Log10Base
+        @test function_default(fill_boolean!, :show_legend) == false
+        return nothing
+    end
+
     nested_test("gene_selection") do
         set_vector!(daf, "gene", "marker_rank", UInt32[1, 2, typemax(UInt32)])
         set_vector!(daf, "gene", "is_skeleton", [true, false, true])

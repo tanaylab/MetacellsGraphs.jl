@@ -294,7 +294,10 @@ function define_property_data_source(;
                 $(strip(line.doc)) $(doc_suffix)
                 """
     @eval begin
-        @doc $docstring function $function_name($(leading_arguments...); $(keyword_arguments...))::$result_type  # NOLINT
+        @doc $docstring @documented function $function_name(  # NOLINT
+            $(leading_arguments...);  # NOLINT
+            $(keyword_arguments...),  # NOLINT
+        )::$result_type
             return $body
         end
         export $function_name
@@ -570,7 +573,7 @@ end
 Fill the `sinks` with the mean number of cells per metacell of each of the `entries` of the `daf` `axis`, shown by
 [`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
-function fill_mean_cells_per_metacell!(
+@documented function fill_mean_cells_per_metacell!(
     sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "block",
@@ -624,7 +627,7 @@ end
 Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` of the `daf` `axis`, shown by
 [`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
-function fill_mean_total_UMIs_per_metacell!(
+@documented function fill_mean_total_UMIs_per_metacell!(
     sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "block",
@@ -678,7 +681,7 @@ end
 Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of the `daf` `axis`, shown by
 [`put_size_configuration!`](@ref), and name the entities after the `entries`.
 """
-function fill_mean_total_UMIs_per_cell!(
+@documented function fill_mean_total_UMIs_per_cell!(
     sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString = "metacell",
@@ -998,7 +1001,7 @@ Fill the `sinks` with the Boolean `property` of each of the `entries` of the `da
 [`get_boolean_vector`](@ref)), shown by [`put_boolean_configuration!`](@ref), and name the entities after the
 `entries`.
 """
-function fill_boolean!(
+@documented function fill_boolean!(
     sinks::VectorDataSinks,
     daf::DafReader;
     axis::AbstractString,
@@ -1103,7 +1106,7 @@ Fill the `sinks` with the `gene` expression level (linear fraction) per each of 
 shown by [`put_expression_level_configuration!`](@ref), and name the entities after the `entries`. The hovers show each
 value by the `hover_format`.
 """
-function fill_gene_expression!(
+@documented function fill_gene_expression!(
     sinks::VectorDataSinks,
     daf::DafReader;
     gene::AbstractString,
