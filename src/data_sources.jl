@@ -1032,7 +1032,8 @@ Put the Boolean `value_per_entry` into the `sinks`, shown by [`put_boolean_confi
 after the `name_per_entry` (unless it is `nothing`). Every Boolean data source ends with this.
 
 The values are put as the *strings* `"true"` and `"false"`. Coloring by a Boolean is coloring by two categories, and a
-categorical palette is keyed by strings.
+categorical palette is keyed by strings. The strings are a dense vector even if `value_per_entry` is sparse, since
+`SparseArrays` doesn't support strings.
 """
 function put_boolean_values!(
     sinks::VectorDataSinks,
@@ -1041,7 +1042,7 @@ function put_boolean_values!(
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
-    put_vector_data!(sinks, string.(value_per_entry); title)
+    put_vector_data!(sinks, [string(value) for value in value_per_entry]; title)
     put_boolean_configuration!(sinks; title, show_legend)
     if name_per_entry !== nothing
         put_vector_names_data!(sinks, name_per_entry)

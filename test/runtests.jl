@@ -5,6 +5,7 @@ using MetacellsGraphs
 using NestedTests
 using Random
 using SomeGraphs
+using SparseArrays
 using Test
 
 test_prefixes(ARGS)

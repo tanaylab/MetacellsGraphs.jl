@@ -1873,7 +1873,11 @@
 <code>&quot;true&quot;
 </code> and 
 <code>&quot;false&quot;
-</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings.
+</code>. Coloring by a Boolean is coloring by two categories, and a categorical palette is keyed by strings. The strings are a dense vector even if 
+<code>value_per_entry
+</code> is sparse, since 
+<code>SparseArrays
+</code> doesn&#39;t support strings.
 </p>
 </div>
 </section>

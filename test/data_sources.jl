@@ -927,6 +927,19 @@ nested_test("data_sources") do
         end
     end
 
+    # A sparse flag is put as a dense vector of strings, since `SparseArrays` doesn't support strings.
+    nested_test("put_sparse_boolean_values") do
+        graph = heatmap_graph()
+        put_boolean_values!(
+            rows_annotations_colors_vector_fields(graph, add_rows_annotation!(graph)),
+            sparsevec([2], [true], 2),
+            ["a", "b"],
+        )
+        @test graph.data.rows.annotations[1].values.vector == ["false", "true"]
+        @test graph.data.rows.annotations[1].values.vector isa Vector{String}
+        return nothing
+    end
+
     # The put of each display bucket takes only data already in hand: the values, the names and (for a category) the
     # palette, wherever they came from.
     nested_test("put_values") do
