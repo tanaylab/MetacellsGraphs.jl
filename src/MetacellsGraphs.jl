@@ -38,4 +38,6 @@ include("heatmap_graphs.jl")
 include("bar_graphs.jl")
 @reexport using .BarGraphs
 
+include("workloads.jl")
+
 end  # module
