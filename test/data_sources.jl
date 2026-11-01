@@ -565,6 +565,14 @@ nested_test("data_sources") do
             return nothing
         end
 
+        nested_test("linear") do
+            graph = points_graph()
+            fill_total_UMIs!(points_sizes_vector_fields(graph), daf; log_base = nothing)
+            @test graph.configuration.points.sizes.scale.log_base === nothing
+            @test graph.configuration.points.sizes.scale.log_regularization == 0
+            return nothing
+        end
+
         nested_test("n_cells") do
             graph = points_graph()
             fill_n_cells!(points_colors_vector_fields(graph), daf)

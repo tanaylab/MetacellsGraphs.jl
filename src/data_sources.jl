@@ -334,13 +334,13 @@ end
         sinks::Sinks;
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
     )::Nothing
 
 Show a size (a count) on a log scale of the `log_base`, regularized by 1, in the `YlOrRd` color scale, named by the
 `title`. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the
 means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero
-count, which is rare, a place on the scale.
+count, which is rare, a place on the scale. If the `log_base` is `nothing`, the scale is linear, and isn't regularized.
 
 The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is
 visible. A scale which starts at white would lose it against the background.
@@ -349,7 +349,7 @@ function put_size_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     visit_configuration_sinks(sinks) do sink
         return put_size_configuration!(sink; title, show_legend, log_base)
@@ -361,7 +361,7 @@ function put_size_configuration!(
     sizes::SizesConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     sizes.show_legend = show_legend
     put_size_configuration!(sizes.scale; log_base)
@@ -375,7 +375,7 @@ function put_size_configuration!(
     axis::AxisConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,  # NOLINT
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     put_size_configuration!(axis.scale; log_base)
     if title !== nothing
@@ -388,7 +388,7 @@ function put_size_configuration!(
     colors::ColorsConfiguration;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     colors.palette = "YlOrRd"
     colors.show_legend = show_legend
@@ -403,10 +403,10 @@ function put_size_configuration!(
     scale::ScaleConfiguration;
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     scale.log_base = log_base
-    scale.log_regularization = 1
+    scale.log_regularization = log_base === nothing ? 0 : 1
     return nothing
 end
 
@@ -415,7 +415,7 @@ end
 const SIZE_GET_KEYWORDS = (:(empty_value::Real = 1),)
 const SIZE_PUT_KEYWORDS = (
     :(show_legend::Bool = true),
-    :(log_base::LogBase = Log10Base),
+    :(log_base::Maybe{LogBase} = Log10Base),
     :(hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS),
 )
 
@@ -458,7 +458,7 @@ end
         title::Maybe{AbstractString} = property,
         empty_value::Real = 1,
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -475,7 +475,7 @@ function fill_size!(
     title::Maybe{AbstractString} = property,
     empty_value::Real = 1,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -492,7 +492,7 @@ end
         name_per_entry::AbstractVector{<:AbstractString};
         title::Maybe{AbstractString} = nothing,
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -506,7 +506,7 @@ function put_size_values!(
     name_per_entry::AbstractVector{<:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     put_vector_data!(sinks, value_per_entry; title, hover_format)
@@ -566,7 +566,7 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean cells per metacell",
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -581,7 +581,7 @@ Fill the `sinks` with the mean number of cells per metacell of each of the `entr
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean cells per metacell",
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -620,7 +620,7 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean UMIs per metacell",
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -635,7 +635,7 @@ Fill the `sinks` with the mean total UMIs per metacell of each of the `entries` 
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean UMIs per metacell",
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -674,7 +674,7 @@ end
         via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
         title::Maybe{AbstractString} = "mean UMIs per cell",
         show_legend::Bool = true,
-        log_base::LogBase = Log10Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -689,7 +689,7 @@ Fill the `sinks` with the mean total UMIs per cell of each of the `entries` of t
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{<:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = "mean UMIs per cell",
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -1099,7 +1099,7 @@ define_bucket_data_sources(;
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "\$(gene) fraction",
         show_legend::Bool = true,
-        log_base::LogBase = Log2Base,
+        log_base::Maybe{LogBase} = Log2Base,
         hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -1116,7 +1116,7 @@ value by the `hover_format`.
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "$(gene) fraction",
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -1511,7 +1511,7 @@ end
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
-        log_base::LogBase = Log2Base,
+        log_base::Maybe{LogBase} = Log2Base,
         hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -1528,7 +1528,7 @@ function fill_genes_expression_matrix!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
@@ -1578,11 +1578,12 @@ end
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
-        log_base::LogBase = Log2Base,
+        log_base::Maybe{LogBase} = Log2Base,
     )::Nothing
 
 Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log scale of the `log_base`,
-regularized by `gene_fraction_regularization`, named by the `title`. The expression levels themselves are put in by
+regularized by `gene_fraction_regularization`, named by the `title`. If the `log_base` is `nothing`, the scale is
+linear, and isn't regularized. The expression levels themselves are put in by
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
@@ -1596,7 +1597,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
 )::Nothing
     @assert gene_fraction_regularization >= 0
     visit_configuration_sinks(sinks) do sink
@@ -1611,7 +1612,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
     title::Maybe{AbstractString} = "fraction",  # NOLINT
     show_legend::Bool = true,  # NOLINT
-    log_base::LogBase = Log2Base,  # NOLINT
+    log_base::Maybe{LogBase} = Log2Base,  # NOLINT
 )::Nothing
     return nothing
 end
@@ -1621,7 +1622,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,  # NOLINT
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
 )::Nothing
     put_expression_level_configuration!(axis.scale; gene_fraction_regularization, log_base)
     if title !== nothing
@@ -1635,7 +1636,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
 )::Nothing
     put_expression_level_configuration!(colors.scale; gene_fraction_regularization, log_base)
     colors.palette = "WtYlOrRdDm"
@@ -1652,10 +1653,10 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
 )::Nothing
     scale.log_base = log_base
-    scale.log_regularization = gene_fraction_regularization
+    scale.log_regularization = log_base === nothing ? 0 : gene_fraction_regularization
     return nothing
 end
 

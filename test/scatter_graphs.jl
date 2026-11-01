@@ -74,6 +74,23 @@ nested_test("scatter_graphs") do
             @test graph.configuration.y_axis.scale.log_regularization == 1e-3
             return nothing
         end
+
+        nested_test("log_base") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", log_base = Log10Base)
+            @test graph.configuration.x_axis.scale.log_base == Log10Base
+            @test graph.configuration.y_axis.scale.log_base == Log10Base
+            return nothing
+        end
+
+        nested_test("linear") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", log_base = nothing)
+            @test graph.configuration.x_axis.scale.log_base === nothing
+            @test graph.configuration.x_axis.scale.log_regularization == 0
+            @test graph.configuration.y_axis.scale.log_base === nothing
+            @test graph.configuration.y_axis.scale.log_regularization == 0
+            graph_to_figure(graph)
+            return nothing
+        end
     end
 
     nested_test("umap") do

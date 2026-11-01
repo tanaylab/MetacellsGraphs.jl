@@ -1124,7 +1124,7 @@
     sinks::Sinks;
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
 </code>
 </pre>
@@ -1134,7 +1134,11 @@
 <code>YlOrRd
 </code> color scale, named by the 
 <code>title
-</code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is rare, a place on the scale.
+</code>. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero count, which is rare, a place on the scale. If the 
+<code>log_base
+</code> is 
+<code>nothing
+</code>, the scale is linear, and isn&#39;t regularized.
 </p>
 <p>The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is visible. A scale which starts at white would lose it against the background.
 </p>
@@ -1210,7 +1214,7 @@
     title::Maybe{AbstractString} = property,
     empty_value::Real = 1,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -1260,7 +1264,7 @@
     name_per_entry::AbstractVector{&lt;:AbstractString};
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -1341,7 +1345,7 @@
     gene_fraction_regularization::Real = 1.0e-5,
     title::Maybe{AbstractString} = &quot;fraction&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
 )::Nothing
 </code>
 </pre>
@@ -1351,7 +1355,11 @@
 <code>gene_fraction_regularization
 </code>, named by the 
 <code>title
-</code>. The expression levels themselves are put in by 
+</code>. If the 
+<code>log_base
+</code> is 
+<code>nothing
+</code>, the scale is linear, and isn&#39;t regularized. The expression levels themselves are put in by 
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
@@ -2211,7 +2219,7 @@
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = &quot;$(gene) fraction&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -2305,7 +2313,7 @@
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = &quot;fraction&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log2Base,
+    log_base::Maybe{LogBase} = Log2Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3340,7 +3348,7 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;total UMIs&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3421,7 +3429,7 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;cells&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3494,7 +3502,7 @@
     empty_value::Real = 1,
     title::Maybe{AbstractString} = &quot;metacells&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3578,7 +3586,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean cells per metacell&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3657,7 +3665,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean UMIs per metacell&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
@@ -3736,7 +3744,7 @@
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     title::Maybe{AbstractString} = &quot;mean UMIs per cell&quot;,
     show_legend::Bool = true,
-    log_base::LogBase = Log10Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>

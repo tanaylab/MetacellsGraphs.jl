@@ -185,6 +185,7 @@ fill_type!(points_colors_vector_fields(graph), daf)
     y_gene::AbstractString,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = 1.0e-5,
+    log_base::Maybe{LogBase} = Log2Base,
 )::PointsGraph
 </code>
 </pre>
@@ -196,7 +197,11 @@ fill_type!(points_colors_vector_fields(graph), daf)
 <code>entries
 </code> of the 
 <code>axis
-</code>, on log scale.
+</code>, on log scale. Both axes use the same 
+<code>log_base
+</code>. If it is 
+<code>nothing
+</code>, both axes are linear.
 </p>
 <p>The 
 <code>axis

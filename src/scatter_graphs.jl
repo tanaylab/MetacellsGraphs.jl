@@ -31,26 +31,45 @@ using ..DataSources
         y_gene::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
+        log_base::Maybe{LogBase} = Log2Base,
     )::PointsGraph
 
-The expression of `x_gene` against `y_gene`, a point per each of the `entries` of the `axis`, on log scale.
+The expression of `x_gene` against `y_gene`, a point per each of the `entries` of the `axis`, on log scale. Both axes
+use the same `log_base`. If it is `nothing`, both axes are linear.
 
 The `axis` can be any axis which has a `linear_fraction` per gene, typically `metacell` or `block`. A block is coarser,
 so the same pair of genes shows fewer points and less scatter.
 
 The hover of each point names its entry and gives both fractions.
 """
-function gene_gene_graph(
+@documented function gene_gene_graph(
     daf::DafReader;
     axis::AbstractString = "metacell",
     x_gene::AbstractString,
     y_gene::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
+    log_base::Maybe{LogBase} = Log2Base,
 )::PointsGraph
     graph = points_graph()
-    fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = x_gene, axis, entries, gene_fraction_regularization)
-    fill_gene_expression!(y_axis_vector_fields(graph), daf; gene = y_gene, axis, entries, gene_fraction_regularization)
+    fill_gene_expression!(
+        x_axis_vector_fields(graph),
+        daf;
+        gene = x_gene,
+        axis,
+        entries,
+        gene_fraction_regularization,
+        log_base,
+    )
+    fill_gene_expression!(
+        y_axis_vector_fields(graph),
+        daf;
+        gene = y_gene,
+        axis,
+        entries,
+        gene_fraction_regularization,
+        log_base,
+    )
     return graph
 end
 
