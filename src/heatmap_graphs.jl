@@ -57,7 +57,7 @@ The genes are the rows and the entries are the columns; both are clustered. By d
 
 There are too many columns to label, so they are named in the hover of each cell instead. The rows are labelled.
 """
-function genes_heatmap_graph(
+@documented function genes_heatmap_graph(
     daf::DafReader;
     axis::AbstractString = "metacell",
     genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
