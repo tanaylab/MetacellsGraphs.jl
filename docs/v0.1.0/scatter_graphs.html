@@ -221,6 +221,90 @@ fill_type!(points_colors_vector_fields(graph), daf)
 </article>
 <article>
 <details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.add_gene_gene_default_colors!">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.add_gene_gene_default_colors!">
+<code>MetacellsGraphs.ScatterGraphs.add_gene_gene_default_colors!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">add_gene_gene_default_colors!(
+    graph::PointsGraph,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Add the default colors of the points (the entries of the 
+<code>axis
+</code>) of a 
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.gene_gene_graph">
+<code>gene_gene_graph
+</code>
+</a> of the 
+<code>daf
+</code>: the type of each entry (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_type!">
+<code>fill_type!
+</code>
+</a>). The 
+<code>axis
+</code> must be the one the graph was made for. If the 
+<code>daf
+</code> doesn&#39;t have the types, the points are left uncolored.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.ScatterGraphs.add_gene_gene_default_sizes!">
+<a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.add_gene_gene_default_sizes!">
+<code>MetacellsGraphs.ScatterGraphs.add_gene_gene_default_sizes!
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">add_gene_gene_default_sizes!(
+    graph::PointsGraph,
+    daf::DafReader;
+    axis::AbstractString = &quot;metacell&quot;,
+)::Nothing
+</code>
+</pre>
+<p>Add the default sizes of the points (the entries of the 
+<code>axis
+</code>) of a 
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.gene_gene_graph">
+<code>gene_gene_graph
+</code>
+</a> of the 
+<code>daf
+</code>: the number of cells of each entry (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.fill_n_cells!">
+<code>fill_n_cells!
+</code>
+</a>). The 
+<code>axis
+</code> must be the one the graph was made for. If the 
+<code>daf
+</code> doesn&#39;t have the numbers of cells, the points are left unsized.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
 <summary id="MetacellsGraphs.ScatterGraphs.umap_graph">
 <a class="docstring-binding" href="#MetacellsGraphs.ScatterGraphs.umap_graph">
 <code>MetacellsGraphs.ScatterGraphs.umap_graph
@@ -351,6 +435,18 @@ fill_type!(points_colors_vector_fields(graph), daf)
 <li>
 <a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs">
 <code>MetacellsGraphs.ScatterGraphs
+</code>
+</a>
+</li>
+<li>
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.add_gene_gene_default_colors!">
+<code>MetacellsGraphs.ScatterGraphs.add_gene_gene_default_colors!
+</code>
+</a>
+</li>
+<li>
+<a href="scatter_graphs.html#MetacellsGraphs.ScatterGraphs.add_gene_gene_default_sizes!">
+<code>MetacellsGraphs.ScatterGraphs.add_gene_gene_default_sizes!
 </code>
 </a>
 </li>

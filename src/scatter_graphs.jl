@@ -12,6 +12,8 @@ graph was named after. The same goes for the sizes of the points, and for anythi
 """
 module ScatterGraphs
 
+export add_gene_gene_default_colors!
+export add_gene_gene_default_sizes!
 export gene_base_delta_correlations_graph
 export gene_gene_graph
 export put_hidden_entries_configuration!
@@ -71,6 +73,42 @@ The hover of each point names its entry and gives both fractions.
         log_base,
     )
     return graph
+end
+
+"""
+    add_gene_gene_default_colors!(
+        graph::PointsGraph,
+        daf::DafReader;
+        axis::AbstractString = "metacell",
+    )::Nothing
+
+Add the default colors of the points (the entries of the `axis`) of a [`gene_gene_graph`](@ref) of the `daf`: the type
+of each entry (see [`fill_type!`](@ref MetacellsGraphs.DataSources.fill_type!)). The `axis` must be the one the graph
+was made for. If the `daf` doesn't have the types, the points are left uncolored.
+"""
+function add_gene_gene_default_colors!(graph::PointsGraph, daf::DafReader; axis::AbstractString = "metacell")::Nothing
+    if has_vector(daf, axis, "type") && has_axis(daf, "type")
+        fill_type!(points_colors_vector_fields(graph), daf; axis)  # NOLINT
+    end
+    return nothing
+end
+
+"""
+    add_gene_gene_default_sizes!(
+        graph::PointsGraph,
+        daf::DafReader;
+        axis::AbstractString = "metacell",
+    )::Nothing
+
+Add the default sizes of the points (the entries of the `axis`) of a [`gene_gene_graph`](@ref) of the `daf`: the number
+of cells of each entry (see [`fill_n_cells!`](@ref MetacellsGraphs.DataSources.fill_n_cells!)). The `axis` must be the
+one the graph was made for. If the `daf` doesn't have the numbers of cells, the points are left unsized.
+"""
+function add_gene_gene_default_sizes!(graph::PointsGraph, daf::DafReader; axis::AbstractString = "metacell")::Nothing
+    if has_vector(daf, axis, "n_cells")
+        fill_n_cells!(points_sizes_vector_fields(graph), daf; axis)  # NOLINT
+    end
+    return nothing
 end
 
 """

@@ -91,6 +91,32 @@ nested_test("scatter_graphs") do
             graph_to_figure(graph)
             return nothing
         end
+
+        # The default colors and sizes are those the data has: none until the types and the numbers of cells are set,
+        # and the blocks have no types.
+        nested_test("defaults") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B")
+            add_gene_gene_default_colors!(graph, daf)
+            add_gene_gene_default_sizes!(graph, daf)
+            @test graph.data.points.colors.vector === nothing
+            @test graph.data.points.sizes.vector === nothing
+
+            add_axis!(daf, "type", ["X", "Y"])
+            set_vector!(daf, "metacell", "type", ["X", "X", "Y", "Y"])
+            set_vector!(daf, "metacell", "n_cells", UInt32[10, 20, 30, 40])
+            set_vector!(daf, "block", "n_cells", UInt32[30, 70])
+            add_gene_gene_default_colors!(graph, daf)
+            add_gene_gene_default_sizes!(graph, daf)
+            @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
+            @test graph.data.points.sizes.vector == UInt32[10, 20, 30, 40]
+
+            graph = gene_gene_graph(daf; axis = "block", x_gene = "A", y_gene = "B")
+            add_gene_gene_default_colors!(graph, daf; axis = "block")
+            add_gene_gene_default_sizes!(graph, daf; axis = "block")
+            @test graph.data.points.colors.vector === nothing
+            @test graph.data.points.sizes.vector == UInt32[30, 70]
+            return nothing
+        end
     end
 
     nested_test("umap") do

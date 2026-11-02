@@ -72,8 +72,8 @@ function run_workload()::Nothing
         daf = complete_daf(joinpath(directory, "top"))  # NOJET
         for axis in ("metacell", "block")
             points = gene_gene_graph(daf; axis, x_gene = "A", y_gene = "B")
-            fill_type!(points_colors_vector_fields(points), daf; axis)  # NOLINT
-            fill_n_cells!(points_sizes_vector_fields(points), daf; axis)  # NOLINT
+            add_gene_gene_default_colors!(points, daf; axis)
+            add_gene_gene_default_sizes!(points, daf; axis)
             fill_total_UMIs!(points_entities(points), daf; axis)  # NOLINT
             fill_mean_total_UMIs_per_cell!(points_entities(points), daf; axis)
             fill_gene_expression!(points_entities(points), daf; axis, gene = "C")
