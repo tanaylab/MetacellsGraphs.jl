@@ -179,7 +179,7 @@ nested_test("data_sources") do
             @test graph.configuration.points.colors.scale.log_base == Log2Base
             @test graph.configuration.points.colors.palette == "WtYlOrRdDm"
             @test graph.configuration.points.colors.scale.minimum == 0
-            @test graph.configuration.points.colors.show_legend
+            @test graph.configuration.points.colors.legend.show
             return nothing
         end
 
@@ -281,7 +281,7 @@ nested_test("data_sources") do
             @test graph.data.cells.hovers[1, 1] == "fold from median: -1.00"
             @test graph.data.rows.entities.names == ["A", "B"]
             @test graph.configuration.entries.colors.palette == "BuWtRd"
-            @test graph.configuration.entries.colors.show_legend
+            @test graph.configuration.entries.colors.legend.show
             @test graph.configuration.entries.colors.scale.minimum == -MAX_FOLD_FOR_GRAPHS
             @test graph.configuration.entries.colors.scale.maximum == MAX_FOLD_FOR_GRAPHS
             return nothing
@@ -333,7 +333,7 @@ nested_test("data_sources") do
             fill_type!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
             @test graph.configuration.points.colors.title == "type"
-            @test graph.configuration.points.colors.show_legend
+            @test graph.configuration.points.colors.legend.show
             @test graph.data.points.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end
@@ -341,7 +341,7 @@ nested_test("data_sources") do
         nested_test("!show_legend") do
             graph = points_graph()
             fill_type!(points_colors_vector_fields(graph), daf; show_legend = false)
-            @test !graph.configuration.points.colors.show_legend
+            @test !graph.configuration.points.colors.legend.show
             return nothing
         end
 
@@ -380,7 +380,7 @@ nested_test("data_sources") do
             @test graph.data.points.colors.vector == ["X", "Y"]
             @test graph.configuration.points.colors.palette == Dict("X" => "red", "Y" => "blue")
             @test graph.configuration.points.colors.title == "kind"
-            @test !graph.configuration.points.colors.show_legend
+            @test !graph.configuration.points.colors.legend.show
             return nothing
         end
 
@@ -423,7 +423,7 @@ nested_test("data_sources") do
             @test annotation.values.vector == ["B1", "B1", "B2", "B2"]
             @test annotation.colors.palette == get_category_colors(daf; axis = "block")
             @test annotation.colors.title == "block"
-            @test !annotation.colors.show_legend
+            @test !annotation.colors.legend.show
             return nothing
         end
 
@@ -500,7 +500,7 @@ nested_test("data_sources") do
             @test graph.data.rows.annotations[1].values.vector == ["true", "false", "true"]
             @test graph.data.rows.annotations[1].colors.title == "is_skeleton"
             @test graph.data.rows.annotations[1].colors.palette == Dict("true" => "black", "false" => "lightgrey")
-            @test !graph.data.rows.annotations[1].colors.show_legend
+            @test !graph.data.rows.annotations[1].colors.legend.show
             return nothing
         end
 
@@ -520,7 +520,7 @@ nested_test("data_sources") do
             )
             @test graph.data.rows.annotations[1].values.vector == ["true", "false"]
             @test graph.data.rows.annotations[1].colors.title == "skeleton!"
-            @test graph.data.rows.annotations[1].colors.show_legend
+            @test graph.data.rows.annotations[1].colors.legend.show
             @test get_is_skeleton_vector(daf) == [true, false, true]
             return nothing
         end
@@ -547,7 +547,7 @@ nested_test("data_sources") do
             @test graph.data.points.colors.vector == UInt32[100, 200, 300, 400]
             @test graph.configuration.points.colors.title == "total UMIs"
             @test graph.configuration.points.colors.palette == "YlOrRd"
-            @test graph.configuration.points.colors.show_legend
+            @test graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             @test graph.configuration.points.colors.scale.log_regularization == 1
             @test graph.configuration.points.colors.scale.minimum === nothing
@@ -559,7 +559,7 @@ nested_test("data_sources") do
             fill_total_UMIs!(points_sizes_vector_fields(graph), daf)
             @test graph.data.points.sizes.vector == UInt32[100, 200, 300, 400]
             @test graph.configuration.points.sizes.title == "total UMIs"
-            @test graph.configuration.points.sizes.show_legend
+            @test graph.configuration.points.sizes.legend.show
             @test graph.configuration.points.sizes.scale.log_base == Log10Base
             @test graph.configuration.points.sizes.scale.log_regularization == 1
             return nothing
@@ -598,7 +598,7 @@ nested_test("data_sources") do
             @test graph.data.points.colors.vector == UInt32[70]
             @test graph.data.points.entities.hovers[1] == "cells!: 70.0"
             @test graph.configuration.points.colors.title == "cells!"
-            @test !graph.configuration.points.colors.show_legend
+            @test !graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log2Base
             @test get_n_cells_vector(daf; axis = "block") == UInt32[30, 70]
             return nothing
@@ -782,7 +782,7 @@ nested_test("data_sources") do
                 fill_gene_correlation_change!(points_colors_vector_fields(graph), daf, base_daf; gene = "A")
                 @test graph.data.points.colors.vector ≈ Float32[0.1, -0.1]
                 @test graph.configuration.points.colors.title == "correlation change"
-                @test graph.configuration.points.colors.show_legend
+                @test graph.configuration.points.colors.legend.show
                 return nothing
             end
         end
@@ -928,7 +928,7 @@ nested_test("data_sources") do
             )
             @test graph.data.rows.annotations[1].values.vector == Float32[0.5, 0.2]
             @test graph.data.rows.annotations[1].colors.title == "correlation!"
-            @test !graph.data.rows.annotations[1].colors.show_legend
+            @test !graph.data.rows.annotations[1].colors.legend.show
             @test graph.data.rows.annotations[1].colors.scale.minimum == 0
             @test get_correlation_between_cells_and_punctuated_metacells_vector(daf) == Float32[0.5, -0.1, 0.2]
             return nothing

@@ -157,7 +157,7 @@ nested_test("scatter_graphs") do
             @test graph.configuration.points.colors.title == "type"
             @test graph.configuration.points.colors.palette ==
                   Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
-            @test graph.configuration.points.colors.show_legend
+            @test graph.configuration.points.colors.legend.show
             @test graph.data.points.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end

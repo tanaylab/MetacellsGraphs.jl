@@ -363,7 +363,7 @@ function put_size_configuration!(
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
-    sizes.show_legend = show_legend
+    sizes.legend.show = show_legend
     put_size_configuration!(sizes.scale; log_base)
     if title !== nothing
         sizes.title = title
@@ -391,7 +391,7 @@ function put_size_configuration!(
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     colors.palette = "YlOrRd"
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     put_size_configuration!(colors.scale; log_base)
     if title !== nothing
         colors.title = title
@@ -977,7 +977,7 @@ function put_boolean_configuration!(
     show_legend::Bool = false,
 )::Nothing
     colors.palette = Dict("true" => "black", "false" => "lightgrey")
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     if title !== nothing
         colors.title = title
     end
@@ -1335,7 +1335,7 @@ function put_correlation_configuration!(
     colors.palette = color_scale
     colors.scale.minimum = minimum_value
     colors.scale.maximum = maximum_value
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     if title !== nothing
         colors.title = title
     end
@@ -1641,7 +1641,7 @@ function put_expression_level_configuration!(
     put_expression_level_configuration!(colors.scale; gene_fraction_regularization, log_base)
     colors.palette = "WtYlOrRdDm"
     colors.scale.minimum = 0
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     if title !== nothing
         colors.title = title
     end
@@ -1902,7 +1902,7 @@ function put_fold_configuration!(
     show_legend::Bool = true,
 )::Nothing
     colors.palette = "BuWtRd"
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     colors.scale.minimum = -max_fold
     colors.scale.maximum = max_fold
     if title !== nothing
@@ -2319,7 +2319,7 @@ function put_category_configuration!(
     show_legend::Bool = true,
 )::Nothing
     colors.palette = color_per_value
-    colors.show_legend = show_legend
+    colors.legend.show = show_legend
     if title !== nothing
         colors.title = title
     end
