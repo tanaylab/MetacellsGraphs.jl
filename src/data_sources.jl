@@ -100,6 +100,7 @@ export get_gene_correlation_change_vector
 export get_gene_correlation_vector
 export get_gene_expression_vector
 export get_gene_is_correlated_vector
+export get_gene_markers_correlation_vector
 export get_genes_expression_matrix
 export get_genes_fold_matrix
 export get_global_flow_order_vector
@@ -111,6 +112,7 @@ export get_mean_cells_per_metacell_vector
 export get_mean_total_UMIs_per_cell_vector
 export get_mean_total_UMIs_per_metacell_vector
 export get_module_regulators_hovers
+export get_most_correlated_gene_indices
 export get_size_vector
 export get_skeleton_gene_indices
 export get_top_marker_gene_indices
@@ -118,6 +120,7 @@ export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
 export MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS
+export MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS
 export put_boolean_configuration!
 export put_boolean_values!
 export put_category_configuration!
@@ -155,6 +158,12 @@ The number of the strongest marker genes a graph shows when it isn't told which 
 [`get_top_marker_gene_indices`](@ref)).
 """
 TOP_MARKERS_COUNT_FOR_GRAPHS::Int = 100
+
+"""
+The number of the genes most correlated with a gene which are offered to pick from (see
+[`get_most_correlated_gene_indices`](@ref)).
+"""
+MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS::Int = 200
 
 """
 The `hover_format` of a size (a count): a whole number.
@@ -724,6 +733,53 @@ blocks were computed from, so they show what the blocks were told apart by.
 """
 function get_skeleton_gene_indices(daf::DafReader)::Vector{Int}
     return findall(get_is_skeleton_vector(daf))  # NOLINT
+end
+
+"""
+    get_gene_markers_correlation_vector(daf::DafReader; gene::AbstractString)::AbstractVector{<:AbstractFloat}
+
+Get the correlation between the log expression of the `gene` and of each gene across the metacells of a `daf`
+repository. This is only computed between marker genes, so it is zero for a non-marker gene (and for every gene if the
+`gene` isn't a marker).
+"""
+function get_gene_markers_correlation_vector(daf::DafReader; gene::AbstractString)::AbstractVector{<:AbstractFloat}
+    return get_axis_vector(
+        daf;
+        axis = "gene",
+        query_suffix = ":: correlation_between_markers @ gene = $(escape_value(gene))",
+    )
+end
+
+"""
+    get_most_correlated_gene_indices(
+        daf::DafReader;
+        gene::AbstractString,
+        genes_count::Integer,
+        is_anti_correlated::Bool = false,
+    )::Vector{Int}
+
+Get the indices of the `genes_count` genes most correlated with the `gene` (see
+[`get_gene_markers_correlation_vector`](@ref)), strongest first. If `is_anti_correlated`, these are the genes with the
+most negative correlation instead. Only genes whose correlation has the requested sign are included, so there may be
+fewer of them (none if the `gene` isn't a marker). The `gene` itself is never included.
+"""
+function get_most_correlated_gene_indices(
+    daf::DafReader;
+    gene::AbstractString,
+    genes_count::Integer,
+    is_anti_correlated::Bool = false,
+)::Vector{Int}
+    @assert genes_count > 0
+    correlation_per_gene = get_gene_markers_correlation_vector(daf; gene)
+    if is_anti_correlated
+        strength_per_gene = .-correlation_per_gene
+    else
+        strength_per_gene = copy(correlation_per_gene)
+    end
+    strength_per_gene[axis_indices(daf, "gene", [gene])] .= 0
+    candidate_gene_indices = findall(strength_per_gene .> 0)
+    candidate_gene_indices = candidate_gene_indices[sortperm(strength_per_gene[candidate_gene_indices]; rev = true)]
+    return first(candidate_gene_indices, genes_count)
 end
 
 """

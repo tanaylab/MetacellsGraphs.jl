@@ -664,6 +664,21 @@ nested_test("data_sources") do
         @test get_top_marker_gene_indices(daf; markers_count = 100) == [1, 2]
         @test get_top_marker_gene_indices(daf; markers_count = 1) == [1]
         @test get_skeleton_gene_indices(daf) == [1, 3]
+
+        set_matrix!(
+            daf,
+            "gene",
+            "gene",
+            "correlation_between_markers",
+            Float32[1.0 0.5 -0.3; 0.5 1.0 0.2; -0.3 0.2 1.0],
+        )
+        @test get_gene_markers_correlation_vector(daf; gene = "A") == Float32[1.0, 0.5, -0.3]
+        @test get_most_correlated_gene_indices(daf; gene = "A", genes_count = 100) == [2]
+        @test get_most_correlated_gene_indices(daf; gene = "A", genes_count = 100, is_anti_correlated = true) == [3]
+        @test get_most_correlated_gene_indices(daf; gene = "B", genes_count = 100) == [1, 3]
+        @test get_most_correlated_gene_indices(daf; gene = "B", genes_count = 1) == [1]
+        @test get_most_correlated_gene_indices(daf; gene = "B", genes_count = 100, is_anti_correlated = true) == Int[]
+        @test get_gene_markers_correlation_vector(daf; gene = "B") == Float32[0.5, 1.0, 0.2]
         return nothing
     end
 

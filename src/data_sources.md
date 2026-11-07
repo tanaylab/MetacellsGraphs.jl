@@ -157,6 +157,9 @@ These pick which genes a graph shows, and return indices to pass as the `genes` 
 MetacellsGraphs.DataSources.get_top_marker_gene_indices
 MetacellsGraphs.DataSources.TOP_MARKERS_COUNT_FOR_GRAPHS
 MetacellsGraphs.DataSources.get_skeleton_gene_indices
+MetacellsGraphs.DataSources.get_most_correlated_gene_indices
+MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS
+MetacellsGraphs.DataSources.get_gene_markers_correlation_vector
 ```
 
 ## Entry Masks

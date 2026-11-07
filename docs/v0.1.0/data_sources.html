@@ -3141,6 +3141,97 @@
 </section>
 </details>
 </article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_most_correlated_gene_indices">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_most_correlated_gene_indices">
+<code>MetacellsGraphs.DataSources.get_most_correlated_gene_indices
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_most_correlated_gene_indices(
+    daf::DafReader;
+    gene::AbstractString,
+    genes_count::Integer,
+    is_anti_correlated::Bool = false,
+)::Vector{Int}
+</code>
+</pre>
+<p>Get the indices of the 
+<code>genes_count
+</code> genes most correlated with the 
+<code>gene
+</code> (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_markers_correlation_vector">
+<code>get_gene_markers_correlation_vector
+</code>
+</a>), strongest first. If 
+<code>is_anti_correlated
+</code>, these are the genes with the most negative correlation instead. Only genes whose correlation has the requested sign are included, so there may be fewer of them (none if the 
+<code>gene
+</code> isn&#39;t a marker). The 
+<code>gene
+</code> itself is never included.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Constant
+</span>
+</summary>
+<section>
+<div>
+<p>The number of the genes most correlated with a gene which are offered to pick from (see 
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_most_correlated_gene_indices">
+<code>get_most_correlated_gene_indices
+</code>
+</a>).
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.get_gene_markers_correlation_vector">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.get_gene_markers_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_gene_markers_correlation_vector
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<pre>
+<code class="language-julia hljs">get_gene_markers_correlation_vector(daf::DafReader; gene::AbstractString)::AbstractVector{&lt;:AbstractFloat}
+</code>
+</pre>
+<p>Get the correlation between the log expression of the 
+<code>gene
+</code> and of each gene across the metacells of a 
+<code>daf
+</code> repository. This is only computed between marker genes, so it is zero for a non-marker gene (and for every gene if the 
+<code>gene
+</code> isn&#39;t a marker).
+</p>
+</div>
+</section>
+</details>
+</article>
 <h2 id="Entry-Masks">
 <a class="docs-heading-anchor" href="#Entry-Masks">Entry Masks
 </a>
@@ -4953,6 +5044,12 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.TOP_MARKERS_COUNT_FOR_GRAPHS">
 <code>MetacellsGraphs.DataSources.TOP_MARKERS_COUNT_FOR_GRAPHS
 </code>
@@ -5331,6 +5428,12 @@
 </a>
 </li>
 <li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_gene_markers_correlation_vector">
+<code>MetacellsGraphs.DataSources.get_gene_markers_correlation_vector
+</code>
+</a>
+</li>
+<li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_genes_expression_matrix">
 <code>MetacellsGraphs.DataSources.get_genes_expression_matrix
 </code>
@@ -5453,6 +5556,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.get_module_regulators_hovers">
 <code>MetacellsGraphs.DataSources.get_module_regulators_hovers
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.get_most_correlated_gene_indices">
+<code>MetacellsGraphs.DataSources.get_most_correlated_gene_indices
 </code>
 </a>
 </li>
