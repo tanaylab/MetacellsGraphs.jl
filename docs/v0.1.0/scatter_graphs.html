@@ -185,7 +185,7 @@ fill_type!(points_colors_vector_fields(graph), daf)
     y_gene::AbstractString,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = 1.0e-5,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
     same_scale::Bool = true,
     maximum_fraction::Maybe{Real} = 0.02,
 )::PointsGraph

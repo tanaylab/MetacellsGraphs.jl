@@ -41,7 +41,7 @@ nested_test("scatter_graphs") do
             @test graph.data.y.vector == Float32[0.4, 0.3, 0.2, 0.1]
             @test graph.configuration.x_axis.title == "A fraction"
             @test graph.configuration.y_axis.title == "B fraction"
-            @test graph.configuration.x_axis.scale.log_base == Log2Base
+            @test graph.configuration.x_axis.scale.log_base == Log10Base
             @test graph.configuration.y_axis.scale.log_regularization == 1e-5
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
             @test graph.data.points.entities.hovers[1] == "A fraction: 0.1<br>B fraction: 0.4"
@@ -76,9 +76,9 @@ nested_test("scatter_graphs") do
         end
 
         nested_test("log_base") do
-            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", log_base = Log10Base)
-            @test graph.configuration.x_axis.scale.log_base == Log10Base
-            @test graph.configuration.y_axis.scale.log_base == Log10Base
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", log_base = Log2Base)
+            @test graph.configuration.x_axis.scale.log_base == Log2Base
+            @test graph.configuration.y_axis.scale.log_base == Log2Base
             return nothing
         end
 
@@ -264,7 +264,7 @@ nested_test("scatter_graphs") do
             @test graph.data.y.vector == Float32[0.15, 0.35]
             @test graph.configuration.x_axis.title == "correlation change"
             @test graph.configuration.y_axis.title == "A fraction"
-            @test graph.configuration.y_axis.scale.log_base == Log2Base
+            @test graph.configuration.y_axis.scale.log_base == Log10Base
             @test !graph.configuration.x_axis.scale.include_hidden
             @test !graph.configuration.y_axis.scale.include_hidden
             @test graph.data.points.entities.names == ["B1", "B2"]

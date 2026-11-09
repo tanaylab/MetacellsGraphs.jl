@@ -33,7 +33,7 @@ using ..DataSources
         y_gene::AbstractString,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
-        log_base::Maybe{LogBase} = Log2Base,
+        log_base::Maybe{LogBase} = Log10Base,
         same_scale::Bool = true,
         maximum_fraction::Maybe{Real} = $(MAXIMUM_GENE_FRACTION_FOR_GRAPHS),
     )::PointsGraph
@@ -57,7 +57,7 @@ The hover of each point names its entry and gives both fractions.
     y_gene::AbstractString,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
     same_scale::Bool = true,
     maximum_fraction::Maybe{Real} = MAXIMUM_GENE_FRACTION_FOR_GRAPHS,
 )::PointsGraph

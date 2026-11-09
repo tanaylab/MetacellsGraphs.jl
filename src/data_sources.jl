@@ -1162,7 +1162,7 @@ define_bucket_data_sources(;
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "\$(gene) fraction",
         show_legend::Bool = true,
-        log_base::Maybe{LogBase} = Log2Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -1179,7 +1179,7 @@ value by the `hover_format`.
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "$(gene) fraction",
     show_legend::Bool = true,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     entries = sinks_entries(sinks, entries)
@@ -1574,7 +1574,7 @@ end
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
-        log_base::Maybe{LogBase} = Log2Base,
+        log_base::Maybe{LogBase} = Log10Base,
         hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
@@ -1591,7 +1591,7 @@ function fill_genes_expression_matrix!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
@@ -1641,7 +1641,7 @@ end
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         title::Maybe{AbstractString} = "fraction",
         show_legend::Bool = true,
-        log_base::Maybe{LogBase} = Log2Base,
+        log_base::Maybe{LogBase} = Log10Base,
     )::Nothing
 
 Show an expression level (the fraction of the UMIs of a gene, or of a gene module) on a log scale of the `log_base`,
@@ -1660,7 +1660,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     @assert gene_fraction_regularization >= 0
     visit_configuration_sinks(sinks) do sink
@@ -1675,7 +1675,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
     title::Maybe{AbstractString} = "fraction",  # NOLINT
     show_legend::Bool = true,  # NOLINT
-    log_base::Maybe{LogBase} = Log2Base,  # NOLINT
+    log_base::Maybe{LogBase} = Log10Base,  # NOLINT
 )::Nothing
     return nothing
 end
@@ -1685,7 +1685,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,  # NOLINT
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     put_expression_level_configuration!(axis.scale; gene_fraction_regularization, log_base)
     if title !== nothing
@@ -1699,7 +1699,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = "fraction",
     show_legend::Bool = true,
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     put_expression_level_configuration!(colors.scale; gene_fraction_regularization, log_base)
     colors.palette = "WtYlOrRdDm"
@@ -1716,7 +1716,7 @@ function put_expression_level_configuration!(
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
-    log_base::Maybe{LogBase} = Log2Base,
+    log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     scale.log_base = log_base
     scale.log_regularization = log_base === nothing ? 0 : gene_fraction_regularization
