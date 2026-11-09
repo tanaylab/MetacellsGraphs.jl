@@ -220,7 +220,7 @@ function define_bucket_data_sources(;
 )::Nothing
     for line in table
         get_name = Symbol("get_$(line.property)_vector")
-        get_arguments = [
+        get_arguments = Expr[
             line_keyword(line, keyword) for
             keyword in (:(axis::AbstractString = $(line.axis)), ENTRIES_KEYWORDS..., get_keywords...)
         ]
@@ -235,12 +235,12 @@ function define_bucket_data_sources(;
             body = :(return $get_function(daf; property = $(line.property), $(get_names...))),
         )
 
-        put_arguments = [
+        put_arguments = Expr[
             line_keyword(line, keyword) for
             keyword in (:(title::Maybe{AbstractString} = $(line.title)), put_keywords...)
         ]
         put_names = keyword_names(put_arguments)
-        palette_arguments = [line_keyword(line, keyword) for keyword in palette_keywords]
+        palette_arguments = Expr[line_keyword(line, keyword) for keyword in palette_keywords]
         fill_arguments = copy(get_arguments)
         for argument in vcat(palette_arguments, put_arguments)
             if !(argument.args[1].args[1] in keyword_names(fill_arguments))
@@ -291,9 +291,9 @@ function define_property_data_source(;
     body::Expr,
 )::Nothing
     signature_lines = [
-        ["        $(argument)," for argument in leading_arguments[1:(end - 1)]]...,
+        String["        $(argument)," for argument in leading_arguments[1:(end - 1)]]...,
         "        $(leading_arguments[end]);",
-        ["        $(keyword.args[1]) = $(default_text(keyword.args[2]))," for keyword in keyword_arguments]...,
+        String["        $(keyword.args[1]) = $(default_text(keyword.args[2]))," for keyword in keyword_arguments]...,
     ]
     docstring = """
                     $(function_name)(
@@ -316,7 +316,7 @@ end
 
 # The names of keyword arguments.
 function keyword_names(keyword_arguments::AbstractVector{Expr})::Vector{Symbol}  # ONLY SEEMS UNTESTED
-    return [keyword.args[1].args[1] for keyword in keyword_arguments]  # NOJET
+    return Symbol[keyword.args[1].args[1] for keyword in keyword_arguments]
 end
 
 # A keyword declaration as a keyword argument, with its default given by the table `line` if it gives one.
@@ -1098,7 +1098,7 @@ function put_boolean_values!(
     title::Maybe{AbstractString} = nothing,
     show_legend::Bool = false,
 )::Nothing
-    put_vector_data!(sinks, [string(value) for value in value_per_entry]; title)
+    put_vector_data!(sinks, String[string(value) for value in value_per_entry]; title)
     put_boolean_configuration!(sinks; title, show_legend)
     if name_per_entry !== nothing
         put_vector_names_data!(sinks, name_per_entry)
@@ -1372,7 +1372,7 @@ function put_correlation_configuration!(
     title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,
 )::Nothing
-    minimum_value = min(0, minimum(value for value in values if isfinite(value); init = 0))
+    minimum_value = min(0, minimum(value for value in values if isfinite(value); init = 0))  # NOJET
     maximum_value = max(0, maximum(value for value in values if isfinite(value); init = 0))
     if minimum_value == maximum_value
         minimum_value = -1
@@ -2408,7 +2408,7 @@ function get_category_colors(
 )::OrderedDict{AbstractString, AbstractString}
     if has_vector(daf, axis, "color")
         color_per_entry = get_vector(daf, axis, "color")
-        color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_entry)[1], color_per_entry))
+        color_palette = OrderedDict{AbstractString, AbstractString}(zip(names(color_per_entry)[1], color_per_entry))  # NOJET
     else
         color_palette = OrderedDict{AbstractString, AbstractString}(categorical_palette(axis_vector(daf, axis)))  # NOJET
     end
