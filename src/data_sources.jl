@@ -119,6 +119,7 @@ export get_top_marker_gene_indices
 export get_umap_vector
 export get_vector_query
 export MAX_FOLD_FOR_GRAPHS
+export MAXIMUM_GENE_FRACTION_FOR_GRAPHS
 export MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS
 export MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS
 export put_boolean_configuration!
@@ -147,6 +148,12 @@ using TanayLabUtilities
 The regularization added to a gene fraction before taking its log.
 """
 GENE_FRACTION_REGULARIZATION_FOR_GRAPHS::Float64 = 1e-5
+
+"""
+The top of both axes of a [`gene_gene_graph`](@ref MetacellsGraphs.ScatterGraphs.gene_gene_graph), as a gene fraction.
+It is the same for every pair of genes, so the axes don't move when switching genes.
+"""
+MAXIMUM_GENE_FRACTION_FOR_GRAPHS::Float64 = 0.02
 
 """
 The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.

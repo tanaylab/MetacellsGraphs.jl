@@ -92,6 +92,48 @@ nested_test("scatter_graphs") do
             return nothing
         end
 
+        nested_test("same_scale") do
+            nested_test("()") do
+                graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B")
+                @test graph.configuration.same_scale
+                return nothing
+            end
+
+            nested_test("false") do
+                graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", same_scale = false)
+                @test !graph.configuration.same_scale
+                return nothing
+            end
+        end
+
+        nested_test("maximum_fraction") do
+            nested_test("()") do
+                graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B")
+                for scale in (graph.configuration.x_axis.scale, graph.configuration.y_axis.scale)
+                    @test scale.minimum == 0
+                    @test scale.maximum == MAXIMUM_GENE_FRACTION_FOR_GRAPHS
+                end
+                graph_to_figure(graph)
+                return nothing
+            end
+
+            nested_test("value") do
+                graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", maximum_fraction = 0.5)
+                @test graph.configuration.x_axis.scale.maximum == 0.5
+                @test graph.configuration.y_axis.scale.maximum == 0.5
+                return nothing
+            end
+
+            nested_test("nothing") do
+                graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", maximum_fraction = nothing)
+                for scale in (graph.configuration.x_axis.scale, graph.configuration.y_axis.scale)
+                    @test scale.minimum === nothing
+                    @test scale.maximum === nothing
+                end
+                return nothing
+            end
+        end
+
         # The default colors and sizes are those the data has: none until the types and the numbers of cells are set,
         # and the blocks have no types.
         nested_test("defaults") do

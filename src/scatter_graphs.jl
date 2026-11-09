@@ -34,6 +34,8 @@ using ..DataSources
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         log_base::Maybe{LogBase} = Log2Base,
+        same_scale::Bool = true,
+        maximum_fraction::Maybe{Real} = $(MAXIMUM_GENE_FRACTION_FOR_GRAPHS),
     )::PointsGraph
 
 The expression of `x_gene` against `y_gene`, a point per each of the `entries` of the `axis`, on log scale. Both axes
@@ -41,6 +43,10 @@ use the same `log_base`. If it is `nothing`, both axes are linear.
 
 The `axis` can be any axis which has a `linear_fraction` per gene, typically `metacell` or `block`. A block is coarser,
 so the same pair of genes shows fewer points and less scatter.
+
+If `same_scale`, one unit has the same length on both axes. Both axes go from a fraction of 0 to the
+`maximum_fraction`. A point above it is drawn at the edge, as an arrow pointing toward its real place. If the
+`maximum_fraction` is `nothing`, the axes cover the data.
 
 The hover of each point names its entry and gives both fractions.
 """
@@ -52,8 +58,17 @@ The hover of each point names its entry and gives both fractions.
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     log_base::Maybe{LogBase} = Log2Base,
+    same_scale::Bool = true,
+    maximum_fraction::Maybe{Real} = MAXIMUM_GENE_FRACTION_FOR_GRAPHS,
 )::PointsGraph
     graph = points_graph()
+    graph.configuration.same_scale = same_scale
+    if maximum_fraction !== nothing
+        for scale in (graph.configuration.x_axis.scale, graph.configuration.y_axis.scale)
+            scale.minimum = 0
+            scale.maximum = maximum_fraction
+        end
+    end
     fill_gene_expression!(
         x_axis_vector_fields(graph),
         daf;

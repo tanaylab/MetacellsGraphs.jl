@@ -186,6 +186,8 @@ fill_type!(points_colors_vector_fields(graph), daf)
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = 1.0e-5,
     log_base::Maybe{LogBase} = Log2Base,
+    same_scale::Bool = true,
+    maximum_fraction::Maybe{Real} = 0.02,
 )::PointsGraph
 </code>
 </pre>
@@ -212,6 +214,16 @@ fill_type!(points_colors_vector_fields(graph), daf)
 </code> or 
 <code>block
 </code>. A block is coarser, so the same pair of genes shows fewer points and less scatter.
+</p>
+<p>If 
+<code>same_scale
+</code>, one unit has the same length on both axes. Both axes go from a fraction of 0 to the 
+<code>maximum_fraction
+</code>. A point above it is drawn at the edge, as an arrow pointing toward its real place. If the 
+<code>maximum_fraction
+</code> is 
+<code>nothing
+</code>, the axes cover the data.
 </p>
 <p>The hover of each point names its entry and gives both fractions.
 </p>
