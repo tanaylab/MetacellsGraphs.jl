@@ -131,6 +131,7 @@ export put_coordinates_configuration!
 export put_correlation_configuration!
 export put_correlation_values!
 export put_expression_level_configuration!
+export put_fixed_size_configuration!
 export put_fold_configuration!
 export put_size_configuration!
 export put_size_values!
@@ -430,6 +431,28 @@ function put_size_configuration!(
     scale.log_base = log_base
     scale.log_regularization = log_base === nothing ? 0 : 1
     return nothing
+end
+
+"""
+    put_fixed_size_configuration!(sinks::Sinks; size::Real)::Nothing
+
+Show every entity in the `sinks` with the same `size` (in pixels), instead of sizing each by its data. Only sizes can be
+fixed; any other sink is an error.
+"""
+function put_fixed_size_configuration!(sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector}; size::Real)::Nothing
+    visit_configuration_sinks(sinks) do sink
+        return put_fixed_size_configuration!(sink; size)
+    end
+    return nothing
+end
+
+function put_fixed_size_configuration!(sizes::SizesConfiguration; size::Real)::Nothing
+    sizes.fixed = size
+    return nothing
+end
+
+function put_fixed_size_configuration!(sink::Any; size::Real)::Nothing  # NOLINT
+    throw(ArgumentError("a fixed size applies only to sizes, not to: $(typeof(sink))"))
 end
 
 # The keywords of the size bucket's get and of its `put_size_values!`, other than the ones every generated data source

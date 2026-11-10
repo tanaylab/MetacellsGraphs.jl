@@ -584,6 +584,19 @@ nested_test("data_sources") do
             return nothing
         end
 
+        # A fixed size is configuration, not data, and applies only to sizes.
+        nested_test("fixed") do
+            graph = points_graph()
+            put_fixed_size_configuration!(points_sizes_vector_fields(graph); size = 8)
+            @test graph.configuration.points.sizes.fixed == 8
+            @test graph.data.points.sizes.vector === nothing
+            @test_throws "a fixed size applies only to sizes" put_fixed_size_configuration!(
+                x_axis_vector_fields(graph);
+                size = 8,
+            )
+            return nothing
+        end
+
         nested_test("linear") do
             graph = points_graph()
             fill_total_UMIs!(points_sizes_vector_fields(graph), daf; log_base = nothing)
