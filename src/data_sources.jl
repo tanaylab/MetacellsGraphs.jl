@@ -64,6 +64,7 @@ module DataSources
 export CORRELATION_HOVER_FORMAT_FOR_GRAPHS
 export EMPTY_CATEGORY_COLOR
 export EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS
+export EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS
 export fill_axes_matrix_data!
 export fill_axes_names_data!
 export fill_axis_names_data!
@@ -175,27 +176,32 @@ MOST_CORRELATED_GENES_COUNT_FOR_GRAPHS::Int = 200
 """
 The `hover_format` of a size (a count): a whole number.
 """
-SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 0)
+SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; digits = 0)
 
 """
 The `hover_format` of a mean of sizes (e.g., the mean cells per metacell): one digit after the decimal point.
 """
-MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 1)
+MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; digits = 1)
 
 """
-The `hover_format` of an expression level: 3 significant digits.
+The `hover_format` of an expression level shown as a fraction: 3 significant digits.
 """
-EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS::Function = significant_format(; sigdigits = 3)
+EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; sigdigits = 3)
+
+"""
+The `hover_format` of an expression level shown as a percent: 3 significant digits.
+"""
+EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS::Function = percent_format(; sigdigits = 3)
 
 """
 The `hover_format` of a fold factor: two digits after the decimal point.
 """
-FOLD_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 2)
+FOLD_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; digits = 2)
 
 """
 The `hover_format` of a correlation: three digits after the decimal point, since small correlations are common.
 """
-CORRELATION_HOVER_FORMAT_FOR_GRAPHS::Function = fixed_format(; digits = 3)
+CORRELATION_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; digits = 3)
 
 """
 The color to give to entities without any value of a category (an empty string), e.g. with no type or no block. A
@@ -1160,10 +1166,12 @@ define_bucket_data_sources(;
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-        title::Maybe{AbstractString} = "\$(gene) fraction",
+        percent::Bool = true,
+        title::Maybe{AbstractString} = percent ? "\$(gene) percent" : "\$(gene) fraction",
         show_legend::Bool = true,
         log_base::Maybe{LogBase} = Log10Base,
-        hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+        hover_format::Maybe{Function} = percent ? EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS :
+                                        EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the `gene` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
@@ -1177,14 +1185,19 @@ value by the `hover_format`.
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = "$(gene) fraction",
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "$(gene) percent" : "$(gene) fraction",
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
-    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+    hover_format::Maybe{Function} = if percent
+        EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS
+    else
+        EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS
+    end,
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title, hover_format)
-    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, percent, title, show_legend, log_base)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
@@ -1572,10 +1585,12 @@ end
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-        title::Maybe{AbstractString} = "fraction",
+        percent::Bool = true,
+        title::Maybe{AbstractString} = percent ? "percent" : "fraction",
         show_legend::Bool = true,
         log_base::Maybe{LogBase} = Log10Base,
-        hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+        hover_format::Maybe{Function} = percent ? EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS :
+                                        EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
     )::Nothing
 
 Fill the `sinks` with the `genes` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
@@ -1589,14 +1604,19 @@ function fill_genes_expression_matrix!(
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = "fraction",
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "percent" : "fraction",
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
-    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+    hover_format::Maybe{Function} = if percent
+        EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS
+    else
+        EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS
+    end,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
     put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title, hover_format)
-    put_expression_level_configuration!(sinks; gene_fraction_regularization, title, show_legend, log_base)
+    put_expression_level_configuration!(sinks; gene_fraction_regularization, percent, title, show_legend, log_base)
     fill_axes_names_data!(
         sinks,
         daf;
@@ -1639,7 +1659,8 @@ end
     put_expression_level_configuration!(
         sinks::Sinks;
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
-        title::Maybe{AbstractString} = "fraction",
+        percent::Bool = true,
+        title::Maybe{AbstractString} = percent ? "percent" : "fraction",
         show_legend::Bool = true,
         log_base::Maybe{LogBase} = Log10Base,
     )::Nothing
@@ -1650,6 +1671,8 @@ linear, and isn't regularized. The expression levels themselves are put in by
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
+If `percent`, the fractions are shown as percents. The regularization still applies to the fractions.
+
 As colors, the expression levels are shown in the `WtYlOrRdDm` color scale, which starts at zero. Zero expression is
 common, and is white, so any expression above it shows a color.
 
@@ -1658,13 +1681,21 @@ The `show_legend` applies where the expression levels are the colors. An axis is
 function put_expression_level_configuration!(
     sinks::Union{AnyContainer, DataLeaf, Tuple, AbstractVector};
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = "fraction",
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "percent" : "fraction",
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     @assert gene_fraction_regularization >= 0
     visit_configuration_sinks(sinks) do sink
-        return put_expression_level_configuration!(sink; gene_fraction_regularization, title, show_legend, log_base)
+        return put_expression_level_configuration!(
+            sink;
+            gene_fraction_regularization,
+            percent,
+            title,
+            show_legend,
+            log_base,
+        )
     end
     return nothing
 end
@@ -1673,7 +1704,8 @@ end
 function put_expression_level_configuration!(
     ::SizesConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,  # NOLINT
-    title::Maybe{AbstractString} = "fraction",  # NOLINT
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "percent" : "fraction",  # NOLINT
     show_legend::Bool = true,  # NOLINT
     log_base::Maybe{LogBase} = Log10Base,  # NOLINT
 )::Nothing
@@ -1683,11 +1715,12 @@ end
 function put_expression_level_configuration!(
     axis::AxisConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = "fraction",
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "percent" : "fraction",
     show_legend::Bool = true,  # NOLINT
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
-    put_expression_level_configuration!(axis.scale; gene_fraction_regularization, log_base)
+    put_expression_level_configuration!(axis.scale; gene_fraction_regularization, percent, log_base)
     if title !== nothing
         axis.title = title
     end
@@ -1697,11 +1730,12 @@ end
 function put_expression_level_configuration!(
     colors::ColorsConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = "fraction",
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? "percent" : "fraction",
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
-    put_expression_level_configuration!(colors.scale; gene_fraction_regularization, log_base)
+    put_expression_level_configuration!(colors.scale; gene_fraction_regularization, percent, log_base)
     colors.palette = "WtYlOrRdDm"
     colors.scale.minimum = 0
     colors.legend.show = show_legend
@@ -1714,12 +1748,14 @@ end
 function put_expression_level_configuration!(
     scale::ScaleConfiguration;
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
+    percent::Bool = true,
     title::Maybe{AbstractString} = nothing,  # NOLINT
     show_legend::Bool = true,  # NOLINT
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
     scale.log_base = log_base
     scale.log_regularization = log_base === nothing ? 0 : gene_fraction_regularization
+    scale.percent = percent
     return nothing
 end
 

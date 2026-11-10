@@ -34,12 +34,14 @@ using ..DataSources
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         gene_fraction_regularization::Real = $(GENE_FRACTION_REGULARIZATION_FOR_GRAPHS),
         log_base::Maybe{LogBase} = Log10Base,
+        percent::Bool = true,
         same_scale::Bool = true,
         maximum_fraction::Maybe{Real} = $(MAXIMUM_GENE_FRACTION_FOR_GRAPHS),
     )::PointsGraph
 
 The expression of `x_gene` against `y_gene`, a point per each of the `entries` of the `axis`, on log scale. Both axes
-use the same `log_base`. If it is `nothing`, both axes are linear.
+use the same `log_base`. If it is `nothing`, both axes are linear. If `percent`, both axes show the fractions as
+percents.
 
 The `axis` can be any axis which has a `linear_fraction` per gene, typically `metacell` or `block`. A block is coarser,
 so the same pair of genes shows fewer points and less scatter.
@@ -58,6 +60,7 @@ The hover of each point names its entry and gives both fractions.
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
     log_base::Maybe{LogBase} = Log10Base,
+    percent::Bool = true,
     same_scale::Bool = true,
     maximum_fraction::Maybe{Real} = MAXIMUM_GENE_FRACTION_FOR_GRAPHS,
 )::PointsGraph
@@ -77,6 +80,7 @@ The hover of each point names its entry and gives both fractions.
         entries,
         gene_fraction_regularization,
         log_base,
+        percent,
     )
     fill_gene_expression!(
         y_axis_vector_fields(graph),
@@ -86,6 +90,7 @@ The hover of each point names its entry and gives both fractions.
         entries,
         gene_fraction_regularization,
         log_base,
+        percent,
     )
     return graph
 end

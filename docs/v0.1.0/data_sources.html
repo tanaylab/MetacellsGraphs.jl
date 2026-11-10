@@ -1343,7 +1343,8 @@
 <code class="language-julia hljs">put_expression_level_configuration!(
     sinks::Sinks;
     gene_fraction_regularization::Real = 1.0e-5,
-    title::Maybe{AbstractString} = &quot;fraction&quot;,
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? &quot;percent&quot; : &quot;fraction&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
@@ -1368,6 +1369,10 @@
 <code>put_matrix_data!
 </code>
 </a>.
+</p>
+<p>If 
+<code>percent
+</code>, the fractions are shown as percents. The regularization still applies to the fractions.
 </p>
 <p>As colors, the expression levels are shown in the 
 <code>WtYlOrRdDm
@@ -1435,7 +1440,27 @@
 <div>
 <p>The 
 <code>hover_format
-</code> of an expression level: 3 significant digits.
+</code> of an expression level shown as a fraction: 3 significant digits.
+</p>
+</div>
+</section>
+</details>
+</article>
+<article>
+<details class="docstring" open="true">
+<summary id="MetacellsGraphs.DataSources.EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS">
+<a class="docstring-binding" href="#MetacellsGraphs.DataSources.EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS
+</code>
+</a> — 
+<span class="docstring-category">Function
+</span>
+</summary>
+<section>
+<div>
+<p>The 
+<code>hover_format
+</code> of an expression level shown as a percent: 3 significant digits.
 </p>
 </div>
 </section>
@@ -2239,10 +2264,12 @@
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = &quot;$(gene) fraction&quot;,
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? &quot;$(gene) percent&quot; : &quot;$(gene) fraction&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
-    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+    hover_format::Maybe{Function} = percent ? EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS :
+                                    EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
 </pre>
@@ -2333,10 +2360,12 @@
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = GENE_FRACTION_REGULARIZATION_FOR_GRAPHS,
-    title::Maybe{AbstractString} = &quot;fraction&quot;,
+    percent::Bool = true,
+    title::Maybe{AbstractString} = percent ? &quot;percent&quot; : &quot;fraction&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
-    hover_format::Maybe{Function} = EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
+    hover_format::Maybe{Function} = percent ? EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS :
+                                    EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
 </code>
 </pre>
@@ -5092,6 +5121,12 @@
 <li>
 <a href="data_sources.html#MetacellsGraphs.DataSources.EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS">
 <code>MetacellsGraphs.DataSources.EXPRESSION_LEVEL_HOVER_FORMAT_FOR_GRAPHS
+</code>
+</a>
+</li>
+<li>
+<a href="data_sources.html#MetacellsGraphs.DataSources.EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS">
+<code>MetacellsGraphs.DataSources.EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS
 </code>
 </a>
 </li>

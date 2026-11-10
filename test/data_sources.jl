@@ -116,7 +116,7 @@ nested_test("data_sources") do
                 axis = "metacell",
                 query_suffix = ": umap_x",
                 title = "X",
-                hover_format = fixed_format(; digits = 2),
+                hover_format = number_format(; digits = 2),
             )
             @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
             @test graph.data.points.entities.hovers[2] == "X: 1.00"
@@ -164,10 +164,20 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = "A")
             @test graph.data.x.vector == Float32[0.1, 0.2, 0.3, 0.4]
-            @test graph.configuration.x_axis.title == "A fraction"
+            @test graph.configuration.x_axis.title == "A percent"
             @test graph.configuration.x_axis.scale.log_base == Log10Base
             @test graph.configuration.x_axis.scale.log_regularization == GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
-            @test graph.data.points.entities.hovers[1] == "A fraction: 0.1"
+            @test graph.configuration.x_axis.scale.percent
+            @test graph.data.points.entities.hovers[1] == "A percent: 10.0%"
+            return nothing
+        end
+
+        nested_test("fraction") do
+            graph = points_graph()
+            fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = "A", percent = false)
+            @test graph.configuration.x_axis.title == "A fraction"
+            @test !graph.configuration.x_axis.scale.percent
+            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100"
             return nothing
         end
 
@@ -175,7 +185,8 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_gene_expression!(points_colors_vector_fields(graph), daf; gene = "C")
             @test graph.data.points.colors.vector == Float32[0.0, 0.1, 0.0, 0.1]
-            @test graph.configuration.points.colors.title == "C fraction"
+            @test graph.configuration.points.colors.title == "C percent"
+            @test graph.configuration.points.colors.scale.percent
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             @test graph.configuration.points.colors.palette == "WtYlOrRdDm"
             @test graph.configuration.points.colors.scale.minimum == 0
@@ -201,8 +212,9 @@ nested_test("data_sources") do
                 @test graph.data.entries.matrix == Float32[0.1 0.2 0.3 0.4; 0.4 0.3 0.2 0.1]
                 @test graph.data.rows.entities.names == ["A", "B"]
                 @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-                @test graph.data.cells.hovers[1, 1] == "fraction: 0.1"
+                @test graph.data.cells.hovers[1, 1] == "percent: 10.0%"
                 @test graph.configuration.entries.colors.scale.log_base == Log10Base
+                @test graph.configuration.entries.colors.scale.percent
                 return nothing
             end
 
@@ -653,6 +665,7 @@ nested_test("data_sources") do
         @test function_default(fill_is_lateral!, :show_legend) == false
         @test function_default(fill_type!, :show_legend) == true
         @test function_default(fill_gene_expression!, :log_base) == Log10Base
+        @test function_default(fill_gene_expression!, :percent) == true
         @test function_default(fill_mean_cells_per_metacell!, :log_base) == Log10Base
         @test function_default(fill_boolean!, :show_legend) == false
         return nothing

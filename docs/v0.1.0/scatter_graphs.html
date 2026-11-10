@@ -186,6 +186,7 @@ fill_type!(points_colors_vector_fields(graph), daf)
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     gene_fraction_regularization::Real = 1.0e-5,
     log_base::Maybe{LogBase} = Log10Base,
+    percent::Bool = true,
     same_scale::Bool = true,
     maximum_fraction::Maybe{Real} = 0.02,
 )::PointsGraph
@@ -203,7 +204,9 @@ fill_type!(points_colors_vector_fields(graph), daf)
 <code>log_base
 </code>. If it is 
 <code>nothing
-</code>, both axes are linear.
+</code>, both axes are linear. If 
+<code>percent
+</code>, both axes show the fractions as percents.
 </p>
 <p>The 
 <code>axis

@@ -39,12 +39,14 @@ nested_test("scatter_graphs") do
             graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B")
             @test graph.data.x.vector == Float32[0.1, 0.2, 0.3, 0.4]
             @test graph.data.y.vector == Float32[0.4, 0.3, 0.2, 0.1]
-            @test graph.configuration.x_axis.title == "A fraction"
-            @test graph.configuration.y_axis.title == "B fraction"
+            @test graph.configuration.x_axis.title == "A percent"
+            @test graph.configuration.y_axis.title == "B percent"
             @test graph.configuration.x_axis.scale.log_base == Log10Base
             @test graph.configuration.y_axis.scale.log_regularization == 1e-5
+            @test graph.configuration.x_axis.scale.percent
+            @test graph.configuration.y_axis.scale.percent
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.points.entities.hovers[1] == "A fraction: 0.1<br>B fraction: 0.4"
+            @test graph.data.points.entities.hovers[1] == "A percent: 10.0%<br>B percent: 40.0%"
 
             # The graph says nothing about the colors of the points; the caller does.
             @test graph.data.points.colors.vector === nothing
@@ -56,7 +58,17 @@ nested_test("scatter_graphs") do
             @test graph.data.x.vector == Float32[0.15, 0.35]
             @test graph.data.y.vector == Float32[0.05, 0.05]
             @test graph.data.points.entities.names == ["B1", "B2"]
-            @test graph.data.points.entities.hovers[2] == "A fraction: 0.35<br>C fraction: 0.05"
+            @test graph.data.points.entities.hovers[2] == "A percent: 35.0%<br>C percent: 5.00%"
+            return nothing
+        end
+
+        nested_test("fraction") do
+            graph = gene_gene_graph(daf; x_gene = "A", y_gene = "B", percent = false)
+            @test graph.configuration.x_axis.title == "A fraction"
+            @test !graph.configuration.x_axis.scale.percent
+            @test !graph.configuration.y_axis.scale.percent
+            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100<br>B fraction: 0.400"
+            graph_to_figure(graph)
             return nothing
         end
 
@@ -263,7 +275,7 @@ nested_test("scatter_graphs") do
             @test graph.data.x.vector ≈ Float32[0.1, -0.1]
             @test graph.data.y.vector == Float32[0.15, 0.35]
             @test graph.configuration.x_axis.title == "correlation change"
-            @test graph.configuration.y_axis.title == "A fraction"
+            @test graph.configuration.y_axis.title == "A percent"
             @test graph.configuration.y_axis.scale.log_base == Log10Base
             @test !graph.configuration.x_axis.scale.include_hidden
             @test !graph.configuration.y_axis.scale.include_hidden
