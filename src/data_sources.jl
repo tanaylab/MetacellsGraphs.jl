@@ -154,7 +154,7 @@ GENE_FRACTION_REGULARIZATION_FOR_GRAPHS::Float64 = 1e-5
 The top of both axes of a [`gene_gene_graph`](@ref MetacellsGraphs.ScatterGraphs.gene_gene_graph), as a gene fraction.
 It is the same for every pair of genes, so the axes don't move when switching genes.
 """
-MAXIMUM_GENE_FRACTION_FOR_GRAPHS::Float64 = 0.02
+MAXIMUM_GENE_FRACTION_FOR_GRAPHS::Float64 = 0.01
 
 """
 The extreme of the color scale of the log-base-2 fold factors between gene expression and median gene expression.
@@ -1671,7 +1671,9 @@ linear, and isn't regularized. The expression levels themselves are put in by
 [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 
-If `percent`, the fractions are shown as percents. The regularization still applies to the fractions.
+If `percent`, the fractions are shown as percents. The regularization still applies to the fractions. Unless the
+`log_base` is `Log2Base`, the tick labels then have 3 digits after the decimal point (on a log scale, only the powers of
+10, e.g. `0.010%`).
 
 As colors, the expression levels are shown in the `WtYlOrRdDm` color scale, which starts at zero. Zero expression is
 common, and is white, so any expression above it shows a color.
@@ -1756,6 +1758,9 @@ function put_expression_level_configuration!(
     scale.log_base = log_base
     scale.log_regularization = log_base === nothing ? 0 : gene_fraction_regularization
     scale.percent = percent
+    # The regularization puts the bottom of a percents log scale at 0.001%, so 3 digits label its powers of 10 alike.
+    # The ticks of a log2 scale are powers of 2, which these digits don't apply to.
+    scale.ticks_digits = percent && log_base !== Log2Base ? 3 : nothing
     return nothing
 end
 

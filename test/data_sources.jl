@@ -168,6 +168,7 @@ nested_test("data_sources") do
             @test graph.configuration.x_axis.scale.log_base == Log10Base
             @test graph.configuration.x_axis.scale.log_regularization == GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
             @test graph.configuration.x_axis.scale.percent
+            @test graph.configuration.x_axis.scale.ticks_digits == 3
             @test graph.data.points.entities.hovers[1] == "A percent: 10.0%"
             return nothing
         end
@@ -177,7 +178,13 @@ nested_test("data_sources") do
             fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = "A", percent = false)
             @test graph.configuration.x_axis.title == "A fraction"
             @test !graph.configuration.x_axis.scale.percent
+            @test graph.configuration.x_axis.scale.ticks_digits === nothing
             @test graph.data.points.entities.hovers[1] == "A fraction: 0.100"
+
+            # A log2 scale of percents keeps its exponents as they are.
+            graph = points_graph()
+            fill_gene_expression!(x_axis_vector_fields(graph), daf; gene = "A", log_base = Log2Base)
+            @test graph.configuration.x_axis.scale.ticks_digits === nothing
             return nothing
         end
 
