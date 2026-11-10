@@ -666,6 +666,7 @@ nested_test("data_sources") do
         @test function_default(fill_type!, :show_legend) == true
         @test function_default(fill_gene_expression!, :log_base) == Log10Base
         @test function_default(fill_gene_expression!, :percent) == true
+        @test function_default(fill_genes_expression_matrix!, :percent) == true
         @test function_default(fill_mean_cells_per_metacell!, :log_base) == Log10Base
         @test function_default(fill_boolean!, :show_legend) == false
         return nothing

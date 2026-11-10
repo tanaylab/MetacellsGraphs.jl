@@ -1597,7 +1597,7 @@ Fill the `sinks` with the `genes` expression level (linear fraction) per each of
 shown by [`put_expression_level_configuration!`](@ref), and name the rows and the columns. The `genes` are the rows
 and the `entries` are the columns. The hovers show each value by the `hover_format`.
 """
-function fill_genes_expression_matrix!(
+@documented function fill_genes_expression_matrix!(
     sinks::MatrixDataSinks,
     daf::DafReader;
     genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
