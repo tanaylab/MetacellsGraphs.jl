@@ -195,9 +195,9 @@ The `hover_format` of an expression level shown as a percent: 3 significant digi
 EXPRESSION_LEVEL_PERCENT_HOVER_FORMAT_FOR_GRAPHS::Function = percent_format(; sigdigits = 3)
 
 """
-The `hover_format` of a fold factor: two digits after the decimal point.
+The `hover_format` of a fold factor, shown as the ratio it stands for: 3 significant digits.
 """
-FOLD_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; digits = 2)
+FOLD_HOVER_FORMAT_FOR_GRAPHS::Function = number_format(; sigdigits = 3)
 
 """
 The `hover_format` of a correlation: three digits after the decimal point, since small correlations are common.
@@ -543,7 +543,7 @@ end
 
 Put the size (count) `value_per_entry` into the `sinks`, shown by [`put_size_configuration!`](@ref), and name the
 entities after the `name_per_entry`. Every size data source ends with this. The hovers show each value by the
-`hover_format`.
+`hover_format`, followed by its exponent in the `log_base` (if any), by `SomeGraphs`' `log_hover_format`.
 """
 function put_size_values!(
     sinks::VectorDataSinks,
@@ -554,7 +554,12 @@ function put_size_values!(
     log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
-    put_vector_data!(sinks, value_per_entry; title, hover_format)
+    put_vector_data!(
+        sinks,
+        value_per_entry;
+        title,
+        hover_format = log_hover_format(something(hover_format, string); log_base),
+    )
     put_size_configuration!(sinks; title, show_legend, log_base)
     put_vector_names_data!(sinks, name_per_entry)
     return nothing
@@ -1199,7 +1204,7 @@ define_bucket_data_sources(;
 
 Fill the `sinks` with the `gene` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
 shown by [`put_expression_level_configuration!`](@ref), and name the entities after the `entries`. The hovers show each
-value by the `hover_format`.
+value by the `hover_format`, followed by its exponent in the `log_base` (if any), by `SomeGraphs`' `log_hover_format`.
 """
 @documented function fill_gene_expression!(
     sinks::VectorDataSinks,
@@ -1219,7 +1224,12 @@ value by the `hover_format`.
     end,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_gene_expression_vector(daf; gene, axis, entries); title, hover_format)
+    put_vector_data!(
+        sinks,
+        get_gene_expression_vector(daf; gene, axis, entries);
+        title,
+        hover_format = log_hover_format(something(hover_format, string); log_base, percent),
+    )
     put_expression_level_configuration!(sinks; gene_fraction_regularization, percent, title, show_legend, log_base)
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
@@ -1618,7 +1628,8 @@ end
 
 Fill the `sinks` with the `genes` expression level (linear fraction) per each of the `entries` of some `daf` `axis`,
 shown by [`put_expression_level_configuration!`](@ref), and name the rows and the columns. The `genes` are the rows
-and the `entries` are the columns. The hovers show each value by the `hover_format`.
+and the `entries` are the columns. The hovers show each value by the `hover_format`, followed by its exponent in the
+`log_base` (if any), by `SomeGraphs`' `log_hover_format`.
 """
 @documented function fill_genes_expression_matrix!(
     sinks::MatrixDataSinks,
@@ -1638,7 +1649,12 @@ and the `entries` are the columns. The hovers show each value by the `hover_form
     end,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
-    put_matrix_data!(sinks, get_genes_expression_matrix(daf; genes, axis, entries); title, hover_format)
+    put_matrix_data!(
+        sinks,
+        get_genes_expression_matrix(daf; genes, axis, entries);
+        title,
+        hover_format = log_hover_format(something(hover_format, string); log_base, percent),
+    )
     put_expression_level_configuration!(sinks; gene_fraction_regularization, percent, title, show_legend, log_base)
     fill_axes_names_data!(
         sinks,
@@ -1928,9 +1944,11 @@ end
     )::Nothing
 
 Fill the `sinks` with the `genes` fold (log base-2 minus the median) per each of the `entries` of some `daf` `axis`,
-shown in the range -`max_fold` (blue) to 0 (white) to +`max_fold` (red), and name the rows and the columns. The `genes`
-are the rows and the `entries` are the columns. This is based on the `log_linear_fraction` per gene per `axis`, which is
-already a log, so there's no regularization to apply here. The hovers show each value by the `hover_format`.
+shown by [`put_fold_configuration!`](@ref), and name the rows and the columns. The `genes` are the rows and the
+`entries` are the columns. This is based on the `log_linear_fraction` per gene per `axis`, which is already a log, so
+there's no regularization to apply here. The values are the ratios the folds stand for (2 to the power of the fold), so
+the color scale labels them as log2 scales are. The hovers show each ratio by the `hover_format`, followed by its fold
+(its log2 exponent), by `SomeGraphs`' `log_hover_format`.
 """
 function fill_genes_fold_matrix!(
     sinks::MatrixDataSinks,
@@ -1944,7 +1962,12 @@ function fill_genes_fold_matrix!(
     hover_format::Maybe{Function} = FOLD_HOVER_FORMAT_FOR_GRAPHS,
 )::Nothing
     genes, entries = sinks_matrix_entries(sinks, genes, entries)
-    put_matrix_data!(sinks, get_genes_fold_matrix(daf; genes, axis, entries); title, hover_format)
+    put_matrix_data!(
+        sinks,
+        2 .^ get_genes_fold_matrix(daf; genes, axis, entries);
+        title,
+        hover_format = log_hover_format(something(hover_format, string); log_base = Log2Base),
+    )
     put_fold_configuration!(sinks; max_fold, title, show_legend)
     fill_axes_names_data!(
         sinks,
@@ -1995,8 +2018,9 @@ end
     )::Nothing
 
 Show a fold (the log base 2 of a ratio, e.g. of a gene's expression to its median) in the range -`max_fold` (blue) to
-0 (white) to +`max_fold` (red), named by the `title`, and include it in the legend if `show_legend`. The folds
-themselves are put in by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
+0 (white) to +`max_fold` (red), named by the `title`, and include it in the legend if `show_legend`. The values are
+the ratios (2 to the power of the folds), on a log base 2 scale, so it labels them as log2 scales are. They are put in
+by [`put_vector_data!`](@extref SomeGraphs SomeGraphs.Sources.put_vector_data!) or
 [`put_matrix_data!`](@extref SomeGraphs SomeGraphs.Sources.put_matrix_data!).
 """
 function put_fold_configuration!(
@@ -2030,8 +2054,10 @@ function put_fold_configuration!(
 )::Nothing
     colors.palette = "BuWtRd"
     colors.legend.show = show_legend
-    colors.scale.minimum = -max_fold
-    colors.scale.maximum = max_fold
+    colors.scale.log_base = Log2Base
+    colors.scale.log_regularization = 0
+    colors.scale.minimum = 2.0^-max_fold
+    colors.scale.maximum = 2.0^max_fold
     if title !== nothing
         colors.title = title
     end

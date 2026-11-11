@@ -58,13 +58,13 @@ nested_test("heatmap_graphs") do
             graph = genes_heatmap_graph(daf; genes, rows_axis_title = "Marker genes")
             @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
             @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.entries.matrix[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
+            @test graph.data.entries.matrix[1, :] == Float32[0.5, 1.0, 1.0, 2.0]
             @test graph.configuration.rows.title == "Marker genes"
             @test graph.configuration.columns.title == "Metacells"
             @test graph.configuration.rows.order_source == OptimalTreeReorder
             @test graph.configuration.columns.order_source == OptimalTreeReorder
-            @test graph.configuration.entries.colors.scale.minimum == -3
-            @test graph.configuration.entries.colors.scale.maximum == 3
+            @test graph.configuration.entries.colors.scale.minimum == 0.125
+            @test graph.configuration.entries.colors.scale.maximum == 8
             @test graph.configuration.entries.colors.palette == "BuWtRd"
 
             # There are too many columns to label, so they are named in the hovers only.
@@ -97,7 +97,7 @@ nested_test("heatmap_graphs") do
             genes = get_skeleton_gene_indices(daf)
             graph = genes_heatmap_graph(daf; genes, rows_axis_title = "Skeleton genes")
             @test graph.data.rows.entities.names == ["A", "B"]
-            @test graph.data.entries.matrix[2, :] == Float32[1.0, 0.0, 0.0, -1.0]
+            @test graph.data.entries.matrix[2, :] == Float32[2.0, 1.0, 1.0, 0.5]
             return nothing
         end
 
@@ -106,7 +106,7 @@ nested_test("heatmap_graphs") do
             graph = genes_heatmap_graph(daf; axis = "block", genes)
             @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
             @test graph.data.columns.entities.names == ["B1", "B2"]
-            @test graph.data.entries.matrix[1, :] == Float32[-0.5, 0.5]
+            @test graph.data.entries.matrix[1, :] == 2 .^ Float32[-0.5, 0.5]
             @test graph.configuration.columns.title == "Blocks"
             return nothing
         end

@@ -169,7 +169,7 @@ nested_test("data_sources") do
             @test graph.configuration.x_axis.scale.log_regularization == GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
             @test graph.configuration.x_axis.scale.percent
             @test graph.configuration.x_axis.scale.ticks_digits == 3
-            @test graph.data.points.entities.hovers[1] == "A percent: 10.0%"
+            @test graph.data.points.entities.hovers[1] == "A percent: 10.0% (<sub>10</sub>1.00)"
             return nothing
         end
 
@@ -179,7 +179,7 @@ nested_test("data_sources") do
             @test graph.configuration.x_axis.title == "A fraction"
             @test !graph.configuration.x_axis.scale.percent
             @test graph.configuration.x_axis.scale.ticks_digits === nothing
-            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100"
+            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100 (<sub>10</sub>-1.00)"
 
             # A log2 scale of percents keeps its exponents as they are.
             graph = points_graph()
@@ -219,7 +219,7 @@ nested_test("data_sources") do
                 @test graph.data.entries.matrix == Float32[0.1 0.2 0.3 0.4; 0.4 0.3 0.2 0.1]
                 @test graph.data.rows.entities.names == ["A", "B"]
                 @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-                @test graph.data.cells.hovers[1, 1] == "percent: 10.0%"
+                @test graph.data.cells.hovers[1, 1] == "percent: 10.0% (<sub>10</sub>1.00)"
                 @test graph.configuration.entries.colors.scale.log_base == Log10Base
                 @test graph.configuration.entries.colors.scale.percent
                 return nothing
@@ -295,20 +295,21 @@ nested_test("data_sources") do
 
         nested_test("()") do
             fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes = [1, 2])
-            @test graph.data.entries.matrix[1, :] == Float32[-1.0, 0.0, 0.0, 1.0]
-            @test graph.data.entries.matrix[2, :] == Float32[1.0, 0.0, 0.0, -1.0]
-            @test graph.data.cells.hovers[1, 1] == "fold from median: -1.00"
+            @test graph.data.entries.matrix[1, :] == Float32[0.5, 1.0, 1.0, 2.0]
+            @test graph.data.entries.matrix[2, :] == Float32[2.0, 1.0, 1.0, 0.5]
+            @test graph.data.cells.hovers[1, 1] == "fold from median: 0.500 (<sub>2</sub>-1.00)"
             @test graph.data.rows.entities.names == ["A", "B"]
             @test graph.configuration.entries.colors.palette == "BuWtRd"
             @test graph.configuration.entries.colors.legend.show
-            @test graph.configuration.entries.colors.scale.minimum == -MAX_FOLD_FOR_GRAPHS
-            @test graph.configuration.entries.colors.scale.maximum == MAX_FOLD_FOR_GRAPHS
+            @test graph.configuration.entries.colors.scale.log_base == Log2Base
+            @test graph.configuration.entries.colors.scale.minimum == 2.0^-MAX_FOLD_FOR_GRAPHS
+            @test graph.configuration.entries.colors.scale.maximum == 2.0^MAX_FOLD_FOR_GRAPHS
             return nothing
         end
 
         nested_test("max_fold") do
             fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes = [1, 2], max_fold = 2)
-            @test graph.configuration.entries.colors.scale.minimum == -2
+            @test graph.configuration.entries.colors.scale.minimum == 0.25
             return nothing
         end
 
@@ -628,7 +629,7 @@ nested_test("data_sources") do
                 hover_format = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
             )
             @test graph.data.points.colors.vector == UInt32[70]
-            @test graph.data.points.entities.hovers[1] == "cells!: 70.0"
+            @test graph.data.points.entities.hovers[1] == "cells!: 70.0 (<sub>2</sub>6.13)"
             @test graph.configuration.points.colors.title == "cells!"
             @test !graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log2Base
@@ -640,7 +641,7 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_size!(points_colors_vector_fields(graph), daf; axis = "metacell", property = "n_cells")
             @test graph.data.points.colors.vector == UInt32[10, 20, 30, 40]
-            @test graph.data.points.entities.hovers[1] == "n_cells: 10"
+            @test graph.data.points.entities.hovers[1] == "n_cells: 10 (<sub>10</sub>1.00)"
             @test graph.configuration.points.colors.title == "n_cells"
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             return nothing
@@ -661,7 +662,8 @@ nested_test("data_sources") do
                 @test graph.data.x.vector == Float32[15.0, 35.0]
                 @test graph.data.y.vector == Float32[150.0, 350.0]
                 @test graph.data.points.entities.hovers[1] ==
-                      "mean cells per metacell: 15.0<br>mean UMIs per metacell: 150.0"
+                      "mean cells per metacell: 15.0 (<sub>10</sub>1.18)<br>" *
+                      "mean UMIs per metacell: 150.0 (<sub>10</sub>2.18)"
                 @test graph.configuration.x_axis.title == "mean cells per metacell"
                 @test graph.configuration.y_axis.title == "mean UMIs per metacell"
                 return nothing

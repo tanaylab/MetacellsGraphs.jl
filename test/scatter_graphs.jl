@@ -46,7 +46,8 @@ nested_test("scatter_graphs") do
             @test graph.configuration.x_axis.scale.percent
             @test graph.configuration.y_axis.scale.percent
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.points.entities.hovers[1] == "A percent: 10.0%<br>B percent: 40.0%"
+            @test graph.data.points.entities.hovers[1] ==
+                  "A percent: 10.0% (<sub>10</sub>1.00)<br>B percent: 40.0% (<sub>10</sub>1.60)"
 
             # The graph says nothing about the colors of the points; the caller does.
             @test graph.data.points.colors.vector === nothing
@@ -58,7 +59,8 @@ nested_test("scatter_graphs") do
             @test graph.data.x.vector == Float32[0.15, 0.35]
             @test graph.data.y.vector == Float32[0.05, 0.05]
             @test graph.data.points.entities.names == ["B1", "B2"]
-            @test graph.data.points.entities.hovers[2] == "A percent: 35.0%<br>C percent: 5.00%"
+            @test graph.data.points.entities.hovers[2] ==
+                  "A percent: 35.0% (<sub>10</sub>1.54)<br>C percent: 5.00% (<sub>10</sub>0.70)"
             return nothing
         end
 
@@ -67,7 +69,8 @@ nested_test("scatter_graphs") do
             @test graph.configuration.x_axis.title == "A fraction"
             @test !graph.configuration.x_axis.scale.percent
             @test !graph.configuration.y_axis.scale.percent
-            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100<br>B fraction: 0.400"
+            @test graph.data.points.entities.hovers[1] ==
+                  "A fraction: 0.100 (<sub>10</sub>-1.00)<br>B fraction: 0.400 (<sub>10</sub>-0.40)"
             graph_to_figure(graph)
             return nothing
         end

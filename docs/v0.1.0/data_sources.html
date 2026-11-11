@@ -1281,6 +1281,12 @@
 <code>name_per_entry
 </code>. Every size data source ends with this. The hovers show each value by the 
 <code>hover_format
+</code>, followed by its exponent in the 
+<code>log_base
+</code> (if any), by 
+<code>SomeGraphs
+</code>&#39; 
+<code>log_hover_format
 </code>.
 </p>
 </div>
@@ -1527,7 +1533,7 @@
 <code>title
 </code>, and include it in the legend if 
 <code>show_legend
-</code>. The folds themselves are put in by 
+</code>. The values are the ratios (2 to the power of the folds), on a log base 2 scale, so it labels them as log2 scales are. They are put in by 
 <a href="https://tanaylab.github.io/SomeGraphs.jl/v0.2.0/sources.html#SomeGraphs.Sources.put_vector_data%21">
 <code>put_vector_data!
 </code>
@@ -1573,7 +1579,7 @@
 <div>
 <p>The 
 <code>hover_format
-</code> of a fold factor: two digits after the decimal point.
+</code> of a fold factor, shown as the ratio it stands for: 3 significant digits.
 </p>
 </div>
 </section>
@@ -2323,6 +2329,12 @@
 <code>entries
 </code>. The hovers show each value by the 
 <code>hover_format
+</code>, followed by its exponent in the 
+<code>log_base
+</code> (if any), by 
+<code>SomeGraphs
+</code>&#39; 
+<code>log_hover_format
 </code>.
 </p>
 </div>
@@ -2421,6 +2433,12 @@
 <code>entries
 </code> are the columns. The hovers show each value by the 
 <code>hover_format
+</code>, followed by its exponent in the 
+<code>log_base
+</code> (if any), by 
+<code>SomeGraphs
+</code>&#39; 
+<code>log_hover_format
 </code>.
 </p>
 </div>
@@ -2510,11 +2528,11 @@
 <code>daf
 </code> 
 <code>axis
-</code>, shown in the range -
-<code>max_fold
-</code> (blue) to 0 (white) to +
-<code>max_fold
-</code> (red), and name the rows and the columns. The 
+</code>, shown by 
+<a href="data_sources.html#MetacellsGraphs.DataSources.put_fold_configuration!">
+<code>put_fold_configuration!
+</code>
+</a>, and name the rows and the columns. The 
 <code>genes
 </code> are the rows and the 
 <code>entries
@@ -2522,8 +2540,12 @@
 <code>log_linear_fraction
 </code> per gene per 
 <code>axis
-</code>, which is already a log, so there&#39;s no regularization to apply here. The hovers show each value by the 
+</code>, which is already a log, so there&#39;s no regularization to apply here. The values are the ratios the folds stand for (2 to the power of the fold), so the color scale labels them as log2 scales are. The hovers show each ratio by the 
 <code>hover_format
+</code>, followed by its fold (its log2 exponent), by 
+<code>SomeGraphs
+</code>&#39; 
+<code>log_hover_format
 </code>.
 </p>
 </div>
