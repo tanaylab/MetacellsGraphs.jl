@@ -42,7 +42,6 @@ nested_test("heatmap_graphs") do
     nested_test("configuration") do
         graph = heatmap_graph()
         put_genes_heatmap_configuration!(graph.configuration; n_genes = 3, n_entries = 1, columns_axis_title = "Blocks")
-        @test graph.configuration.figure.margins.left == 100
         @test graph.configuration.origin == HeatmapTopLeft
         @test graph.configuration.rows.title == "Genes"
         @test graph.configuration.columns.title == "Blocks"

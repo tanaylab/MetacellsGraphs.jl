@@ -101,7 +101,6 @@ function put_genes_heatmap_configuration!(
     rows_axis_title::Maybe{AbstractString} = "Genes",
     columns_axis_title::Maybe{AbstractString} = "Metacells",
 )::Nothing
-    configuration.figure.margins.left = 100
     configuration.origin = HeatmapTopLeft
     configuration.rows.title = rows_axis_title
     configuration.rows.tree_source = n_genes > 1 ? ClusteredTree : nothing
