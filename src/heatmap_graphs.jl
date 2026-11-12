@@ -41,8 +41,8 @@ using ..DataSources
         axis::AbstractString = "metacell",
         genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        rows_axis_title::Maybe{AbstractString} = "Genes",
-        columns_axis_title::Maybe{AbstractString} = "\$(uppercasefirst(axis))s",
+        rows_axis_title::Maybe{AbstractString} = "gene",
+        columns_axis_title::Maybe{AbstractString} = axis,
         max_fold::Real = $(MAX_FOLD_FOR_GRAPHS),
     )::HeatmapGraph
 
@@ -64,8 +64,8 @@ There are too many columns to label, so they are named in the hover of each cell
     axis::AbstractString = "metacell",
     genes::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    rows_axis_title::Maybe{AbstractString} = "Genes",
-    columns_axis_title::Maybe{AbstractString} = "$(uppercasefirst(axis))s",
+    rows_axis_title::Maybe{AbstractString} = "gene",
+    columns_axis_title::Maybe{AbstractString} = axis,
     max_fold::Real = MAX_FOLD_FOR_GRAPHS,
 )::HeatmapGraph
     if genes === nothing
@@ -83,8 +83,8 @@ end
         configuration::HeatmapGraphConfiguration;
         n_genes::Integer,
         n_entries::Integer,
-        rows_axis_title::Maybe{AbstractString} = "Genes",
-        columns_axis_title::Maybe{AbstractString} = "Metacells",
+        rows_axis_title::Maybe{AbstractString} = "gene",
+        columns_axis_title::Maybe{AbstractString} = "metacell",
     )::Nothing
 
 Lay out a heatmap of `n_genes` genes (the rows) by `n_entries` entries (the columns), as
@@ -98,8 +98,8 @@ function put_genes_heatmap_configuration!(
     configuration::HeatmapGraphConfiguration;
     n_genes::Integer,
     n_entries::Integer,
-    rows_axis_title::Maybe{AbstractString} = "Genes",
-    columns_axis_title::Maybe{AbstractString} = "Metacells",
+    rows_axis_title::Maybe{AbstractString} = "gene",
+    columns_axis_title::Maybe{AbstractString} = "metacell",
 )::Nothing
     configuration.origin = HeatmapTopLeft
     configuration.rows.title = rows_axis_title

@@ -71,7 +71,7 @@ nested_test("data_sources") do
             )
             @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.points.entities.hovers[1] == "X: 0.0"
+            @test graph.data.points.entities.hovers[1] == "X: 0.00"
 
             # Nothing is configured, because how to show a value depends on which property it is.
             @test graph.configuration.x_axis.title === nothing
@@ -272,7 +272,7 @@ nested_test("data_sources") do
         @test graph.data.entries.matrix[1, :] == Float32[0.1, 0.2, 0.3, 0.4]
         @test graph.data.rows.entities.names == ["A", "B", "C"]
         @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-        @test graph.data.cells.hovers[1, 1] == "fraction: 0.1"
+        @test graph.data.cells.hovers[1, 1] == "fraction: 0.100"
 
         # Nothing is configured, because how to show a value depends on which property it is.
         @test graph.configuration.entries.colors.palette === nothing
@@ -328,7 +328,7 @@ nested_test("data_sources") do
         graph = points_graph()
         fill_umap!(x_axis_vector_fields(graph), daf; coordinate = "x")
         @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
-        @test graph.configuration.x_axis.title == "UMAP X"
+        @test graph.configuration.x_axis.title == "umap_x"
         @test !graph.configuration.x_axis.show_ticks
         @test !graph.configuration.x_axis.show_grid
         @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
@@ -565,7 +565,7 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_total_UMIs!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == UInt32[100, 200, 300, 400]
-            @test graph.configuration.points.colors.title == "total UMIs"
+            @test graph.configuration.points.colors.title == "total_UMIs"
             @test graph.configuration.points.colors.palette == "YlOrRd"
             @test graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log10Base
@@ -578,7 +578,7 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_total_UMIs!(points_sizes_vector_fields(graph), daf)
             @test graph.data.points.sizes.vector == UInt32[100, 200, 300, 400]
-            @test graph.configuration.points.sizes.title == "total UMIs"
+            @test graph.configuration.points.sizes.title == "total_UMIs"
             @test graph.configuration.points.sizes.legend.show
             @test graph.configuration.points.sizes.scale.log_base == Log10Base
             @test graph.configuration.points.sizes.scale.log_regularization == 1
@@ -846,7 +846,7 @@ nested_test("data_sources") do
             graph = bars_graph()
             fill_column_vector_data!(values_axis_vector_fields(graph), frame; column = "imp_f", title = "improved")
             @test graph.data.values.vector == [0.75, 0.25]
-            @test graph.data.bars.hovers == ["improved: 0.75", "improved: 0.25"]
+            @test graph.data.bars.hovers == ["improved: 0.750", "improved: 0.250"]
 
             # A frame has no one column which identifies its rows, so say which one does.
             @test graph.data.bars.names === nothing
@@ -896,8 +896,8 @@ nested_test("data_sources") do
         # A side which gives a gene fewer regulators than asked for pads with empty names, which are left out.
         nested_test("()") do
             hovers = get_module_regulators_hovers(frame; prefix = "imp", side_name = "improved", regulators_count = 2)
-            @test hovers[1] == "improved: in no module in 25.0% of the cells<br>- B: 40.0%"
-            @test hovers[2] == "improved: in no module in 100.0% of the cells"
+            @test hovers[1] == "improved cells in no module: 25.0%<br>improved cells in module with B: 40.0%"
+            @test hovers[2] == "improved cells in no module: 100.0%"
             return nothing
         end
 
@@ -911,7 +911,7 @@ nested_test("data_sources") do
                 side_name = "improved",
                 regulators_count = 2,
             )
-            @test entities.hovers[1] == "improved: in no module in 25.0% of the cells<br>- B: 40.0%"
+            @test entities.hovers[1] == "improved cells in no module: 25.0%<br>improved cells in module with B: 40.0%"
             return nothing
         end
     end

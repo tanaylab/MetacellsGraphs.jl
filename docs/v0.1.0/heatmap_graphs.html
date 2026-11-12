@@ -195,8 +195,8 @@ fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)
     axis::AbstractString = &quot;metacell&quot;,
     genes::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-    rows_axis_title::Maybe{AbstractString} = &quot;Genes&quot;,
-    columns_axis_title::Maybe{AbstractString} = &quot;$(uppercasefirst(axis))s&quot;,
+    rows_axis_title::Maybe{AbstractString} = &quot;gene&quot;,
+    columns_axis_title::Maybe{AbstractString} = axis,
     max_fold::Real = 3.0,
 )::HeatmapGraph
 </code>
@@ -256,8 +256,8 @@ fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)
     configuration::HeatmapGraphConfiguration;
     n_genes::Integer,
     n_entries::Integer,
-    rows_axis_title::Maybe{AbstractString} = &quot;Genes&quot;,
-    columns_axis_title::Maybe{AbstractString} = &quot;Metacells&quot;,
+    rows_axis_title::Maybe{AbstractString} = &quot;gene&quot;,
+    columns_axis_title::Maybe{AbstractString} = &quot;metacell&quot;,
 )::Nothing
 </code>
 </pre>

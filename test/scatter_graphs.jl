@@ -181,11 +181,12 @@ nested_test("scatter_graphs") do
             graph = umap_graph(daf)
             @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
             @test graph.data.y.vector == Float32[3.0, 2.0, 1.0, 0.0]
-            @test graph.configuration.x_axis.title == "UMAP X"
-            @test graph.configuration.y_axis.title == "UMAP Y"
+            @test graph.configuration.x_axis.title == "umap_x"
+            @test graph.configuration.y_axis.title == "umap_y"
             @test !graph.configuration.x_axis.show_ticks
             @test !graph.configuration.y_axis.show_grid
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
+            @test graph.configuration.points_title == "metacell"
 
             # A UMAP coordinate is the arbitrary output of the projection, so it says nothing in a hover.
             @test graph.data.points.entities.hovers === nothing

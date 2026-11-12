@@ -106,7 +106,7 @@ function changed_genes_graph(;
             series.values,
             shown_report;
             column = "$(prefix)_f",
-            title = "Base neighborhoods",
+            title = "base neighborhoods",
             hover_format = percent_format(; digits = 1),
         )
         fill_module_regulators_hovers!(series.entities, shown_report; prefix, side_name, regulators_count)
@@ -125,9 +125,9 @@ neighborhoods.
 function put_changed_genes_configuration!(configuration::SeriesBarsGraphConfiguration)::Nothing
     configuration.values_orientation = HorizontalValues
     configuration.mirrored = true
-    configuration.value_axis.title = "Base neighborhoods"
+    configuration.value_axis.title = "base neighborhoods"
     configuration.value_axis.scale.percent = true
-    configuration.bar_axis.title = "Genes"
+    configuration.bar_axis.title = "gene"
     return nothing
 end
 

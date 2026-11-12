@@ -50,7 +50,7 @@ If `same_scale`, one unit has the same length on both axes. Both axes go from a 
 `maximum_fraction`. A point above it is drawn at the edge, as an arrow pointing toward its real place. If the
 `maximum_fraction` is `nothing`, the axes cover the data.
 
-The hover of each point names its entry and gives both fractions.
+The hover of each point names its entry (titled by the `axis`) and gives both fractions.
 """
 @documented function gene_gene_graph(
     daf::DafReader;
@@ -65,6 +65,7 @@ The hover of each point names its entry and gives both fractions.
     maximum_fraction::Maybe{Real} = MAXIMUM_GENE_FRACTION_FOR_GRAPHS,
 )::PointsGraph
     graph = points_graph()
+    graph.configuration.points_title = axis
     graph.configuration.same_scale = same_scale
     if maximum_fraction !== nothing
         for scale in (graph.configuration.x_axis.scale, graph.configuration.y_axis.scale)
@@ -146,7 +147,8 @@ position of its metacells, so the same embedding shows fewer points closer to it
 The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid. Only
 which points are near which other points means anything.
 
-The hover of each point names its entry and gives its coordinates.
+The hover of each point names its entry (titled by the `axis`). It doesn't give the coordinates, which mean nothing on
+their own.
 """
 function umap_graph(
     daf::DafReader;
@@ -154,6 +156,7 @@ function umap_graph(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
 )::PointsGraph
     graph = points_graph()
+    graph.configuration.points_title = axis
     fill_umap!(x_axis_vector_fields(graph), daf; coordinate = "x", axis, entries)
     fill_umap!(y_axis_vector_fields(graph), daf; coordinate = "y", axis, entries)
     return graph
@@ -186,8 +189,8 @@ entry looks like, rather than a correlation which happens to be zero. A gene whi
 nothing to show and is an error rather than an empty graph. The hidden entries stay in the data, masked, and do not
 affect the ranges of the axes.
 
-The hover of each point names its entry and gives both correlations, the change between them, and the fraction of the
-gene.
+The hover of each point names its entry (titled by the `axis`) and gives both correlations, the change between them,
+and the fraction of the gene.
 """
 function gene_base_delta_correlations_graph(;
     daf::DafReader,
@@ -201,11 +204,12 @@ function gene_base_delta_correlations_graph(;
     assert_same_entries(daf, base_daf; axis, base_axis)
 
     graph = points_graph()
+    graph.configuration.points_title = axis
     put_hidden_entries_configuration!(graph.configuration)
 
     entities = points_entities(graph)
     fill_gene_correlation!(entities, base_daf; gene, axis, entries, title = "base correlation")
-    fill_gene_correlation!(entities, daf; gene, axis, entries)
+    fill_gene_correlation!(entities, daf; gene, axis, entries, title = "new correlation")
     fill_gene_correlation_change!(x_axis_vector_fields(graph), daf, base_daf; gene, axis, entries)
     fill_gene_expression!(
         y_axis_vector_fields(graph),

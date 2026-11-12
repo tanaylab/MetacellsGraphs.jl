@@ -112,10 +112,10 @@ nested_test("bar_graphs") do
         # The gene the graph is named for is at the top, which for horizontal bars is the end of the vector. `C` and `D`
         # both improved in nothing, so they are in marker rank order.
         @test graph.data.bars.names == ["C", "D", "B", "A"]
-        @test graph.configuration.bar_axis.title == "Genes"
+        @test graph.configuration.bar_axis.title == "gene"
         @test graph.data.series[1].values.vector == [1.0, 0.0, 0.5, 0.0]
         @test graph.data.series[2].values.vector == [0.0, 0.0, 0.25, 0.75]
-        @test graph.configuration.value_axis.title == "Base neighborhoods"
+        @test graph.configuration.value_axis.title == "base neighborhoods"
         @test [series.name for series in graph.data.series] == ["degraded", "improved"]
         @test [series.color for series in graph.data.series] == ["darkred", "darkblue"]
         @test graph.configuration.mirrored
@@ -145,20 +145,19 @@ nested_test("bar_graphs") do
         # by the bar it belongs to, so the hover of a series does not repeat it. It starts with the bar's value, as a
         # percent like the axis.
         @test graph.data.series[1].bars.hovers[1] ==
-              "Base neighborhoods: 100.0%<br>degraded: in no module in 20.0% of the cells<br>- B: 60.0%"
-        @test graph.data.series[1].bars.hovers[4] ==
-              "Base neighborhoods: 0.0%<br>degraded: in no module in 100.0% of the cells"
-        @test graph.data.series[2].bars.hovers[1] ==
-              "Base neighborhoods: 0.0%<br>improved: in no module in 100.0% of the cells"
+              "base neighborhoods: 100.0%<br>degraded cells in no module: 20.0%<br>" *
+              "degraded cells in module with B: 60.0%"
+        @test graph.data.series[1].bars.hovers[4] == "base neighborhoods: 0.0%<br>degraded cells in no module: 100.0%"
+        @test graph.data.series[2].bars.hovers[1] == "base neighborhoods: 0.0%<br>improved cells in no module: 100.0%"
         @test graph.data.series[2].bars.hovers[4] ==
-              "Base neighborhoods: 75.0%<br>improved: in no module in 25.0% of the cells<br>- B: 40.0%"
+              "base neighborhoods: 75.0%<br>improved cells in no module: 25.0%<br>" *
+              "improved cells in module with B: 40.0%"
         return nothing
     end
 
     nested_test("regulators_count") do
         graph = improved_genes_graph(; daf, base_daf, regulators_count = 0)
-        @test graph.data.series[2].bars.hovers[4] ==
-              "Base neighborhoods: 75.0%<br>improved: in no module in 25.0% of the cells"
+        @test graph.data.series[2].bars.hovers[4] == "base neighborhoods: 75.0%<br>improved cells in no module: 25.0%"
         return nothing
     end
 
@@ -174,7 +173,8 @@ nested_test("bar_graphs") do
         set_vector!(base_daf, "gene", "is_regulator", [false, true, false, false, false])
         set_vector!(base_daf, "gene", "is_marker", [true, false, true, true, false])
         add_changed_genes_default_annotations!(graph; daf, base_daf)
-        @test [annotation.colors.title for annotation in graph.data.annotations] == ["lateral", "regulator", "marker"]
+        titles = [annotation.colors.title for annotation in graph.data.annotations]
+        @test titles == ["is_lateral", "is_regulator", "is_marker"]
         @test graph.data.annotations[1].values.vector == ["false", "true", "false", "false"]
         @test graph.data.annotations[2].values.vector == ["false", "false", "true", "false"]
         @test graph.data.annotations[3].values.vector == ["true", "true", "false", "true"]

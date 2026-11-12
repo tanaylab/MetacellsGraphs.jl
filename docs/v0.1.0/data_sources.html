@@ -3067,7 +3067,7 @@
     coordinate::AbstractString,
     axis::AbstractString = &quot;metacell&quot;,
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
-    title::Maybe{AbstractString} = &quot;UMAP $(uppercase(coordinate))&quot;,
+    title::Maybe{AbstractString} = &quot;umap_$(coordinate)&quot;,
 )::Nothing
 </code>
 </pre>
@@ -3542,7 +3542,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-    title::Maybe{AbstractString} = &quot;total UMIs&quot;,
+    title::Maybe{AbstractString} = &quot;total_UMIs&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
@@ -3623,7 +3623,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-    title::Maybe{AbstractString} = &quot;cells&quot;,
+    title::Maybe{AbstractString} = &quot;n_cells&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
@@ -3696,7 +3696,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Real = 1,
-    title::Maybe{AbstractString} = &quot;metacells&quot;,
+    title::Maybe{AbstractString} = &quot;n_metacells&quot;,
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
     hover_format::Maybe{Function} = SIZE_HOVER_FORMAT_FOR_GRAPHS,
@@ -4349,7 +4349,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;lateral&quot;,
+    title::Maybe{AbstractString} = &quot;is_lateral&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4420,7 +4420,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;marker&quot;,
+    title::Maybe{AbstractString} = &quot;is_marker&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4491,7 +4491,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;transcription factor&quot;,
+    title::Maybe{AbstractString} = &quot;is_transcription_factor&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4562,7 +4562,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;regulator&quot;,
+    title::Maybe{AbstractString} = &quot;is_regulator&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4633,7 +4633,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;forbidden&quot;,
+    title::Maybe{AbstractString} = &quot;is_forbidden&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4704,7 +4704,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;skeleton&quot;,
+    title::Maybe{AbstractString} = &quot;is_skeleton&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4775,7 +4775,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;correlated with skeleton&quot;,
+    title::Maybe{AbstractString} = &quot;is_correlated_with_skeleton&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4846,7 +4846,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;mitochondrial&quot;,
+    title::Maybe{AbstractString} = &quot;is_mitochondrial&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4917,7 +4917,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;ribosomal&quot;,
+    title::Maybe{AbstractString} = &quot;is_ribosomal&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>
@@ -4988,7 +4988,7 @@
     entries::Maybe{Union{AbstractVector{&lt;:AbstractString}, AbstractVector{&lt;:Integer}}} = nothing,
     via::Maybe{Union{Tuple{Vararg{AbstractString}}, AbstractVector{&lt;:AbstractString}}} = nothing,
     empty_value::Bool = false,
-    title::Maybe{AbstractString} = &quot;excluded&quot;,
+    title::Maybe{AbstractString} = &quot;is_excluded&quot;,
     show_legend::Bool = false,
 )::Nothing
 </code>

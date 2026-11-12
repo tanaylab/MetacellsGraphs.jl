@@ -228,7 +228,9 @@ fill_type!(points_colors_vector_fields(graph), daf)
 <code>nothing
 </code>, the axes cover the data.
 </p>
-<p>The hover of each point names its entry and gives both fractions.
+<p>The hover of each point names its entry (titled by the 
+<code>axis
+</code>) and gives both fractions.
 </p>
 </div>
 </section>
@@ -354,7 +356,9 @@ fill_type!(points_colors_vector_fields(graph), daf)
 </p>
 <p>The coordinates are the arbitrary output of the UMAP projection, so the axes are drawn without ticks or a grid. Only which points are near which other points means anything.
 </p>
-<p>The hover of each point names its entry and gives its coordinates.
+<p>The hover of each point names its entry (titled by the 
+<code>axis
+</code>). It doesn&#39;t give the coordinates, which mean nothing on their own.
 </p>
 </div>
 </section>
@@ -406,7 +410,9 @@ fill_type!(points_colors_vector_fields(graph), daf)
 </p>
 <p>Only the entries whose base correlation is not zero are shown. A zero there is what a gene saying nothing about an entry looks like, rather than a correlation which happens to be zero. A gene which says nothing about any entry has nothing to show and is an error rather than an empty graph. The hidden entries stay in the data, masked, and do not affect the ranges of the axes.
 </p>
-<p>The hover of each point names its entry and gives both correlations, the change between them, and the fraction of the gene.
+<p>The hover of each point names its entry (titled by the 
+<code>axis
+</code>) and gives both correlations, the change between them, and the fraction of the gene.
 </p>
 </div>
 </section>

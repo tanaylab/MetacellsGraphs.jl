@@ -41,10 +41,10 @@ nested_test("heatmap_graphs") do
     # The layout takes the sizes it is given, so it serves a heatmap filled from any source.
     nested_test("configuration") do
         graph = heatmap_graph()
-        put_genes_heatmap_configuration!(graph.configuration; n_genes = 3, n_entries = 1, columns_axis_title = "Blocks")
+        put_genes_heatmap_configuration!(graph.configuration; n_genes = 3, n_entries = 1, columns_axis_title = "block")
         @test graph.configuration.origin == HeatmapTopLeft
-        @test graph.configuration.rows.title == "Genes"
-        @test graph.configuration.columns.title == "Blocks"
+        @test graph.configuration.rows.title == "gene"
+        @test graph.configuration.columns.title == "block"
         @test graph.configuration.rows.tree_source == ClusteredTree
         @test graph.configuration.columns.tree_source === nothing
         @test graph.configuration.rows.order_source === nothing
@@ -60,7 +60,7 @@ nested_test("heatmap_graphs") do
             @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
             @test graph.data.entries.matrix[1, :] == Float32[0.5, 1.0, 1.0, 2.0]
             @test graph.configuration.rows.title == "Marker genes"
-            @test graph.configuration.columns.title == "Metacells"
+            @test graph.configuration.columns.title == "metacell"
             @test graph.configuration.rows.tree_source == ClusteredTree
             @test graph.configuration.columns.tree_source == ClusteredTree
             @test graph.configuration.entries.colors.scale.minimum == 0.125
@@ -89,7 +89,7 @@ nested_test("heatmap_graphs") do
             genes = get_top_marker_gene_indices(daf; markers_count = 2)
             graph = genes_heatmap_graph(daf; genes)
             @test graph.data.rows.entities.names == ["A", "B"]
-            @test graph.configuration.rows.title == "Genes"
+            @test graph.configuration.rows.title == "gene"
             return nothing
         end
 
@@ -107,7 +107,7 @@ nested_test("heatmap_graphs") do
             @test graph.data.rows.entities.names == ["A", "B", "C", "D"]
             @test graph.data.columns.entities.names == ["B1", "B2"]
             @test graph.data.entries.matrix[1, :] == 2 .^ Float32[-0.5, 0.5]
-            @test graph.configuration.columns.title == "Blocks"
+            @test graph.configuration.columns.title == "block"
             return nothing
         end
 

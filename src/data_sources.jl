@@ -222,7 +222,8 @@ const ENTRIES_KEYWORDS = (
 # entries, and (for a bucket with a `palette_expression`) the palette. It then passes all of them to the bucket's
 # `put_values_function`. The get takes the `axis`, the `ENTRIES_KEYWORDS` and the bucket's `get_keywords`. The fill also
 # takes the `title`, the bucket's `palette_keywords` and its `put_keywords`. A table line gives the `property`, its
-# default `axis` and `title`, and its `doc`. It may also give its own defaults for any of the bucket's keywords.
+# default `axis`, and its `doc`. It may also give its own default `title` (by default, the `property`), and its own
+# defaults for any of the bucket's keywords.
 function define_bucket_data_sources(;
     get_function::Symbol,
     put_values_function::Symbol,
@@ -251,7 +252,7 @@ function define_bucket_data_sources(;
 
         put_arguments = Expr[
             line_keyword(line, keyword) for
-            keyword in (:(title::Maybe{AbstractString} = $(line.title)), put_keywords...)
+            keyword in (:(title::Maybe{AbstractString} = $(get(line, :title, line.property))), put_keywords...)
         ]
         put_names = keyword_names(put_arguments)
         palette_arguments = Expr[line_keyword(line, keyword) for keyword in palette_keywords]
@@ -571,17 +572,15 @@ define_bucket_data_sources(;
     get_keywords = SIZE_GET_KEYWORDS,
     put_keywords = SIZE_PUT_KEYWORDS,
     table = (
-        (; property = "total_UMIs", axis = "metacell", title = "total UMIs", doc = "The total UMIs of each entry."),
+        (; property = "total_UMIs", axis = "metacell", doc = "The total UMIs of each entry."),
         (;
             property = "n_cells",
             axis = "metacell",
-            title = "cells",
             doc = "The number of cells of each entry. Both metacells and blocks have one.",
         ),
         (;
             property = "n_metacells",
             axis = "block",
-            title = "metacells",
             doc = "The number of metacells of each entry. Only blocks have one, so the default `axis` is the block.",
         ),
     ),
@@ -1155,36 +1154,28 @@ define_bucket_data_sources(;
     get_keywords = BOOLEAN_GET_KEYWORDS,
     put_keywords = BOOLEAN_PUT_KEYWORDS,
     table = (
-        (; property = "is_lateral", axis = "gene", title = "lateral", doc = "Whether each gene is lateral."),
-        (; property = "is_marker", axis = "gene", title = "marker", doc = "Whether each gene is a marker gene."),
+        (; property = "is_lateral", axis = "gene", doc = "Whether each gene is lateral."),
+        (; property = "is_marker", axis = "gene", doc = "Whether each gene is a marker gene."),
         (;
             property = "is_transcription_factor",
             axis = "gene",
-            title = "transcription factor",
             doc = "Whether each gene is a transcription factor (binds to DNA).",
         ),
         (;
             property = "is_regulator",
             axis = "gene",
-            title = "regulator",
             doc = "Whether each gene regulates the expression of other genes.",
         ),
-        (; property = "is_forbidden", axis = "gene", title = "forbidden", doc = "Whether each gene is forbidden."),
-        (; property = "is_skeleton", axis = "gene", title = "skeleton", doc = "Whether each gene is a skeleton gene."),
+        (; property = "is_forbidden", axis = "gene", doc = "Whether each gene is forbidden."),
+        (; property = "is_skeleton", axis = "gene", doc = "Whether each gene is a skeleton gene."),
         (;
             property = "is_correlated_with_skeleton",
             axis = "gene",
-            title = "correlated with skeleton",
             doc = "Whether each gene is correlated with some skeleton gene.",
         ),
-        (;
-            property = "is_mitochondrial",
-            axis = "gene",
-            title = "mitochondrial",
-            doc = "Whether each gene is mitochondrial.",
-        ),
-        (; property = "is_ribosomal", axis = "gene", title = "ribosomal", doc = "Whether each gene is ribosomal."),
-        (; property = "is_excluded", axis = "gene", title = "excluded", doc = "Whether each gene is excluded."),
+        (; property = "is_mitochondrial", axis = "gene", doc = "Whether each gene is mitochondrial."),
+        (; property = "is_ribosomal", axis = "gene", doc = "Whether each gene is ribosomal."),
+        (; property = "is_excluded", axis = "gene", doc = "Whether each gene is excluded."),
     ),
 )
 
@@ -1859,7 +1850,7 @@ end
         coordinate::AbstractString,
         axis::AbstractString = "metacell",
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-        title::Maybe{AbstractString} = "UMAP \$(uppercase(coordinate))",
+        title::Maybe{AbstractString} = "umap_\$(coordinate)",
     )::Nothing
 
 Fill the `sinks` with the UMAP `coordinate` per each of the `entries` of some `daf` `axis`, shown without ticks or a
@@ -1871,7 +1862,7 @@ function fill_umap!(
     coordinate::AbstractString,
     axis::AbstractString = "metacell",
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
-    title::Maybe{AbstractString} = "UMAP $(uppercase(coordinate))",
+    title::Maybe{AbstractString} = "umap_$(coordinate)",
 )::Nothing
     entries = sinks_entries(sinks, entries)
     put_umap_data!(sinks, get_umap_vector(daf; coordinate, axis, entries); title)
@@ -2379,7 +2370,8 @@ function get_module_regulators_hovers(
     ]
 end
 
-# The lines of one gene's hover: how often it is in no module, and then a line per regulator it is in a module with.
+# The lines of one gene's hover: the fraction of the cells in which it is in no module, and then a line per regulator
+# with the fraction of the cells in which it is in a module with it.
 function module_regulators_lines(
     frame::DataFrame,
     row_index::Integer;
@@ -2387,11 +2379,12 @@ function module_regulators_lines(
     side_name::AbstractString,
     regulators_count::Integer,
 )::Vector{String}
-    lines = String["$(side_name): in no module in $(percent_text(frame[row_index, "$(prefix)_no_mod_f"])) of the cells"]
+    lines = String["$(side_name) cells in no module: $(percent_text(frame[row_index, "$(prefix)_no_mod_f"]))"]
     for rank in 1:regulators_count
         regulator_name = frame[row_index, "$(prefix)_reg$(rank)"]
         if regulator_name != ""
-            push!(lines, "- $(regulator_name): $(percent_text(frame[row_index, "$(prefix)_reg$(rank)_f"]))")
+            regulator_fraction = frame[row_index, "$(prefix)_reg$(rank)_f"]
+            push!(lines, "$(side_name) cells in module with $(regulator_name): $(percent_text(regulator_fraction))")
         end
     end
     return lines
@@ -2651,14 +2644,12 @@ const CATEGORY_PROPERTIES = (
     (;
         property = "type",
         axis = "metacell",
-        title = "type",
         colors_axis = "type",
         doc = "The type of each entry, shown in the `color` of each type.",
     ),
     (;
         property = "block",
         axis = "metacell",
-        title = "block",
         colors_axis = "block",
         show_legend = false,
         doc = """
