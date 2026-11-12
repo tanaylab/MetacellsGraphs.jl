@@ -984,11 +984,10 @@ end
         entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
         type_property::AbstractString = "type",
         empty_value::Real = 0,
-        title::Maybe{AbstractString} = nothing,
     )::Nothing
 
 Fill the `sinks` with the global flow order of the type of each of the `entries` of the `daf` `axis`, and name the
-entities after the `entries`.
+entities after the `entries`. The flow order only arranges the entries, so it adds no hover line.
 """
 function fill_global_flow_order!(
     sinks::VectorDataSinks,
@@ -997,10 +996,13 @@ function fill_global_flow_order!(
     entries::Maybe{Union{AbstractVector{<:AbstractString}, AbstractVector{<:Integer}}} = nothing,
     type_property::AbstractString = "type",
     empty_value::Real = 0,
-    title::Maybe{AbstractString} = nothing,
 )::Nothing
     entries = sinks_entries(sinks, entries)
-    put_vector_data!(sinks, get_global_flow_order_vector(daf; axis, entries, type_property, empty_value); title)
+    put_vector_data!(
+        sinks,
+        get_global_flow_order_vector(daf; axis, entries, type_property, empty_value);
+        is_hovered = false,
+    )
     fill_axis_names_data!(sinks, daf; axis, entries)
     return nothing
 end
