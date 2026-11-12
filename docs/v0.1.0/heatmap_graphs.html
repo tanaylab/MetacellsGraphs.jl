@@ -148,16 +148,18 @@
 <div>
 <p>Heatmap graphs of a metacells repository.
 </p>
-<p>A graph function fills in the data the graph is about, and nothing else. In particular it does not group the columns and does not annotate them. The caller says how, in a second call, so that any property can group or annotate:
+<p>A graph function fills in the data the graph is about, and nothing else. In particular it does not group, order or annotate the columns. The caller says how, in a second call, so that any property can group, order or annotate:
 </p>
 <pre>
 <code class="language-julia hljs">graph = genes_heatmap_graph(daf; genes = get_skeleton_gene_indices(daf))
 fill_type!(columns_annotations_colors_vector_fields(graph, add_columns_annotation!(graph)), daf)
-fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
-fill_block!(columns_subgroups_vector_data_fields(graph), daf)
+fill_block!(columns_groups_vector_data_fields(graph), daf)
+fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)
 </code>
 </pre>
-<p>Grouping a level constrains the clustering to it and puts a gap between the groups. Naming both levels nests them: the blocks are grouped inside the types, which is how they nest. A level given numbers is laid out in the order of these numbers, and a level given names is laid out by the clustering.
+<p>Grouping a level constrains the clustering to it and puts a gap between the groups. Subgroups (filled through 
+<code>columns_subgroups_vector_data_fields
+</code>) nest inside the groups, e.g. blocks inside types. A level given numbers is laid out in the order of these numbers, and a level given names is laid out by the clustering. Ordering moves the clustered entries as close to the order as the groups allow. Here each block stays together, and the blocks follow the flow order of their types.
 </p>
 <p>The second call must name the same 
 <code>axis
@@ -271,7 +273,9 @@ fill_block!(columns_subgroups_vector_data_fields(graph), daf)
 <code>rows_axis_title
 </code>. There are too many columns to label, so they are named only by the 
 <code>columns_axis_title
-</code> and in the hover of each cell. Both sides are clustered, except a side with a single entry, which has nothing to be ordered against.
+</code> and in the hover of each cell. Both sides are clustered, except a side with a single entry, which has nothing to be ordered against. A side given values to order by (e.g., 
+<code>fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)
+</code>) is clustered, then moved as close to that order as its clustering allows.
 </p>
 </div>
 </section>

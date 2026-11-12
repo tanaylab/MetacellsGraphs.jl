@@ -1,17 +1,19 @@
 """
 Heatmap graphs of a metacells repository.
 
-A graph function fills in the data the graph is about, and nothing else. In particular it does not group the columns
-and does not annotate them. The caller says how, in a second call, so that any property can group or annotate:
+A graph function fills in the data the graph is about, and nothing else. In particular it does not group, order or
+annotate the columns. The caller says how, in a second call, so that any property can group, order or annotate:
 
     graph = genes_heatmap_graph(daf; genes = get_skeleton_gene_indices(daf))
     fill_type!(columns_annotations_colors_vector_fields(graph, add_columns_annotation!(graph)), daf)
-    fill_global_flow_order!(columns_groups_vector_data_fields(graph), daf)
-    fill_block!(columns_subgroups_vector_data_fields(graph), daf)
+    fill_block!(columns_groups_vector_data_fields(graph), daf)
+    fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)
 
-Grouping a level constrains the clustering to it and puts a gap between the groups. Naming both levels nests them: the
-blocks are grouped inside the types, which is how they nest. A level given numbers is laid out in the order of these
-numbers, and a level given names is laid out by the clustering.
+Grouping a level constrains the clustering to it and puts a gap between the groups. Subgroups (filled through
+`columns_subgroups_vector_data_fields`) nest inside the groups, e.g. blocks inside types. A level given numbers is laid
+out in the order of these numbers, and a level given names is laid out by the clustering. Ordering moves the clustered
+entries as close to the order as the groups allow. Here each block stays together, and the blocks follow the flow
+order of their types.
 
 The second call must name the same `axis` as the first. It needn't name the `entries`, since it fills the entries the
 graph was named after.
@@ -88,7 +90,9 @@ end
 Lay out a heatmap of `n_genes` genes (the rows) by `n_entries` entries (the columns), as
 [`genes_heatmap_graph`](@ref) shows it. The rows are labelled and named by the `rows_axis_title`. There are too many
 columns to label, so they are named only by the `columns_axis_title` and in the hover of each cell. Both sides are
-clustered, except a side with a single entry, which has nothing to be ordered against.
+clustered, except a side with a single entry, which has nothing to be ordered against. A side given values to order
+by (e.g., `fill_global_flow_order!(columns_order_by_vector_data_fields(graph), daf)`) is clustered, then moved as close
+to that order as its clustering allows.
 """
 function put_genes_heatmap_configuration!(
     configuration::HeatmapGraphConfiguration;
@@ -100,10 +104,10 @@ function put_genes_heatmap_configuration!(
     configuration.figure.margins.left = 100
     configuration.origin = HeatmapTopLeft
     configuration.rows.title = rows_axis_title
-    configuration.rows.order_source = n_genes > 1 ? OptimalTreeReorder : nothing
+    configuration.rows.tree_source = n_genes > 1 ? ClusteredTree : nothing
     configuration.columns.title = columns_axis_title
     configuration.columns.show_ticks = false
-    configuration.columns.order_source = n_entries > 1 ? OptimalTreeReorder : nothing
+    configuration.columns.tree_source = n_entries > 1 ? ClusteredTree : nothing
     return nothing
 end
 
