@@ -361,10 +361,11 @@ end
         log_base::Maybe{LogBase} = Log10Base,
     )::Nothing
 
-Show a size (a count) on a log scale of the `log_base`, regularized by 1, in the `YlOrRd` color scale, named by the
-`title`. This is how every count-like quantity is shown: how many cells, how many metacells, how many UMIs, and the
-means of these. They all span orders of magnitude, which is what the log scale is for. The regularization gives a zero
-count, which is rare, a place on the scale. If the `log_base` is `nothing`, the scale is linear, and isn't regularized.
+Show a size (a count) on a log scale of the `log_base`, regularized by 1, in the `YlOrRd_r` color scale (light yellow
+for low counts, dark red for high ones), named by the `title`. This is how every count-like quantity is shown: how many
+cells, how many metacells, how many UMIs, and the means of these. They all span orders of magnitude, which is what the
+log scale is for. The regularization gives a zero count, which is rare, a place on the scale. If the `log_base` is
+`nothing`, the scale is linear, and isn't regularized.
 
 The color scale follows the range of the data. It runs from yellow through orange to red, so even the smallest count is
 visible. A scale which starts at white would lose it against the background.
@@ -414,7 +415,7 @@ function put_size_configuration!(
     show_legend::Bool = true,
     log_base::Maybe{LogBase} = Log10Base,
 )::Nothing
-    colors.palette = "YlOrRd"
+    colors.palette = "YlOrRd_r"
     colors.legend.show = show_legend
     put_size_configuration!(colors.scale; log_base)
     if title !== nothing

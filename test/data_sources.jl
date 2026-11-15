@@ -566,7 +566,7 @@ nested_test("data_sources") do
             fill_total_UMIs!(points_colors_vector_fields(graph), daf)
             @test graph.data.points.colors.vector == UInt32[100, 200, 300, 400]
             @test graph.configuration.points.colors.title == "total_UMIs"
-            @test graph.configuration.points.colors.palette == "YlOrRd"
+            @test graph.configuration.points.colors.palette == "YlOrRd_r"
             @test graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             @test graph.configuration.points.colors.scale.log_regularization == 1
