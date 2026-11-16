@@ -102,7 +102,7 @@ function changed_genes_graph(;
     # gives its value as a percent, as the axis does, then what the sharpening moved the gene with.
     for (prefix, side_name, color) in (("deg", "degraded", "darkred"), ("imp", "improved", "darkblue"))
         series = add_series!(graph, SeriesData(; name = side_name, color))
-        fill_column_vector_data!(  # NOJET
+        fill_column_vector_data!(
             series.values,
             shown_report;
             column = "$(prefix)_f",

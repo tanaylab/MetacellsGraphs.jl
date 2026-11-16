@@ -144,12 +144,14 @@ nested_test("bar_graphs") do
         # The bars are ["C", "D", "B", "A"], and each wing says what its own side's base blocks say. The gene is named
         # by the bar it belongs to, so the hover of a series does not repeat it. It starts with the bar's value, as a
         # percent like the axis.
-        @test graph.data.series[1].bars.hovers[1] ==
+        @test hover_lines_texts(graph.data.series[1].bars.hover_lines)[1] ==
               "base neighborhoods: 100.0%<br>degraded cells in no module: 20.0%<br>" *
               "degraded cells in module with B: 60.0%"
-        @test graph.data.series[1].bars.hovers[4] == "base neighborhoods: 0.0%<br>degraded cells in no module: 100.0%"
-        @test graph.data.series[2].bars.hovers[1] == "base neighborhoods: 0.0%<br>improved cells in no module: 100.0%"
-        @test graph.data.series[2].bars.hovers[4] ==
+        @test hover_lines_texts(graph.data.series[1].bars.hover_lines)[4] ==
+              "base neighborhoods: 0.0%<br>degraded cells in no module: 100.0%"
+        @test hover_lines_texts(graph.data.series[2].bars.hover_lines)[1] ==
+              "base neighborhoods: 0.0%<br>improved cells in no module: 100.0%"
+        @test hover_lines_texts(graph.data.series[2].bars.hover_lines)[4] ==
               "base neighborhoods: 75.0%<br>improved cells in no module: 25.0%<br>" *
               "improved cells in module with B: 40.0%"
         return nothing
@@ -157,7 +159,8 @@ nested_test("bar_graphs") do
 
     nested_test("regulators_count") do
         graph = improved_genes_graph(; daf, base_daf, regulators_count = 0)
-        @test graph.data.series[2].bars.hovers[4] == "base neighborhoods: 75.0%<br>improved cells in no module: 25.0%"
+        @test hover_lines_texts(graph.data.series[2].bars.hover_lines)[4] ==
+              "base neighborhoods: 75.0%<br>improved cells in no module: 25.0%"
         return nothing
     end
 

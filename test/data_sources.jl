@@ -37,7 +37,7 @@ nested_test("data_sources") do
         nested_test("()") do
             fill_axis_names_data!(points_entities(graph), daf; axis = "metacell")
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.points.entities.hovers === nothing
+            @test isempty(graph.data.points.entities.hover_lines)
             return nothing
         end
 
@@ -71,7 +71,7 @@ nested_test("data_sources") do
             )
             @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
             @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
-            @test graph.data.points.entities.hovers[1] == "X: 0.00"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] == "X: 0.00"
 
             # Nothing is configured, because how to show a value depends on which property it is.
             @test graph.configuration.x_axis.title === nothing
@@ -119,7 +119,7 @@ nested_test("data_sources") do
                 hover_format = number_format(; digits = 2),
             )
             @test graph.data.x.vector == Float32[0.0, 1.0, 2.0, 3.0]
-            @test graph.data.points.entities.hovers[2] == "X: 1.00"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[2] == "X: 1.00"
             return nothing
         end
 
@@ -154,7 +154,7 @@ nested_test("data_sources") do
     nested_test("side") do
         graph = heatmap_graph()
         put_umap_data!(rows_side(graph), Float32[1.0, 2.0])
-        @test graph.data.rows.entities.hovers === nothing
+        @test isempty(graph.data.rows.entities.hover_lines)
         @test graph.data.rows.arrangement.groups.vector === nothing
         return nothing
     end
@@ -169,7 +169,7 @@ nested_test("data_sources") do
             @test graph.configuration.x_axis.scale.log_regularization == GENE_FRACTION_REGULARIZATION_FOR_GRAPHS
             @test graph.configuration.x_axis.scale.percent
             @test graph.configuration.x_axis.scale.ticks_digits == 3
-            @test graph.data.points.entities.hovers[1] == "A percent: 10.0% (<sub>10</sub>1.00)"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] == "A percent: 10.0% (<sub>10</sub>1.00)"
             return nothing
         end
 
@@ -179,7 +179,8 @@ nested_test("data_sources") do
             @test graph.configuration.x_axis.title == "A fraction"
             @test !graph.configuration.x_axis.scale.percent
             @test graph.configuration.x_axis.scale.ticks_digits === nothing
-            @test graph.data.points.entities.hovers[1] == "A fraction: 0.100 (<sub>10</sub>-1.00)"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] ==
+                  "A fraction: 0.100 (<sub>10</sub>-1.00)"
 
             # A log2 scale of percents keeps its exponents as they are.
             graph = points_graph()
@@ -219,7 +220,7 @@ nested_test("data_sources") do
                 @test graph.data.entries.matrix == Float32[0.1 0.2 0.3 0.4; 0.4 0.3 0.2 0.1]
                 @test graph.data.rows.entities.names == ["A", "B"]
                 @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-                @test graph.data.cells.hovers[1, 1] == "percent: 10.0% (<sub>10</sub>1.00)"
+                @test hover_lines_texts(graph.data.cells.hover_lines)[1, 1] == "percent: 10.0% (<sub>10</sub>1.00)"
                 @test graph.configuration.entries.colors.scale.log_base == Log10Base
                 @test graph.configuration.entries.colors.scale.percent
                 return nothing
@@ -272,7 +273,7 @@ nested_test("data_sources") do
         @test graph.data.entries.matrix[1, :] == Float32[0.1, 0.2, 0.3, 0.4]
         @test graph.data.rows.entities.names == ["A", "B", "C"]
         @test graph.data.columns.entities.names == ["M1", "M2", "M3", "M4"]
-        @test graph.data.cells.hovers[1, 1] == "fraction: 0.100"
+        @test hover_lines_texts(graph.data.cells.hover_lines)[1, 1] == "fraction: 0.100"
 
         # Nothing is configured, because how to show a value depends on which property it is.
         @test graph.configuration.entries.colors.palette === nothing
@@ -286,7 +287,7 @@ nested_test("data_sources") do
             query_suffix = ":: linear_fraction",
             hover_format = percent_format(; digits = 0),
         )
-        @test graph.data.cells.hovers[1, 1] == "10%"
+        @test hover_lines_texts(graph.data.cells.hover_lines)[1, 1] == "10%"
         return nothing
     end
 
@@ -297,7 +298,7 @@ nested_test("data_sources") do
             fill_genes_fold_matrix!(entries_matrix_fields(graph), daf; genes = [1, 2])
             @test graph.data.entries.matrix[1, :] == Float32[0.5, 1.0, 1.0, 2.0]
             @test graph.data.entries.matrix[2, :] == Float32[2.0, 1.0, 1.0, 0.5]
-            @test graph.data.cells.hovers[1, 1] == "fold from median: 0.500 (<sub>2</sub>-1.00)"
+            @test hover_lines_texts(graph.data.cells.hover_lines)[1, 1] == "fold from median: 0.500 (<sub>2</sub>-1.00)"
             @test graph.data.rows.entities.names == ["A", "B"]
             @test graph.configuration.entries.colors.palette == "BuWtRd"
             @test graph.configuration.entries.colors.legend.show
@@ -334,7 +335,7 @@ nested_test("data_sources") do
         @test graph.data.points.entities.names == ["M1", "M2", "M3", "M4"]
 
         # A UMAP coordinate is the arbitrary output of the projection, so it says nothing in a hover.
-        @test graph.data.points.entities.hovers === nothing
+        @test isempty(graph.data.points.entities.hover_lines)
 
         fill_umap!(y_axis_vector_fields(graph), daf; coordinate = "y")
         @test graph.data.y.vector == Float32[3.0, 2.0, 1.0, 0.0]
@@ -354,7 +355,8 @@ nested_test("data_sources") do
             @test graph.data.points.colors.vector == ["X", "X", "Y", "Y"]
             @test graph.configuration.points.colors.title == "type"
             @test graph.configuration.points.colors.legend.show
-            @test graph.data.points.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
+            @test hover_lines_texts(graph.data.points.entities.hover_lines) ==
+                  ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end
 
@@ -431,7 +433,8 @@ nested_test("data_sources") do
             graph = heatmap_graph()
             fill_block!(columns_groups_vector_data_fields(graph), daf)
             @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
-            @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
+            @test hover_lines_texts(graph.data.columns.entities.hover_lines) ==
+                  ["block: B1", "block: B1", "block: B2", "block: B2"]
             return nothing
         end
 
@@ -629,7 +632,7 @@ nested_test("data_sources") do
                 hover_format = MEAN_SIZE_HOVER_FORMAT_FOR_GRAPHS,
             )
             @test graph.data.points.colors.vector == UInt32[70]
-            @test graph.data.points.entities.hovers[1] == "cells!: 70.0 (<sub>2</sub>6.13)"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] == "cells!: 70.0 (<sub>2</sub>6.13)"
             @test graph.configuration.points.colors.title == "cells!"
             @test !graph.configuration.points.colors.legend.show
             @test graph.configuration.points.colors.scale.log_base == Log2Base
@@ -641,7 +644,7 @@ nested_test("data_sources") do
             graph = points_graph()
             fill_size!(points_colors_vector_fields(graph), daf; axis = "metacell", property = "n_cells")
             @test graph.data.points.colors.vector == UInt32[10, 20, 30, 40]
-            @test graph.data.points.entities.hovers[1] == "n_cells: 10 (<sub>10</sub>1.00)"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] == "n_cells: 10 (<sub>10</sub>1.00)"
             @test graph.configuration.points.colors.title == "n_cells"
             @test graph.configuration.points.colors.scale.log_base == Log10Base
             return nothing
@@ -661,7 +664,7 @@ nested_test("data_sources") do
                 fill_mean_total_UMIs_per_metacell!(y_axis_vector_fields(graph), daf; axis = "block")
                 @test graph.data.x.vector == Float32[15.0, 35.0]
                 @test graph.data.y.vector == Float32[150.0, 350.0]
-                @test graph.data.points.entities.hovers[1] ==
+                @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] ==
                       "mean cells per metacell: 15.0 (<sub>10</sub>1.18)<br>" *
                       "mean UMIs per metacell: 150.0 (<sub>10</sub>2.18)"
                 @test graph.configuration.x_axis.title == "mean cells per metacell"
@@ -809,7 +812,8 @@ nested_test("data_sources") do
             fill_gene_correlation!(points_entities(graph), base_daf; gene = "A", title = "base correlation")
             fill_gene_correlation!(points_entities(graph), daf; gene = "A")
             @test graph.data.points.entities.names == ["B1", "B2"]
-            @test graph.data.points.entities.hovers[1] == "base correlation: 0.300<br>correlation: 0.400"
+            @test hover_lines_texts(graph.data.points.entities.hover_lines)[1] ==
+                  "base correlation: 0.300<br>correlation: 0.400"
             return nothing
         end
 
@@ -846,7 +850,7 @@ nested_test("data_sources") do
             graph = bars_graph()
             fill_column_vector_data!(values_axis_vector_fields(graph), frame; column = "imp_f", title = "improved")
             @test graph.data.values.vector == [0.75, 0.25]
-            @test graph.data.bars.hovers == ["improved: 0.750", "improved: 0.250"]
+            @test hover_lines_texts(graph.data.bars.hover_lines) == ["improved: 0.750", "improved: 0.250"]
 
             # A frame has no one column which identifies its rows, so say which one does.
             @test graph.data.bars.names === nothing
@@ -865,7 +869,7 @@ nested_test("data_sources") do
                 hover_format = percent_format(; digits = 1),
             )
             @test graph.data.values.vector == [0.75, 0.25]
-            @test graph.data.bars.hovers == ["improved: 75.0%", "improved: 25.0%"]
+            @test hover_lines_texts(graph.data.bars.hover_lines) == ["improved: 75.0%", "improved: 25.0%"]
             return nothing
         end
 
@@ -911,7 +915,8 @@ nested_test("data_sources") do
                 side_name = "improved",
                 regulators_count = 2,
             )
-            @test entities.hovers[1] == "improved cells in no module: 25.0%<br>improved cells in module with B: 40.0%"
+            @test hover_lines_texts(entities.hover_lines)[1] ==
+                  "improved cells in no module: 25.0%<br>improved cells in module with B: 40.0%"
             return nothing
         end
     end

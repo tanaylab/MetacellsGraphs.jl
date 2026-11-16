@@ -141,7 +141,8 @@ nested_test("heatmap_graphs") do
             @test graph.data.columns.annotations[1].colors.palette ==
                   Dict("X" => "red", "Y" => "blue", "" => EMPTY_CATEGORY_COLOR)
             @test !graph.data.columns.annotations[1].colors.legend.show
-            @test graph.data.columns.entities.hovers == ["type: X", "type: X", "type: Y", "type: Y"]
+            @test hover_lines_texts(graph.data.columns.entities.hover_lines) ==
+                  ["type: X", "type: X", "type: Y", "type: Y"]
             return nothing
         end
 
@@ -175,7 +176,8 @@ nested_test("heatmap_graphs") do
             graph = genes_heatmap_graph(daf; genes)
             fill_block!(columns_groups_vector_data_fields(graph), daf)
             @test graph.data.columns.arrangement.groups.vector == ["B1", "B1", "B2", "B2"]
-            @test graph.data.columns.entities.hovers == ["block: B1", "block: B1", "block: B2", "block: B2"]
+            @test hover_lines_texts(graph.data.columns.entities.hover_lines) ==
+                  ["block: B1", "block: B1", "block: B2", "block: B2"]
             return nothing
         end
 

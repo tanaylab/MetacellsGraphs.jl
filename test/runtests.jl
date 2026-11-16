@@ -8,6 +8,8 @@ using SomeGraphs
 using SparseArrays
 using Test
 
+import SomeGraphs.Common.hover_lines_texts
+
 test_prefixes(ARGS)
 abort_on_first_failure(true)
 
