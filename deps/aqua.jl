@@ -1,4 +1,5 @@
-push!(LOAD_PATH, ".")
+# The package in the current directory comes first, so Aqua checks it and not another copy in the default environment.
+pushfirst!(LOAD_PATH, ".")
 
 using Aqua
 using Test

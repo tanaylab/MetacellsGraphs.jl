@@ -1419,7 +1419,7 @@ function put_correlation_configuration!(
     title::Maybe{AbstractString} = "correlation",
     show_legend::Bool = true,
 )::Nothing
-    minimum_value = min(0, minimum(value for value in values if isfinite(value); init = 0))  # NOJET
+    minimum_value = min(0, minimum(value for value in values if isfinite(value); init = 0))
     maximum_value = max(0, maximum(value for value in values if isfinite(value); init = 0))
     if minimum_value == maximum_value
         minimum_value = -1
@@ -2000,7 +2000,7 @@ function get_genes_fold_matrix(
         row_entries = genes,
         column_entries = entries,
     )
-    return log_linear_fraction_per_gene_per_entry .- median(log_linear_fraction_per_gene_per_entry; dims = 2)
+    return log_linear_fraction_per_gene_per_entry .- median(log_linear_fraction_per_gene_per_entry; dims = 2)  # NOJET
 end
 
 """

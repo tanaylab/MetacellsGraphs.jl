@@ -41,8 +41,10 @@ def load_file(path):
         bad_paths.add(path)
         return False
 
-def is_local(line):
-    return os.path.basename(os.getcwd()) in line
+# Whether a reported location is in a file of this package. Matching the name of the package's directory in the line
+# would also match other paths which contain it (e.g. `julia` in `~/.julia/`).
+def is_local(path):
+    return normalized(path) in local_paths
 
 def is_disabled(path, line):
     path = normalized(path)
@@ -93,7 +95,7 @@ for line in fileinput.input():
 
         context_lines.append(line)
         context_disabled.append(is_disabled(*match.groups()))
-        context_is_local.append(is_local(line))
+        context_is_local.append(is_local(match.group(1)))
         continue
 
     if 'UndefVarError' in line and 'not defined' in line:
